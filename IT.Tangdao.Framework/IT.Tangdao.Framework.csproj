@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;net471;net48</TargetFrameworks>
+	<UseWPF>true</UseWPF>
+	<Title>一个简易开发的工具类库包</Title>
+	<Authors>liuxin</Authors>
+    <Version>1.0.1</Version>
+    <Description>这是一个简易的工具库包</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
