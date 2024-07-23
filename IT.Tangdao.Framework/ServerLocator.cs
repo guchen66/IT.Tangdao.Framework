@@ -20,10 +20,5 @@ namespace IT.Tangdao.Framework
             Container=container;
             return container;
         }
-
-        public static T Resolve<T>() where T : class
-        {
-            return (T)Container.Resolve<T>();
-        }
     }
 }

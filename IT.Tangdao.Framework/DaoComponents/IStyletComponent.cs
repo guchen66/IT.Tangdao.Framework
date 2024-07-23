@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoComponents
 {
+    /// <summary>
+    /// 使用Stylet框架时，可以实现这个接口
+    /// </summary>
     public interface IStyletComponent: IComponentBase
     {
     }

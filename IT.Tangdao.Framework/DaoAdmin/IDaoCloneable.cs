@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework
+namespace IT.Tangdao.Framework.DaoAdmin
 {
-    public interface ITangdaoProvider: ITangdaoProviderBuilder
+    public interface IDaoCloneable<out T>
     {
-        object Resolve(Type type);
+        T Clone();
     }
+
+ 
 }

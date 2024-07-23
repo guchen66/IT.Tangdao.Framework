@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -70,6 +71,60 @@ namespace IT.Tangdao.Framework.Extensions
             return double.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
         }
 
+        /// <summary>
+        /// 通过路径直接创建文件夹
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static string CreateFolder(this string path)
+        {
+            var directory = Path.GetDirectoryName(path) ?? throw new InvalidOperationException();
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            return path;
+        }
+
+        /// <summary>
+        /// 继续创建文件
+        /// 并且设置缓冲区
+        /// </summary>
+        /// <param name="localPath"></param>
+        /// <returns></returns>
+        public static FileStream ToFileStream(this string localPath)
+        {
+            return new FileStream(localPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024 * 1024);
+        }
+#if SUPPORTS_VALUETUPLE
+
+        public static FileStream Slice(this FileStream stream, Tuple<long, long> block)
+        {
+            stream.Position = block.Item1;
+            return stream;
+        }
+
+#else
+
+        /// <summary>
+        /// 这个方法允许你“切片”一个已存在的 FileStream 对象，即将流的位置设置到指定的偏移量（offset），
+        /// 并假定接下来的特定长度（length）字节是你的操作范围。
+        /// 这在处理大型文件时非常有用，
+        /// 特别是当你只需要操作文件的一部分
+        /// </summary>
+        public static FileStream Slice(this FileStream stream, (long offset, long length) block)
+        {
+            stream.Position = block.offset;
+            return stream;
+        }
+
+#endif
+        // 只有当 SUPPORTS_VALUETUPLE 编译符号被定义时才包含此代码
+
+
+     
         /// <summary>
         /// 生成一个指定长度的随机字符串，RNGCryptoServiceProvider确保安全性
         /// 使用场景，生成随机密码，会话标识

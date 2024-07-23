@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework
 {
-    public interface ITangdaoProvider: ITangdaoProviderBuilder
+    public interface ITangdaoScope
     {
-        object Resolve(Type type);
     }
 }

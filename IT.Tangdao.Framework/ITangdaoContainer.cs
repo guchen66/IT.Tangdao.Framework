@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework
 {
-    public interface ITangdaoContainer
+    public interface ITangdaoContainer: ITangdaoContainerBuilder
     {
-        ITangdaoContainer GetContainer();
+        /// <summary>
+        /// 注册无参数类型
+        /// </summary>
+        /// <typeparam name="TType"></typeparam>
+        void RegisterScoped<TType>();
 
         /// <summary>
         /// 注册类型
@@ -23,11 +27,5 @@ namespace IT.Tangdao.Framework
         /// <typeparam name="TypeImple"></typeparam>
         void RegisterScoped<TType,TypeImple>() where TypeImple:TType;
 
-        /// <summary>
-        /// 解析类型
-        /// </summary>
-        /// <typeparam name="TType"></typeparam>
-        /// <returns></returns>
-        TType Resolve<TType>();
     }
 }

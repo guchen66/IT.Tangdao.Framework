@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework
+namespace IT.Tangdao.Framework.DaoDtos.Options
 {
-    public interface ITangdaoProvider: ITangdaoProviderBuilder
+    public class OptionBase
     {
-        object Resolve(Type type);
     }
 }

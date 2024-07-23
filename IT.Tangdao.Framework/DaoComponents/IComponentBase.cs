@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoComponents
 {
+    /// <summary>
+    /// 自定义组件的基类接口
+    /// </summary>
     public interface IComponentBase
     {
     }
