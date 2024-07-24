@@ -5,40 +5,56 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using IT.Tangdao.Framework.DaoCommon;
 using IT.Tangdao.Framework.DaoComponents;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Providers;
 namespace IT.Tangdao.Framework
 {
-    public class TangdaoContainer : ITangdaoContainer
+    public class TangdaoContainer : TangdaoAdapter, ITangdaoContainer
     {
-        public void RegisterScoped<TType>()
+        public Dictionary<Type, object> SelfRegisterType { get; set; } = new Dictionary<Type, object>();
+        public ITangdaoContainer Register(Type serviceType, Type implementationType)
         {
-            ManualDependProvider.CreateDependLinkList(typeof(TType));
+            var ctors = implementationType.GetConstructors().OrderByDescending(c => c.GetParameters().Length).ToList();
+            var ctor = ctors.First(); // 获取最匹配的构造函数
+            var parameterTypes = ctor.GetParameters().Select(p => p.ParameterType).ToArray();         //拿到所有的参数类型
+            SelfRegisterType.Add(serviceType, parameterTypes);
+            CurrentContext.Add(new CommonContext
+            {
+                RegisterType = SelfRegisterType,          //把构造器和它内部的参数传进来            //显示有字典试一下，字典不行换委托
+                ServiceType = serviceType,               //把所有注册的接口传进来            因为解析的时候是从接口解析的，所以我需要获取接口
+                ParameterTypes = parameterTypes,         //把需要构造器内部的接口传进来
+                                                         //   Creator = (args) => creator() // 注意这里的变化
+            });
+            return new TangdaoContainer();
+            //  return Register(CurrentContext);           
         }
 
-        public void RegisterScoped<TType>(params object[] obj)
-        {
 
-          //  _containerClasss[typeof(TType)]=()=>Activator.CreateInstance(typeof(TType),obj);     
+        public ITangdaoContainer Register(Type serviceType, Func<object> creator)
+        {
+            return new TangdaoContainer();
         }
 
-        public void RegisterScoped<TType, TypeImple>() where TypeImple : TType
+
+        private ITangdaoContainer Register(List<CommonContext> commonContexts)
         {
-           // _containerInterface[typeof(TType)]=typeof(TypeImple);
+            // var runtimeType = serviceType.UnderlyingSystemType;
+            // Register(serviceType, Activator.CreateInstance(implementationType, obj));
+            //   var parameterResolvers = parameterTypes.Select(ptype => (Func<object[], object>)((args) => Resolve(ptype))).ToArray();
+
+            //  Register(serviceType, parameterTypes, () => ctor.Invoke(parameterResolvers.Select(fr => fr(null)).ToArray()));
+
+            return new TangdaoContainer();
         }
-        private readonly Dictionary<Type, Func<object>> _containerClasss = new Dictionary<Type, Func<object>>();
 
-        private readonly Dictionary<Type, object> _containerInterface = new Dictionary<Type, object>();
+        public ITangdaoContainer Register(Type type, Func<ITangdaoProvider, object> factoryMethod)
+        {
+            return new TangdaoContainer();
+        }
 
-        /*   public TType Resolve<TType>()
-           {
-               Type type = typeof(TType);
-               if (_containerClasss.TryGetValue(type, out Func<object> func))
-               {
-                   return (TType)func();
-               }
-               throw new InvalidOperationException($"类型{typeof(TType)} 没有注册.");
-           }*/
+        // 用于跟踪当前正在解析的类型，以避免递归
+        private Stack<Type> ResolvingTypes { get; } = new Stack<Type>();
     }
 }

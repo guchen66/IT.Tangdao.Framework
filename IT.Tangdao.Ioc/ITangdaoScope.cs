@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework
+namespace IT.Tangdao.Ioc
 {
-    public interface ITangdaoScope:ITangdaoProvider
+    public interface ITangdaoScope
     {
     }
 }

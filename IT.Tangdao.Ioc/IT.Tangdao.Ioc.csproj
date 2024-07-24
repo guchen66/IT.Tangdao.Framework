@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+   <PropertyGroup>
+    <TargetFrameworks>net461;net471;net48</TargetFrameworks>
+	<UseWPF>true</UseWPF>
+	<Title>一个简易开发的工具类库包</Title>
+	<Authors>liuxin</Authors>
+    <Version>1.0.4</Version>
+    <Description>一个工具类库包</Description>
+    <RepositoryUrl></RepositoryUrl>
+  </PropertyGroup>
+</Project>

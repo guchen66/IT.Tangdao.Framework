@@ -9,5 +9,6 @@ namespace IT.Tangdao.Framework
     public interface ITangdaoProvider: ITangdaoProviderBuilder
     {
         object Resolve(Type type);
+        object Resolve(Type type, params (Type Type, object Instance)[] parameters);
     }
 }

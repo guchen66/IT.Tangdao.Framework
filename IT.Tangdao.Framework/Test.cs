@@ -13,7 +13,7 @@ namespace IT.Tangdao.Framework
         public static void Usage()
         {
             var container=new TangdaoContainer();
-            container.RegisterScoped<ITangdaoClient>();
+            container.RegisterType<ITangdaoClient, TangdaoClient>();
 
             var provider=container.Builder();
             var client=provider.Resolve<ITangdaoClient>();

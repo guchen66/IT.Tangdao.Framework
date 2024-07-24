@@ -5,51 +5,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using IT.Tangdao.Framework;
 namespace IT.Tangdao.Framework.Extensions
 {
     public static class TangdaoContainerExtension
     {
-        public static ITangdaoContainer RegisterScoped(this ITangdaoContainer container, Type type)
+        public static ITangdaoContainer RegisterType<TService, TImplementation>(this ITangdaoContainer container) where TImplementation : TService
         {
-            var componentContextLinkList = ManualDependProvider.CreateDependLinkList(type);
-
-            foreach (var daoComponentContext in componentContextLinkList)
-            {
-                var item = Activator.CreateInstance(daoComponentContext.ComponentType);
-            }
-
-            return container;
+            return container.Register(typeof(TService), typeof(TImplementation));
         }
 
-        public static ITangdaoContainer RegisterScoped(this ITangdaoContainer container, Type type, object imple)
+        public static ITangdaoContainer RegisterType<TService>(this ITangdaoContainer container, Func<object> creator)
         {
-            var componentContextLinkList = ManualDependProvider.CreateDependLinkList(type, imple);
-
-            foreach (var daoComponentContext in componentContextLinkList)
-            {
-                var item = Activator.CreateInstance(daoComponentContext.ComponentType);
-            }
-
-            return container;
+            return container.Register(typeof(TService), creator);
         }
 
-        //注册接口的实现类
-        public static ITangdaoContainer RegisterSingleton<TImple>(this ITangdaoContainer container, TImple imple) where TImple : class 
+        public static ITangdaoContainer RegisterType<TService>(this ITangdaoContainer container, Func<ITangdaoProvider, object> factoryMethod)
         {
-            return container.RegisterSingleton(typeof(TImple), imple);
-        }
-
-        public static ITangdaoContainer RegisterSingleton(this ITangdaoContainer container, Type type,object imple) 
-        {
-            var componentContextLinkList=ManualDependProvider.CreateDependLinkList(type,imple);
-
-            foreach (var daoComponentContext in componentContextLinkList)
-            {
-                var item=Activator.CreateInstance(daoComponentContext.ComponentType);
-            }
-
-            return container;
+            return container.Register(typeof(TService), factoryMethod);
         }
     }
 }

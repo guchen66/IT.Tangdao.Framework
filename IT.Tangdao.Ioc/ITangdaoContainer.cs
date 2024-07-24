@@ -4,37 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework
+namespace IT.Tangdao.Ioc
 {
     public interface ITangdaoContainer: ITangdaoContainerBuilder
     {
-        #region 瞬时注册
-
         /// <summary>
-        /// 注册无参数类型，可以注册接口和实体类
+        /// 注册无参数类型
         /// </summary>
         /// <typeparam name="TType"></typeparam>
-      //  void RegisterScoped(Type serviceType, Func<object> creator);
+        void RegisterScoped<TType>();
 
         /// <summary>
         /// 注册类型
         /// </summary>
         /// <typeparam name="TType"></typeparam>
-      //  void RegisterScoped<TType>(params object[] obj);
+        void RegisterScoped<TType>(params object[] obj);
 
         /// <summary>
         /// 注册类型和实现类
         /// </summary>
         /// <typeparam name="TType"></typeparam>
         /// <typeparam name="TypeImple"></typeparam>
-     //   void RegisterScoped<TType,TypeImple>() where TypeImple:TType;
+        void RegisterScoped<TType,TypeImple>() where TypeImple:TType;
 
-        ITangdaoContainer Register(Type serviceType, Type implementationType);
-
-        ITangdaoContainer Register(Type serviceType, Func<object> creator);
-
-        ITangdaoContainer Register(Type type, Func<ITangdaoProvider, object> factoryMethod);
-
-        #endregion
     }
 }

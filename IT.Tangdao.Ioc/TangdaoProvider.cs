@@ -1,6 +1,6 @@
-﻿using IT.Tangdao.Framework.DaoComponents;
-using IT.Tangdao.Framework.DaoDtos.Options;
-using IT.Tangdao.Framework.Providers;
+﻿using IT.Tangdao.Ioc.DaoComponents;
+using IT.Tangdao.Ioc.DaoDtos.Options;
+using IT.Tangdao.Ioc.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework
+namespace IT.Tangdao.Ioc
 {
     public sealed class TangdaoProvider: ITangdaoProvider
     {
@@ -34,9 +34,5 @@ namespace IT.Tangdao.Framework
             return obj;
         }
 
-        public object Resolve(Type type, params (Type Type, object Instance)[] parameters)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
