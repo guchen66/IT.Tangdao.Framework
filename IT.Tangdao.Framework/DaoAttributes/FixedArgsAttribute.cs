@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.DaoAttributes
 {
     /// <summary>
-    /// 要求参数必须固定开头和结尾
+    /// 要求参数必须固定开头或结尾
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public class FixedParameterAttribute : Attribute
+    public class FixedArgsAttribute : Attribute
     {
         public string Start { get; set; }
         public string End;//{ get; set; }
 
-        public FixedParameterAttribute(string end)
+        public FixedArgsAttribute(string end)
         {
             End = end;
         }

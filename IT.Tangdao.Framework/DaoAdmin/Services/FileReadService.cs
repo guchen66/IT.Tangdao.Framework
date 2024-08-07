@@ -29,5 +29,10 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             }
             return new TangdaoResponse(false, AlarmBackResult.Failt);
         }
+
+        public Task<TangdaoResponse> ReadNetFile(string filePath)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

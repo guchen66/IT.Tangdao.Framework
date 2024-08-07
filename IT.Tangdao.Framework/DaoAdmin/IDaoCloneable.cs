@@ -10,6 +10,4 @@ namespace IT.Tangdao.Framework.DaoAdmin
     {
         T Clone();
     }
-
- 
 }

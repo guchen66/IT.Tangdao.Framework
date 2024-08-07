@@ -21,7 +21,7 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 return int.Parse(str);
             }
-            catch (FormatException)
+            catch (FormatException e) when (e.Message=="")
             {
                 // 可以选择返回一个特殊值，比如 -1，或者抛出一个新的异常
                 return -1;

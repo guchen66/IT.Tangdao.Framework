@@ -9,9 +9,19 @@ namespace IT.Tangdao.Framework.Extensions
 {
     public class ScanneringExtension
     {
-        public static void GetScanObject<TModel>(TModel model)
+        public static IEnumerable<Type> GetScanObject<TModel>(TModel model)
         {
-            var types=model.GetType().Assembly.GetTypes().Where(x=>Attribute.IsDefined(x,typeof(ScanningAttribute)));
+            return model.GetType().Assembly.GetTypes().Where(x=>Attribute.IsDefined(x,typeof(ScanningAttribute)));
+        }
+    }
+
+
+
+    public class ViewToViewModelExtension
+    {
+        public static IEnumerable<Type> GetScanObject<TModel>(TModel model)
+        {
+            return model.GetType().Assembly.GetTypes().Where(x => Attribute.IsDefined(x, typeof(ViewToViewModelAttribute)));
         }
     }
 }

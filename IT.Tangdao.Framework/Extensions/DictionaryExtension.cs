@@ -8,7 +8,14 @@ namespace IT.Tangdao.Framework.Extensions
 {
     public static class DictionaryExtension
     {
-        //此方法用于从字典中获取指定键的值，如果键不存在，则创建一个新的值并将其添加到字典中。
+        /// <summary>
+        /// 此方法用于从字典中获取指定键的值，如果键不存在，则创建一个新的值并将其添加到字典中。
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> @this, TKey key) where TValue : new()
         {
             if (!@this.ContainsKey(key))
@@ -18,7 +25,15 @@ namespace IT.Tangdao.Framework.Extensions
 
             return @this[key];
         }
-        //此方法用于从字典中获取指定键的值，如果键不存在，则返回默认值
+
+        /// <summary>
+        /// 此方法用于从字典中获取指定键的值，如果键不存在，则返回默认值
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="this"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> @this, TKey key)
         {
             return @this.ContainsKey(key) ? @this[key] : default;
@@ -32,6 +47,7 @@ namespace IT.Tangdao.Framework.Extensions
             if (dict.ContainsKey(key) == false) dict.Add(key, value);
             return dict;
         }
+
         /// <summary>
         /// 将键和值添加或替换到字典中：如果不存在，则添加；存在，则替换
         /// </summary>

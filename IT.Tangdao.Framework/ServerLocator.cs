@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,16 +10,13 @@ namespace IT.Tangdao.Framework
 {
     public class ServerLocator
     {
-        public static ITangdaoContainer Container { get; set; }
+        public static ITangdaoProvider Provider { get; set; }
 
-        public ServerLocator()
-        {
-            
+        public static ITangdaoProvider InitContainer(ITangdaoContainer container)
+        {         
+            Provider = container.Builder();
+            return Provider;
         }
-        public static ITangdaoContainer InitContainer(ITangdaoContainer container)
-        {
-            Container=container;
-            return container;
-        }
+
     }
 }

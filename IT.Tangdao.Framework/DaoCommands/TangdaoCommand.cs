@@ -7,12 +7,12 @@ using System.Windows.Input;
 
 namespace IT.Tangdao.Framework.DaoCommands
 {
-    public class RelayCommand : ICommand
+    public class TangdaoCommand : ICommand
     {
         private readonly Action _execute;
         private readonly Func<bool> _canExecute;
 
-        public RelayCommand(Action execute,Func<bool> canExecute=null)
+        public TangdaoCommand(Action execute,Func<bool> canExecute=null)
         {
             this._execute = execute;
             this._canExecute = canExecute;

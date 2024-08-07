@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace IT.Tangdao.Framework.DaoCommands
 {
-    public class AsyncRelayCommand : ICommand
+    public class TangdaoAsyncCommand : ICommand
     {
         private readonly Func<Task> _executeAsync;
 
@@ -15,7 +15,7 @@ namespace IT.Tangdao.Framework.DaoCommands
 
         private bool _isExecuting = false;
 
-        public AsyncRelayCommand(Func<Task> executeAsync, Func<bool> canExecuteAsync = null)
+        public TangdaoAsyncCommand(Func<Task> executeAsync, Func<bool> canExecuteAsync = null)
         {
             this._executeAsync = executeAsync ?? throw new ArgumentNullException(nameof(executeAsync));
             this._canExecuteAsync = canExecuteAsync;

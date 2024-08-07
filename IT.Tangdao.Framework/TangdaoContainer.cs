@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,51 +8,127 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using IT.Tangdao.Framework.DaoCommon;
 using IT.Tangdao.Framework.DaoComponents;
+using IT.Tangdao.Framework.DaoDtos.Globals;
+using IT.Tangdao.Framework.DaoException;
+using IT.Tangdao.Framework.DaoMvvm;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Providers;
 namespace IT.Tangdao.Framework
 {
-    public class TangdaoContainer : TangdaoAdapter, ITangdaoContainer
+    public sealed class TangdaoContainer : ITangdaoAdapter, ITangdaoContainer
     {
-        public Dictionary<Type, object> SelfRegisterType { get; set; } = new Dictionary<Type, object>();
+        private readonly List<CommonContext> _contexts;
+
+        public TangdaoContainer()
+        {
+            _contexts = new List<CommonContext> { new CommonContext() };
+        }
+
+        public List<CommonContext> GetContexts()
+        {
+            return _contexts;
+        }
+
         public ITangdaoContainer Register(Type serviceType, Type implementationType)
         {
-            var ctors = implementationType.GetConstructors().OrderByDescending(c => c.GetParameters().Length).ToList();
-            var ctor = ctors.First(); // 获取最匹配的构造函数
-            var parameterTypes = ctor.GetParameters().Select(p => p.ParameterType).ToArray();         //拿到所有的参数类型
-            SelfRegisterType.Add(serviceType, parameterTypes);
-            CurrentContext.Add(new CommonContext
+            var context = _contexts.LastOrDefault();
+            if (context == null)
             {
-                RegisterType = SelfRegisterType,          //把构造器和它内部的参数传进来            //显示有字典试一下，字典不行换委托
-                ServiceType = serviceType,               //把所有注册的接口传进来            因为解析的时候是从接口解析的，所以我需要获取接口
-                ParameterTypes = parameterTypes,         //把需要构造器内部的接口传进来
-                                                         //   Creator = (args) => creator() // 注意这里的变化
-            });
-            return new TangdaoContainer();
-            //  return Register(CurrentContext);           
+                throw new InvalidOperationException("No context available for registration.");
+            }
+
+            if (!context.RegisterType.ContainsKey(serviceType))
+            {
+                context.RegisterType[serviceType] = implementationType; // 注册服务类型到实现类型
+            }
+            else
+            {
+                // 如果服务类型已经存在，则抛出异常或者进行其他处理
+                throw new InvalidOperationException($"Service type {serviceType.FullName} is already registered.");
+            }
+
+            return this;
         }
 
+        public ITangdaoContainer Register(Type implementationType)
+        {
+            var context = _contexts.LastOrDefault();
+            if (context == null)
+            {
+                throw new InvalidOperationException("No context available for registration.");
+            }
 
+            if (!context.RegisterType.ContainsKey(implementationType))
+            {
+                context.RegisterType[implementationType] = implementationType; // 注册实现类型
+            }
+            else
+            {
+                // 如果实现类型已经存在，则抛出异常或者进行其他处理
+                throw new InvalidOperationException($"Implementation type {implementationType.FullName} is already registered.");
+            }
+
+            return this;
+        }
+
+      
         public ITangdaoContainer Register(Type serviceType, Func<object> creator)
         {
-            return new TangdaoContainer();
-        }
+            var context = _contexts.LastOrDefault();
+            if (context == null)
+            {
+                throw new InvalidOperationException("No context available for registration.");
+            }
 
+            if (!context.RegisterType.ContainsKey(serviceType))
+            {
+                context.RegisterType.Add(serviceType, creator); // 注册服务类型到创建函数
+            }
+            else
+            {
+                // 如果服务类型已经存在，则抛出异常或者进行其他处理
+                throw new InvalidOperationException($"Service type {serviceType.FullName} is already registered.");
+            }
 
-        private ITangdaoContainer Register(List<CommonContext> commonContexts)
-        {
-            // var runtimeType = serviceType.UnderlyingSystemType;
-            // Register(serviceType, Activator.CreateInstance(implementationType, obj));
-            //   var parameterResolvers = parameterTypes.Select(ptype => (Func<object[], object>)((args) => Resolve(ptype))).ToArray();
-
-            //  Register(serviceType, parameterTypes, () => ctor.Invoke(parameterResolvers.Select(fr => fr(null)).ToArray()));
-
-            return new TangdaoContainer();
+            return this;
         }
 
         public ITangdaoContainer Register(Type type, Func<ITangdaoProvider, object> factoryMethod)
         {
-            return new TangdaoContainer();
+            var context = _contexts.LastOrDefault();
+            if (context == null)
+            {
+                throw new InvalidOperationException("No context available for registration.");
+            }
+
+            if (!context.RegisterType.ContainsKey(type))
+            {
+                context.RegisterType.Add(type, factoryMethod); // 注册类型到工厂方法
+            }
+            else
+            {
+                // 如果类型已经存在，则抛出异常或者进行其他处理
+                throw new InvalidOperationException($"Type {type.FullName} is already registered.");
+            }
+
+            return this;
+        }
+
+        // 如果需要添加新的上下文，可以添加一个方法来处理
+        public void AddContext()
+        {
+            _contexts.Add(new CommonContext());
+        }
+
+        public ITangdaoContainer Register(string name)
+        {
+            if (name is string model)
+            {
+                IEnumerable<Type> types = ViewToViewModelExtension.GetScanObject(name);
+                return ViewToViewModelLocator.Build(types);
+            }
+          
+            throw new ContainerErrorException("注册ViewToModel未提供Name");
         }
 
         // 用于跟踪当前正在解析的类型，以避免递归

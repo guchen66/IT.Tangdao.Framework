@@ -1,4 +1,5 @@
-﻿using IT.Tangdao.Framework.DaoDtos.Options;
+﻿using IT.Tangdao.Framework.DaoCommon;
+using IT.Tangdao.Framework.DaoDtos.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,26 +12,33 @@ namespace IT.Tangdao.Framework.Extensions
     {
         public static TangdaoProvider Builder(this ITangdaoContainer container)
         {
-            return Builder(container,TangdaoProviderOptions.Default);
+            ITangdaoAdapter tangdaoAdapter = (ITangdaoAdapter)container;
+           
+            return new TangdaoProvider(tangdaoAdapter);
         }
 
-        public static TangdaoProvider Builder(this ITangdaoContainer container, bool isFromContainer)
+        public static TangdaoProvider Builder(this TangdaoContainer container, ITangdaoAdapter tangdaoAdapter)
         {
-            return container.Builder(new TangdaoProviderOptions { IsFromContainer=isFromContainer});
-        }
 
-        public static TangdaoProvider Builder(this ITangdaoContainer container, TangdaoProviderOptions options)
-        {
-            if (container is null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-            if (options is null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            return new TangdaoProvider(container, options);
+            return new TangdaoProvider(tangdaoAdapter);
         }
+        /*  public static TangdaoProvider Builder(this ITangdaoContainer container, bool isFromContainer)
+          {
+              return container.Builder(new TangdaoProviderOptions { IsFromContainer = isFromContainer });
+          }
+
+          public static TangdaoProvider Builder(this ITangdaoContainer container, TangdaoProviderOptions options)
+          {
+              if (container is null)
+              {
+                  throw new ArgumentNullException(nameof(container));
+              }
+              if (options is null)
+              {
+                  throw new ArgumentNullException(nameof(options));
+              }
+
+              return new TangdaoProvider(container, options);
+          }*/
     }
 }

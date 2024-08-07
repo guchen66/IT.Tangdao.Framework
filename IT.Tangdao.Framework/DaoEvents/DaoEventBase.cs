@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Ioc
+namespace IT.Tangdao.Framework.DaoEvents
 {
-    public interface ITangdaoScope
+    public abstract class DaoEventBase
     {
     }
 }

@@ -1,4 +1,7 @@
-﻿using IT.Tangdao.Framework.DaoEnums;
+﻿using IT.Tangdao.Framework.DaoAdmin;
+using IT.Tangdao.Framework.DaoAdmin.IServices;
+using IT.Tangdao.Framework.DaoAdmin.Services;
+using IT.Tangdao.Framework.DaoEnums;
 using IT.Tangdao.Framework.Extensions;
 using System;
 using System.Collections.Generic;
@@ -14,10 +17,10 @@ namespace IT.Tangdao.Framework
         {
             var container=new TangdaoContainer();
             container.RegisterType<ITangdaoClient, TangdaoClient>();
-
-            var provider=container.Builder();
+            container.RegisterViewToViewModel("win");
+          /*  var provider=container.Builder();
             var client=provider.Resolve<ITangdaoClient>();
-
+*/
             container.RegisterPlcServer(plc => 
             {
                 plc.PlcType= PlcType.Siemens;
@@ -25,6 +28,11 @@ namespace IT.Tangdao.Framework
                 plc.Port = "502";
 
             });
+
+          /*  container.RegisterType<IPlcReadService,PlcReadService>();
+            var plcservice=provider.Resolve<IPlcReadService>();
+            plcservice.ReadAsync("地址");*/
+            
         }
     }
 }
