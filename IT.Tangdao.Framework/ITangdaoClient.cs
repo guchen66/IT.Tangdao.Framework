@@ -9,6 +9,7 @@ namespace IT.Tangdao.Framework
 {
     public interface ITangdaoClient:IDisposable
     {
+        
         TcpClient Client { get; }
     }
 }

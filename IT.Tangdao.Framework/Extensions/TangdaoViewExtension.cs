@@ -15,7 +15,6 @@ namespace IT.Tangdao.Framework.Extensions
 {
     public static class TangdaoViewExtension
     {
-
         public static Task RunParentWindowAsync<TWindow>(this BaseDaoViewModel viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
         {
             var uiSyncContext = System.Windows.Threading.Dispatcher.CurrentDispatcher;

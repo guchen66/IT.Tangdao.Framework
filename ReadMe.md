@@ -41,6 +41,19 @@ LoginViewModel:接收
 
 ITangdaoContainer还未书写完成
 
+```C#
+//容器的初始化
+ITangdaoContainer container = new TangdaoContainer();
+
+//解析器的初始化
+var provider = container.Builder();
+
+//构建一个全局服务定位器
+ServerLocator.InitContainer(container);
+```
+
+
+
 对PLC的读取进行了扩展未完成
 
 ```c#
@@ -63,8 +76,40 @@ ITangdaoContainer还未书写完成
 
 StringExtension 可以方便一些代码
 
+读取本地txt文件的方法
+
+```
+string path = "E://Temp//Student.txt";
+string xmlContent=TxtFolderHelper.ReadByFileStream(path);
+```
+
+
+
+读取本地xml文件的方法
+
+```C#
+ string path = "E://Temp//Student.xml";
+ string xmlContent=TxtFolderHelper.ReadByFileStream(path);
+ Student student=XmlFolderHelper.Deserialize<Student>(xmlContent);
+```
+
+
+
 #### 4、增加一些常用的Helper类
 
 DirectoryHelper
+
+#### 5、强制组件通信
+
+```C#
+//同级别窗体通信 
+//tangdaoParameter为发送的数据，可以在打开窗体的时候直接发送数据过去
+this.RunSameLevelWindowAsync<LoginView>(tangdaoParameter);
+
+//父子窗体通信
+this.RunChildWindowAsync<LoginView>();
+```
+
+
 
 #### 

@@ -10,12 +10,12 @@ namespace IT.Tangdao.Framework
 {
     public class ServerLocator
     {
-        public static ITangdaoProvider Provider { get; set; }
+        public static ITangdaoProvider Current { get; set; }
 
         public static ITangdaoProvider InitContainer(ITangdaoContainer container)
-        {         
-            Provider = container.Builder();
-            return Provider;
+        {
+            Current = container.Builder();
+            return Current;
         }
 
     }
