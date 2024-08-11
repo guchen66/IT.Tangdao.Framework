@@ -1,4 +1,5 @@
-﻿using IT.Tangdao.Framework.Extensions;
+﻿using IT.Tangdao.Framework.DaoTemplates;
+using IT.Tangdao.Framework.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,27 +9,44 @@ using System.Windows;
 
 namespace IT.Tangdao.Framework
 {
-    public abstract class TangdaoAppBase:Application
+    public abstract class TangdaoAppBase:Application, IDataTemplateHost
     {
-        private ITangdaoProvider _provider {  get; set; }
+        private ITangdaoProvider _provider;
 
-        public ITangdaoProvider Provider => _provider;
+        public ITangdaoProvider TangdaoProvider { get => _provider; }
 
         private ITangdaoContainer _container;
 
-        public ITangdaoContainer Container { get; }
+        public ITangdaoContainer TangdaoContainer { get => _container; }
 
+        private TangdaoDataTemplates _tangdaoDemplates;
+
+        public TangdaoDataTemplates TangdaoDataTemplates => _tangdaoDemplates ?? (_tangdaoDemplates = new TangdaoDataTemplates());
+
+        bool IDataTemplateHost.IsDataTemplatesInitialized => _tangdaoDemplates != null;
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            _container = new TangdaoContainer();
+            _provider = TangdaoContainer.Builder();
+            Init();
+
+        }
         protected TangdaoAppBase()
         {
-            Container = new TangdaoContainer();
+           /* Container = new TangdaoContainer();
             _provider = Container.Builder();
-            Init();
+            Init();*/
         }
 
         public virtual void Init()
         {
+            InitServerLocator();
             InitWindow();
             InitIoc();
+           
         }
 
         protected void InitWindow()
@@ -37,7 +55,7 @@ namespace IT.Tangdao.Framework
         }
         protected void InitIoc()
         {
-            ConfigureIOC();
+            ConfigureIOC(this.TangdaoContainer);
         }
 
         /// <summary>
@@ -49,7 +67,7 @@ namespace IT.Tangdao.Framework
         /// <summary>
         /// 使用IOC容器进行注册
         /// </summary>
-        protected abstract void ConfigureIOC();
+        protected abstract void ConfigureIOC(ITangdaoContainer container);
 
         /// <summary>
         /// 初始化界面资源
@@ -57,5 +75,10 @@ namespace IT.Tangdao.Framework
         /// <param name="resourceDictionary"></param>
       //  protected abstract void InitResource(ResourceDictionary resourceDictionary);
 
+        //注册服务定位器
+        private void InitServerLocator()
+        {
+            ServerLocator.InitContainer(this.TangdaoContainer);
+        }
     }
 }

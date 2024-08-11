@@ -89,6 +89,43 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
         /// <summary>
+        /// 继续创建流
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static StreamReader ToStreamReader(this string path,Encoding encoding=null)
+        {
+            if (encoding is null)
+            {
+                encoding = Encoding.UTF8;
+            }
+            var result= new StreamReader(path, encoding);
+            return result;
+        }
+
+        /// <summary>
+        /// 继续创建流做一个简单的读取
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static string UseStreamReadToEnd(this string path, Encoding encoding = null)
+        {
+            if (encoding is null)
+            {
+                encoding = Encoding.UTF8;
+            }
+            string content=string.Empty;
+
+            using (var stream= new StreamReader(path, encoding))
+            {
+                content = stream.ReadToEnd();
+            }
+            return content;
+        }
+
+        /// <summary>
         /// 继续创建文件
         /// 并且设置缓冲区
         /// </summary>

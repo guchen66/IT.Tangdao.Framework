@@ -79,8 +79,15 @@ StringExtension 可以方便一些代码
 读取本地txt文件的方法
 
 ```
-string path = "E://Temp//Student.txt";
+string path = "E://Temp.txt";
 string xmlContent=TxtFolderHelper.ReadByFileStream(path);
+```
+
+如果是测试读取文件的话，可以简单的读取
+
+```
+ string path = "E://Temp.txt";
+ string content=path.CreateFolder().UseStreamReadToEnd();
 ```
 
 

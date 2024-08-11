@@ -5,7 +5,7 @@
 	<UseWPF>true</UseWPF>
 	<Title>一个简易开发的工具类库包</Title>
 	<Authors>liuxin</Authors>
-    <Version>3.0.1</Version>
+    <Version>3.0.3</Version>
     <Description>一个工具类库包</Description>
     <RepositoryUrl></RepositoryUrl>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>

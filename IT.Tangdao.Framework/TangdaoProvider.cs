@@ -28,10 +28,31 @@ namespace IT.Tangdao.Framework
             return _contexts;
         }
 
+        /// <summary>
+        /// 解析的时候无非分为三种
+        /// 1、解析的是接口
+        /// 2、解析的是具有无参构造的类
+        /// 3、解析的是具有有参构造的类
+        /// 
+        /// 所以当它具有无参构造器，我不需要注册，直接解析
+        /// 当它具有有参构造器的时候，我在从字典里捞，并且递归
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public object Resolve(Type type)
         {
+            if (type.IsInterface)
+            {
+                ResolveInterface(type);
+            }
+            else if(type.IsClass && type.GetConstructor(Type.EmptyTypes) != null)
+            {
+               return Activator.CreateInstance(type);
+            }
             ConstructorInfo[] constructorInfos = type.GetConstructors();
             var context = _contexts.LastOrDefault();
+            var serviceType=context.RegisterType[type] as Type;
             List<object> parameList=new List<object>();
             if (constructorInfos.Length > 0)
             {
@@ -53,10 +74,68 @@ namespace IT.Tangdao.Framework
                 }
             }
           
-            var obj=Activator.CreateInstance(type,parameList.ToArray());
+            var obj=Activator.CreateInstance(serviceType, parameList.ToArray());
             return obj;
         }
 
+        public object ResolveClass(Type type)
+        {
+            ConstructorInfo[] constructorInfos = type.GetConstructors();
+            var context = _contexts.LastOrDefault();
+            List<object> parameList = new List<object>();
+            if (constructorInfos.Length > 0)
+            {
+                ConstructorInfo constructorInfo = constructorInfos[0];
+                foreach (ParameterInfo parameter in constructorInfo.GetParameters())
+                {
+                    Type paramType = parameter.ParameterType;
+                    if (!context.RegisterType.ContainsKey(paramType))
+                    {
+                        TangdaoGuards.ThrowIfNull($"{paramType}，为空，未注册");
+                        throw new InvalidOperationException();
+                    }
+
+                    //获取类的映射
+                    //  Type implementationType= paramType.GetGenericTypeDefinition();
+                    var implementationType = context.RegisterType[paramType] as Type;
+                    var instance = Resolve(implementationType);
+                    parameList.Add(instance);
+                }
+            }
+
+            var obj = Activator.CreateInstance(type, parameList.ToArray());
+            return obj;
+        }
+
+        public object ResolveInterface(Type type)
+        {
+            ConstructorInfo[] constructorInfos = type.GetConstructors();
+            var context = _contexts.LastOrDefault();
+            var serviceType = context.RegisterType[type] as Type;
+            List<object> parameList = new List<object>();
+            if (constructorInfos.Length > 0)
+            {
+                ConstructorInfo constructorInfo = constructorInfos[0];
+                foreach (ParameterInfo parameter in constructorInfo.GetParameters())
+                {
+                    Type paramType = parameter.ParameterType;
+                    if (!context.RegisterType.ContainsKey(paramType))
+                    {
+                        TangdaoGuards.ThrowIfNull($"{paramType}，为空，未注册");
+                        throw new InvalidOperationException();
+                    }
+
+                    //获取类的映射
+                    //  Type implementationType= paramType.GetGenericTypeDefinition();
+                    var implementationType = context.RegisterType[paramType] as Type;
+                    var instance = ResolveInterface(implementationType);
+                    parameList.Add(instance);
+                }
+            }
+
+            var obj = Activator.CreateInstance(serviceType, parameList.ToArray());
+            return obj;
+        }
         public object Resolve(Type type, bool useFactoryMethods = false)
         {
             ConstructorInfo[] constructorInfos = type.GetConstructors();
