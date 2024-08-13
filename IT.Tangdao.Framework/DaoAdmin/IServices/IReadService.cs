@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoEnums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,33 +9,18 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.DaoAdmin.IServices
 {
     /// <summary>
-    /// 定义读取服务层
+    /// 定义读取文本的服务
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public interface IReadService<TEntity> where TEntity : class, new()
-    {
-        #region 增删改查
+    public interface IReadService
+    {             
+        string Read(string path, DaoFileType daoFileType= DaoFileType.None);
 
-      //  Task<bool> AddAsync(TEntity entity);
-     //   Task<bool> UpdateAsync(TEntity entity);
-     //   Task<bool> DeleteAsync(int id);
-     //   Task<TEntity> QueryAsync(int id);
-     //   Task<TEntity> QueryAsync(Expression<Func<TEntity, bool>> func);
-        #endregion
+        Task<string> ReadAsync(string path, DaoFileType daoFileType = DaoFileType.None);
 
-        /// <summary>
-        /// 查询全部数据
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-       // Task<List<TEntity>> QueryListAsync();
+        Task<TEntity> ReadXmlToEntityAsync<TEntity>(string path, DaoFileType daoFileType) where TEntity : class, new();
 
-        /// <summary>
-        /// 自定义条件查询
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-       // Task<List<TEntity>> QueryListAsync(Expression<Func<TEntity, bool>> func);
-
+        Task<string> QueryFilterAsync(string path, Expression<Func<string, bool>> func);
+       
     }
 }

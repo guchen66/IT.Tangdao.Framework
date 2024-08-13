@@ -35,11 +35,9 @@ LoginViewModel:接收
  }
 ```
 
-
-
 #### 2、容器
 
-ITangdaoContainer还未书写完成
+ITangdaoContainer
 
 ```C#
 //容器的初始化
@@ -50,6 +48,10 @@ var provider = container.Builder();
 
 //构建一个全局服务定位器
 ServerLocator.InitContainer(container);
+
+//注册接口和实体类
+container.RegisterType<IReadService,ReadService>();
+container.RegisterType<IWriteService,WriteService>();
 ```
 
 
@@ -78,26 +80,73 @@ StringExtension 可以方便一些代码
 
 读取本地txt文件的方法
 
-```
+```c#
 string path = "E://Temp.txt";
 string xmlContent=TxtFolderHelper.ReadByFileStream(path);
 ```
 
 如果是测试读取文件的话，可以简单的读取
 
-```
+```c#
  string path = "E://Temp.txt";
  string content=path.CreateFolder().UseStreamReadToEnd();
 ```
 
-
-
 读取本地xml文件的方法
 
-```C#
+```C#C#
  string path = "E://Temp//Student.xml";
  string xmlContent=TxtFolderHelper.ReadByFileStream(path);
  Student student=XmlFolderHelper.Deserialize<Student>(xmlContent);
+```
+
+也可以使用接口读取
+
+xml文件是
+
+```C#
+<?xml version="1.0" encoding="utf-8"?>
+<Student target="学生">
+	<Id target="009">1</Id>
+	<Age>18</Age>
+	<Name>李四</Name>
+</Student>
+```
+
+实体类为
+
+```c#
+ [XmlRoot("Student")]
+ public class Student
+ {
+     [XmlAttribute("target")]
+     public string Target { get; set; }
+
+     [XmlElement("Id")]
+     public int Id { get; set; }
+
+     [XmlElement("Age")]
+     public int Age { get; set; }
+
+     [XmlElement("Name")]
+     public string Name { get; set; }
+    
+ }
+```
+
+注册接口，然后读取
+
+```c#
+  string path = "E://Temp//Student.xml";
+  Student stu= await _readService.ReadXmlToEntityAsync<Student>(path,DaoFileType.Xml);
+```
+
+简单的读取写入
+
+```C#
+  await _writeService.WriteAsync("E://Temp//100.txt","HelloWorld");
+
+  await _readService.ReadAsync("E://Temp//100.txt");
 ```
 
 

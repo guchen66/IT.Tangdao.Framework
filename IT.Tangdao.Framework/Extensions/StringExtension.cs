@@ -125,6 +125,38 @@ namespace IT.Tangdao.Framework.Extensions
             return content;
         }
 
+        public static Stream UseFileOpenRead(this string path, Encoding encoding = null)
+        {
+            if (encoding is null)
+            {
+                encoding = Encoding.UTF8;
+            }
+            return File.OpenRead(path);
+        }
+
+        public static void UseFileWriteToTxt(this string path, string contents, Encoding encoding = null)
+        {
+            if (encoding == null)
+            {
+                encoding = Encoding.UTF8;
+            }
+            File.WriteAllText(path, contents, encoding);
+        }
+
+        public static void UseFileWriteByteToTxt(this string path, byte contents, Encoding encoding = null)
+        {
+            if (encoding == null)
+            {
+                encoding = Encoding.UTF8;
+            }
+            using (var fileStream=new FileStream(path,FileMode.OpenOrCreate))
+            {
+                fileStream.WriteByte(contents);
+            }
+            
+        }
+
+
         /// <summary>
         /// 继续创建文件
         /// 并且设置缓冲区

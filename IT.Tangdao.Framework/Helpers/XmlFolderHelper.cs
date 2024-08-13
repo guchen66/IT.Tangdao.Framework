@@ -10,6 +10,12 @@ namespace IT.Tangdao.Framework.Helpers
 {
     public class XmlFolderHelper
     {
+        /// <summary>
+        /// 将对象转成XML，以字符串保存
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public static string SerializeXML<T>(T t)
         {
             using (StringWriter sw = new StringWriter())
@@ -21,7 +27,7 @@ namespace IT.Tangdao.Framework.Helpers
         }
 
         /// <summary>
-        /// XML反序列化为对象
+        /// XML字符串反序列化为对象
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="xml">xml字符串</param>
