@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoMvvm
 {
-    public abstract class BaseDaoViewModel : INotifyPropertyChanged
+    public abstract class DaoViewModelBase : INotifyPropertyChanged
     {      
         public event PropertyChangedEventHandler PropertyChanged;
      

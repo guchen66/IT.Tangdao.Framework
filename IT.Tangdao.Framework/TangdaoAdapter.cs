@@ -9,7 +9,7 @@ namespace IT.Tangdao.Framework
 {
     public abstract class TangdaoAdapter
     {
-        public readonly List<CommonContext> CurrentContext = new List<CommonContext>();
+        public readonly List<RegisterContext> CurrentContext = new List<RegisterContext>();
       
     }
 }

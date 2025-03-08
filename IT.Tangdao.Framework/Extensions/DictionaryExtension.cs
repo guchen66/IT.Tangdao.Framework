@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,6 +59,20 @@ namespace IT.Tangdao.Framework.Extensions
             dict[key] = value;
             return dict;
         }
-    }
 
+        /// <summary>
+        /// 对字典的值重新进行排序
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dict"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Dictionary<TKey, TValue> TryOrderBy<TKey, TValue>(this Dictionary<TKey, TValue> dict)
+        {
+            var sortedDicts = dict.OrderBy(kvp => kvp.Key).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            return sortedDicts;
+        }
+    }
 }

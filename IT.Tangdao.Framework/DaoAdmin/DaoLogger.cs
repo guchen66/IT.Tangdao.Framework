@@ -24,7 +24,7 @@ namespace IT.Tangdao.Framework.DaoAdmin
             {
                 Loggers[type] = LoggerFactory?.Invoke(type) ?? new DaoLogger(type);
             }
-
+           
             return Loggers[type];
         }
 
@@ -74,9 +74,9 @@ namespace IT.Tangdao.Framework.DaoAdmin
                       $"{message}{Environment.NewLine}";
 
             System.Diagnostics.Debug.Write(message);
-            File.WriteAllText(
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "accelerider.windows.log"),
-                message);
+            File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Tangdao.log"), message);
         }
+
+      
     }
 }

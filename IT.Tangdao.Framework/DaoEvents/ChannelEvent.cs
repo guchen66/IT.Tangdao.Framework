@@ -1,4 +1,6 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoCommon;
+using IT.Tangdao.Framework.DaoEnums;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +14,35 @@ namespace IT.Tangdao.Framework.DaoEvents
     /// </summary>
     public static class ChannelEvent
     {
+        /// <summary>
+        /// 存储字符串
+        /// </summary>
         private static readonly ConcurrentDictionary<string, string> _localValues = new ConcurrentDictionary<string, string>();
 
+        /// <summary>
+        /// 存储方法
+        /// </summary>
         private static readonly ConcurrentDictionary<string, Delegate> _actions = new ConcurrentDictionary<string, Delegate>();
+
+        /// <summary>
+        /// 存储数据上下文
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, RegisterContext> _contexts = new ConcurrentDictionary<Type, RegisterContext>();
+
+        /// <summary>
+        /// 存储工厂
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, Func<ITangdaoProvider, object>> _instanceFactories = new ConcurrentDictionary<Type, Func<ITangdaoProvider, object>>();
+
+        /// <summary>
+        /// 存储实例
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, object> _instances = new ConcurrentDictionary<Type, object>();
+
+        /// <summary>
+        /// 存储解析容器
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, ITangdaoProvider> _providers = new ConcurrentDictionary<Type, ITangdaoProvider>();
 
         public static void SetLocalValue(string name, string value)
         {
@@ -45,30 +73,67 @@ namespace IT.Tangdao.Framework.DaoEvents
                 }
             }
         }
-    }
 
-    public class WriteEvent
-    {
-        public static void Write()
+        public static void SetContext<TService>(RegisterContext context)
         {
-            ChannelEvent.SetLocalValue("name", "Hello");
+            _contexts[typeof(TService)] = context;
         }
-    }
 
-    public class ReadEvent
-    {
-        public static void Read()
+        public static RegisterContext GetContext<TService>()
         {
-            var value = ChannelEvent.GetLocalValue("name");
-            Console.WriteLine(value); // 输出 Hello
+            _contexts.TryGetValue(typeof(TService), out var context);
+            return context;
         }
-    }
 
-    public class First
-    {
-        public static void Usage()
+        public static RegisterContext GetContext(Type type)
         {
-            WriteEvent.Write();
+            _contexts.TryGetValue(type, out var context);
+            return context;
+        }
+
+        /// <summary>
+        /// 注册一个类型的实例工厂方法。
+        /// </summary>
+        /// <typeparam name="TService">服务类型。</typeparam>
+        /// <param name="factory">工厂方法，接受 ITangdaoProvider 并返回 TService 实例。</param>
+        public static void SetInstance<TService>(Func<ITangdaoProvider, object> factory)
+        {
+            _instanceFactories[typeof(TService)] = factory;
+        }
+
+        /// <summary>
+        /// 获取指定类型的单例实例。如果尚未创建，则使用注册的工厂方法创建。
+        /// </summary>
+        /// <typeparam name="TService">服务类型。</typeparam>
+        /// <returns>TService 的单例实例。</returns>
+        public static TService GetInstance<TService>(ITangdaoProvider provider) where TService : class
+        {
+            return (TService)_instances.GetOrAdd(typeof(TService), type =>
+            {
+                if (_instanceFactories.TryGetValue(type, out var factory))
+                {
+                    return factory(provider) as object;
+                }
+                throw new InvalidOperationException($"No instance factory registered for type {type.FullName}");
+            });
+        }
+
+        /// <summary>
+        /// 获取指定类型的单例实例。如果尚未创建，则使用注册的工厂方法创建。
+        /// </summary>
+        /// <param name="type">服务类型。</param>
+        /// <param name="provider">ITangdaoProvider 实例。</param>
+        /// <returns>指定类型的单例实例。</returns>
+        public static object GetInstance(Type type, ITangdaoProvider provider)
+        {
+            return _instances.GetOrAdd(type, t =>
+            {
+                if (_instanceFactories.TryGetValue(t, out var factory))
+                {
+                    return factory(provider);
+                }
+                throw new InvalidOperationException($"No instance factory registered for type {t.FullName}");
+            });
         }
     }
 }

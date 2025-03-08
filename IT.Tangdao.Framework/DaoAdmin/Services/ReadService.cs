@@ -1,5 +1,6 @@
 ﻿using IT.Tangdao.Framework.DaoAdmin.IServices;
 using IT.Tangdao.Framework.DaoEnums;
+using IT.Tangdao.Framework.DaoSelectors;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Helpers;
 using System;
@@ -10,20 +11,34 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace IT.Tangdao.Framework.DaoAdmin.Services
 {
     public class ReadService : IReadService
     {
+        public void Load(string data)
+        {
+            Current.XMLData = data;
+        }
+
+        public void Load(string data, DaoFileType daoFileType)
+        {
+            if (daoFileType == DaoFileType.Json)
+            {
+                Current.JsonData = data;
+            }
+        }
+
         public string Read(string path, DaoFileType daoFileType = DaoFileType.None)
         {
-            string content=string.Empty;
+            string content = string.Empty;
 
             if (daoFileType == DaoFileType.None)
             {
-                daoFileType= DaoFileType.Txt;
+                daoFileType = DaoFileType.Txt;
             }
-            content=path.UseStreamReadToEnd();
+            content = path.UseStreamReadToEnd();
             return content;
         }
 
@@ -37,6 +52,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             {
                 case DaoFileType.Txt:
                     return await ReadTxtAsync(path);
+
                 case DaoFileType.Xml:
                     return await ReadXmlAsync(path);
                 // 可以继续添加其他文件类型的处理逻辑
@@ -45,14 +61,14 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             }
         }
 
-        public async Task<TEntity> ReadXmlToEntityAsync<TEntity>(string path, DaoFileType daoFileType) where TEntity:class,new()
+        public async Task<TEntity> ReadXmlToEntityAsync<TEntity>(string path, DaoFileType daoFileType) where TEntity : class, new()
         {
-            string xml=string.Empty;
-            TEntity Entity=new TEntity();
-            if (daoFileType==DaoFileType.Xml)
+            string xml = string.Empty;
+            TEntity Entity = new TEntity();
+            if (daoFileType == DaoFileType.Xml)
             {
-                xml =await ReadXmlAsync(path);
-                Entity= XmlFolderHelper.Deserialize<TEntity>(xml);
+                xml = await ReadXmlAsync(path);
+                Entity = XmlFolderHelper.Deserialize<TEntity>(xml);
             }
             return Entity;
         }
@@ -83,6 +99,20 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
                 // 返回处理后的字符串或XML文档的字符串表示
                 return doc.ToString();
             }
+        }
+
+        public IRead Current { get; set; } = new Read();
+
+        private IRead GetFile()
+        {
+            return FileSelector.Queryable();
+        }
+
+        public IHardwaredevice Device => GetDevice();
+
+        private IHardwaredevice GetDevice()
+        {
+            return DeviceSelector.SelectCurrentMatchDevice("");
         }
     }
 }

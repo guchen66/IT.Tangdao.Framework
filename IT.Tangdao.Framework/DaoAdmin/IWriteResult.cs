@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoDtos
+namespace IT.Tangdao.Framework.DaoAdmin
 {
-    public class ReadOrWriteResult
+    public class IWriteResult
     {
         public string Message { get; set; }
 
@@ -14,13 +14,17 @@ namespace IT.Tangdao.Framework.DaoDtos
 
         public object Result { get; set; }
 
-        public ReadOrWriteResult(string message, bool status = false)
+        public IWriteResult()
+        {
+        }
+
+        public IWriteResult(string message, bool status = false)
         {
             Message = message;
             Status = status;
         }
 
-        public ReadOrWriteResult(bool status, object result)
+        public IWriteResult(bool status, object result)
         {
             Status = status;
             Result = result;

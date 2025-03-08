@@ -9,11 +9,11 @@ namespace IT.Tangdao.Framework.DaoDtos.Options
 {
     public class PlcOption
     {
-        public PlcType PlcType { get; internal set; }
+        public PlcType PlcType { get;  set; }
 
-        public string PlcIpAddress { get; internal set; }
+        public string PlcIpAddress { get;  set; }
 
-        public string Port { get; internal set; }
+        public string Port { get;  set; }
 
         public bool IsAutoConnection { get; set; }
 

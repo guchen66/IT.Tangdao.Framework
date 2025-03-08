@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework
 {
-    public interface ITangdaoContainer: ITangdaoContainerBuilder
+    public interface ITangdaoContainer : ITangdaoContainerBuilder
     {
+        ITangdaoProvider Builder();
+
         ITangdaoContainer Register(Type serviceType, Type implementationType);
 
         ITangdaoContainer Register(Type implementationType);
@@ -18,6 +20,8 @@ namespace IT.Tangdao.Framework
 
         ITangdaoContainer Register(string name);
 
-        
+        ITangdaoContainerBuilder Register<TService, TImplementation>() where TImplementation : TService;
+
+        ITangdaoContainerBuilder Register<TImplementation>();
     }
 }

@@ -10,7 +10,7 @@ using System.Windows.Data;
 
 namespace IT.Tangdao.Framework.DaoConverters
 {
-    public class ListViewBackgroundConverter : ValueConverterBase
+    public class ListViewBackgroundConverter : NoBindingValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -29,11 +29,6 @@ namespace IT.Tangdao.Framework.DaoConverters
             {
                 return Brushes.White;
             }
-        }
-
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

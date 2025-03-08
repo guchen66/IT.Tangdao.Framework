@@ -8,6 +8,6 @@ namespace IT.Tangdao.Framework.DaoAdmin
 {
     public interface IDaoCloneable<out T>
     {
-        T Clone();
+        T Clone(); 
     }
 }

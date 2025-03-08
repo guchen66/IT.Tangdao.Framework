@@ -1,7 +1,9 @@
 ﻿using IT.Tangdao.Framework.DaoAdmin.IServices;
 using IT.Tangdao.Framework.DaoDtos;
+using IT.Tangdao.Framework.DaoDtos.Globals;
 using IT.Tangdao.Framework.DaoEnums;
 using IT.Tangdao.Framework.Extensions;
+using IT.Tangdao.Framework.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +15,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
 {
     public class WriteService : IWriteService
     {
-        public void WriteString(string path,string content, DaoFileType daoFileType = DaoFileType.None)
+        public void WriteString(string path, string content, DaoFileType daoFileType = DaoFileType.None)
         {
             if (daoFileType == DaoFileType.None)
             {
@@ -22,7 +24,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             path.UseFileWriteToTxt(content);
         }
 
-        public async Task<ReadOrWriteResult> WriteAsync(string path, string content, DaoFileType daoFileType = DaoFileType.None)
+        public async Task<IWriteResult> WriteAsync(string path, string content, DaoFileType daoFileType = DaoFileType.None)
         {
             if (daoFileType == DaoFileType.None)
             {
@@ -30,17 +32,25 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             }
             await new TimeSpan(1000);
             path.UseFileWriteToTxt(content);
-            return new ReadOrWriteResult(true,content);
+            return new IWriteResult(true, content);
         }
 
-        public Task<string> WriteFilterAsync(string path, Expression<Func<string, bool>> func)
+        public void WriteFilter(string path, Expression<Func<string, bool>> func)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TEntity> WriteXmlToEntityAsync<TEntity>(string path, DaoFileType daoFileType) where TEntity : class, new()
+        public void WriteEntityToXml<TEntity>(TEntity entity, string path, DaoFileType daoFileType) where TEntity : class, new()
         {
-            throw new NotImplementedException();
+            if (daoFileType == DaoFileType.Xml)
+            {
+                var info = XmlFolderHelper.SerializeXML<TEntity>(entity);
+                WriteString(path, info);
+            }
+            else
+            {
+                TangdaoGuards.ThrowIfNull(entity);
+            }
         }
     }
 }

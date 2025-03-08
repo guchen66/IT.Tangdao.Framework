@@ -13,7 +13,7 @@ namespace IT.Tangdao.Framework.Helpers
         {
             if (!File.Exists(path))
             {
-                return null;
+                throw new FileNotFoundException("指定的文件未找到。", path);
             }
             return File.ReadAllText(path);
         }
@@ -22,16 +22,24 @@ namespace IT.Tangdao.Framework.Helpers
         {
             if (!File.Exists(path))
             {
-                return null;
+                throw new FileNotFoundException("指定的文件未找到。", path);
             }
-            return File.ReadAllLines(path);          
+
+            try
+            {
+                return File.ReadAllLines(path);
+            }
+            catch (Exception ex)
+            {
+                throw new IOException("读取文件时发生错误。", ex);
+            }
         }
 
         public static string ReadByFileStream(string path)
         {
             if (!File.Exists(path))
             {
-                return null;
+                throw new FileNotFoundException("指定的文件未找到。", path);
             }
             using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
             {
@@ -41,33 +49,36 @@ namespace IT.Tangdao.Framework.Helpers
                 }
             }
         }
+
         public static Task<string> SimpleReadAsync(string path)
         {
             return Task.Factory.StartNew(() =>
             {
                 if (!File.Exists(path))
                 {
-                    return null;
+                    throw new FileNotFoundException("指定的文件未找到。", path);
                 }
                 return File.ReadAllText(path);
             });
         }
+
         public static Task<string[]> SimpleReadStringArrayAsync(string path)
         {
             return Task.Factory.StartNew(() =>
             {
                 if (!File.Exists(path))
                 {
-                    return null;
+                    throw new FileNotFoundException("指定的文件未找到。", path);
                 }
                 return File.ReadAllLines(path);
             });
         }
+
         public static async Task<string> ReadByFileStreamAsync(string path)
         {
             if (!File.Exists(path))
             {
-                return null;
+                throw new FileNotFoundException("指定的文件未找到。", path);
             }
             using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
             {

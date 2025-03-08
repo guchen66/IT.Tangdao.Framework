@@ -12,6 +12,7 @@ namespace IT.Tangdao.Framework.DaoEnums
         Txt,
         Xml,
         Xlsx,
-        Xaml
+        Xaml,
+        Json
     }
 }

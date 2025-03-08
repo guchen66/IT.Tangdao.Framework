@@ -9,6 +9,6 @@ namespace IT.Tangdao.Framework
 {
     public interface ITangdaoAdapter
     {
-        List<CommonContext> GetContexts();
+        List<RegisterContext> GetContexts();
     }
 }

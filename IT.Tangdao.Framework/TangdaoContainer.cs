@@ -9,115 +9,91 @@ using System.Windows.Input;
 using IT.Tangdao.Framework.DaoCommon;
 using IT.Tangdao.Framework.DaoComponents;
 using IT.Tangdao.Framework.DaoDtos.Globals;
+using IT.Tangdao.Framework.DaoEnums;
+using IT.Tangdao.Framework.DaoEvents;
 using IT.Tangdao.Framework.DaoException;
 using IT.Tangdao.Framework.DaoMvvm;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Providers;
+
 namespace IT.Tangdao.Framework
 {
-    public sealed class TangdaoContainer : ITangdaoAdapter, ITangdaoContainer
+    public sealed class TangdaoContainer : ITangdaoContainer
     {
-        private readonly List<CommonContext> _contexts;
-
-        public TangdaoContainer()
+        /// <summary>
+        /// 注册一个类
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <returns></returns>
+        public ITangdaoContainerBuilder Register<TService>()
         {
-            _contexts = new List<CommonContext> { new CommonContext() };
+            Type serviceType = typeof(TService);
+
+            var constructors = serviceType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var constructor = constructors[0];
+            var parameters = constructor.GetParameters();
+
+            RegisterContext context = new RegisterContext
+            {
+                RegisterType = serviceType,
+                ParameterInfos = parameters,
+                Lifecycle = Lifecycle.Transient,
+            };
+
+            ChannelEvent.SetContext<TService>(context);
+            return this;
         }
 
-        public List<CommonContext> GetContexts()
+        public ITangdaoContainerBuilder Register<TService, TImplementation>() where TImplementation : TService
         {
-            return _contexts;
+            Type serviceType = typeof(TService);
+            Type implementationType = typeof(TImplementation);
+
+            var constructors = implementationType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var constructor = constructors[0]; // 使用第一个构造函数
+            var parameters = constructor.GetParameters();
+
+            RegisterContext context = new RegisterContext
+            {
+                RegisterType = implementationType,
+                ParameterInfos = parameters
+            };
+
+            // 存储接口和实现类的映射
+            context.InterfaceToImplementationMapping[serviceType] = implementationType;
+
+            ChannelEvent.SetContext<TService>(context);
+            return this;
+        }
+
+        public ITangdaoProvider Builder()
+        {
+            // 创建一个根提供者，不需要传递任何上下文
+            return TangdaoContainerBuilder.Builder();
         }
 
         public ITangdaoContainer Register(Type serviceType, Type implementationType)
         {
-            var context = _contexts.LastOrDefault();
-            if (context == null)
-            {
-                throw new InvalidOperationException("No context available for registration.");
-            }
-
-            if (!context.RegisterType.ContainsKey(serviceType))
-            {
-                context.RegisterType[serviceType] = implementationType; // 注册服务类型到实现类型
-            }
-            else
-            {
-                // 如果服务类型已经存在，则抛出异常或者进行其他处理
-                throw new InvalidOperationException($"Service type {serviceType.FullName} is already registered.");
-            }
-
             return this;
         }
 
         public ITangdaoContainer Register(Type implementationType)
         {
-            var context = _contexts.LastOrDefault();
-            if (context == null)
+            RegisterContext context = new RegisterContext
             {
-                throw new InvalidOperationException("No context available for registration.");
-            }
-
-            if (!context.RegisterType.ContainsKey(implementationType))
-            {
-                context.RegisterType[implementationType] = implementationType; // 注册实现类型
-            }
-            else
-            {
-                // 如果实现类型已经存在，则抛出异常或者进行其他处理
-                throw new InvalidOperationException($"Implementation type {implementationType.FullName} is already registered.");
-            }
-
+                RegisterType = implementationType,
+            };
             return this;
         }
 
-      
         public ITangdaoContainer Register(Type serviceType, Func<object> creator)
         {
-            var context = _contexts.LastOrDefault();
-            if (context == null)
-            {
-                throw new InvalidOperationException("No context available for registration.");
-            }
-
-            if (!context.RegisterType.ContainsKey(serviceType))
-            {
-                context.RegisterType.Add(serviceType, creator); // 注册服务类型到创建函数
-            }
-            else
-            {
-                // 如果服务类型已经存在，则抛出异常或者进行其他处理
-                throw new InvalidOperationException($"Service type {serviceType.FullName} is already registered.");
-            }
-
             return this;
         }
 
         public ITangdaoContainer Register(Type type, Func<ITangdaoProvider, object> factoryMethod)
         {
-            var context = _contexts.LastOrDefault();
-            if (context == null)
-            {
-                throw new InvalidOperationException("No context available for registration.");
-            }
-
-            if (!context.RegisterType.ContainsKey(type))
-            {
-                context.RegisterType.Add(type, factoryMethod); // 注册类型到工厂方法
-            }
-            else
-            {
-                // 如果类型已经存在，则抛出异常或者进行其他处理
-                throw new InvalidOperationException($"Type {type.FullName} is already registered.");
-            }
-
             return this;
-        }
-
-        // 如果需要添加新的上下文，可以添加一个方法来处理
-        public void AddContext()
-        {
-            _contexts.Add(new CommonContext());
         }
 
         public ITangdaoContainer Register(string name)
@@ -127,11 +103,13 @@ namespace IT.Tangdao.Framework
                 IEnumerable<Type> types = ViewToViewModelExtension.GetScanObject(name);
                 return ViewToViewModelLocator.Build(types);
             }
-          
+
             throw new ContainerErrorException("注册ViewToModel未提供Name");
         }
 
-        // 用于跟踪当前正在解析的类型，以避免递归
-        private Stack<Type> ResolvingTypes { get; } = new Stack<Type>();
+        public void Register<TService>(Func<ITangdaoContainer, TService> factory)
+        {
+            //_factories[typeof(TService)] = () => factory(this);
+        }
     }
 }

@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework
 {
-    public interface ITangdaoProvider: ITangdaoProviderBuilder
+    public interface ITangdaoProvider : ITangdaoProviderBuilder
     {
         object Resolve(Type type);
-        object Resolve(Type type,bool useFactoryMethods);
-       // object Resolve(Type type, params (Type Type, object Instance)[] parameters);
+
+        object Resolve(Type type, params object[] impleType);
     }
 }

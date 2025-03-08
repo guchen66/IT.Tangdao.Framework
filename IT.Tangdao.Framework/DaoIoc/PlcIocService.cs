@@ -10,9 +10,9 @@ namespace IT.Tangdao.Framework.DaoIoc
 {
     public class PlcIocService
     {
-        public static void RegisterPlcServer(PlcOption Framework)
+        public static void RegisterPlcServer(PlcOption option)
         {
-            PlcServerCollectionExtension.PlcOptions.Add(Framework);
+            PlcServerCollectionExtension.PlcOptions.Add(option);
         }
 
        /* public static void RegisterPlcServer(List<IocConfig> iocList)

@@ -6,6 +6,16 @@
 
 静态命令：MinidaoCommand
 
+1-1、用法
+
+```js
+TangdaoCommand  taodao=new TangdaoCommand();
+TangdaoAsyncCommand taodaoAsync=new TangdaoAsyncCommand();
+MinidaoCommand.Create();
+```
+
+
+
 #### 2、事件聚合器
 
 用于父子组件的通讯
@@ -75,6 +85,8 @@ container.RegisterType<IWriteService,WriteService>();
 
 
 #### 3、扩展方法
+
+3-1、读写
 
 StringExtension 可以方便一些代码
 
@@ -149,6 +161,20 @@ xml文件是
   await _readService.ReadAsync("E://Temp//100.txt");
 ```
 
+以及增加了XML的序列化和反序列化
+
+将对象转成XML，以字符串保存
+
+```c#
+string xml=XmlFolderHelper.SerializeXML<Student>(student);
+```
+
+XML字符串反序列化为对象
+
+```c#
+Student student=XmlFolderHelper.Deserialize<Student>(xml);
+```
+
 
 
 #### 4、增加一些常用的Helper类
@@ -168,4 +194,9 @@ this.RunChildWindowAsync<LoginView>();
 
 
 
-#### 
+#### 6、日志DaoLogger
+
+日志默认是写在桌面上的
+
+#### 7、类型的转换
+

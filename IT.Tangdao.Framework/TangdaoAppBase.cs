@@ -44,9 +44,9 @@ namespace IT.Tangdao.Framework
         public virtual void Init()
         {
             InitServerLocator();
-            InitWindow();
             InitIoc();
-           
+            InitWindow();
+                    
         }
 
         protected void InitWindow()

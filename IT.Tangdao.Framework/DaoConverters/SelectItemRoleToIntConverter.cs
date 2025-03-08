@@ -11,7 +11,7 @@ using System.Windows.Data;
 
 namespace IT.Tangdao.Framework.DaoConverters
 {
-    public class SelectItemRoleToIntConverter:ValueConverterBase
+    public class SelectItemRoleToIntConverter : NoBindingValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

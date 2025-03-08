@@ -67,7 +67,7 @@ namespace IT.Tangdao.Framework.Helpers
             // 筛选出位于指定文件夹下，并且应用了指定特性的所有类
             IEnumerable<Type> modelTypes = allTypes
                 .Where(type => type.Namespace?.Contains(folder) == true && (inter == null || Attribute.IsDefined(type, inter)));
-
+            
             return modelTypes;
         }
     }

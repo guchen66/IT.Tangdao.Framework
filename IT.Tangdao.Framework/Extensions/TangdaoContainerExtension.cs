@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework;
 using System.Windows;
+
 namespace IT.Tangdao.Framework.Extensions
 {
     public static class TangdaoContainerExtension
@@ -31,7 +32,7 @@ namespace IT.Tangdao.Framework.Extensions
             return container.Register(typeof(TService), factoryMethod);
         }
 
-        public static ITangdaoContainer RegisterViewToViewModel(this ITangdaoContainer container, string name=null)
+        public static ITangdaoContainer RegisterViewToViewModel(this ITangdaoContainer container, string name = null)
         {
             return container.Register(name);
         }

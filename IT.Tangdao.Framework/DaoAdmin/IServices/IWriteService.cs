@@ -11,12 +11,12 @@ namespace IT.Tangdao.Framework.DaoAdmin.IServices
 {
     public interface IWriteService
     {
-        void WriteString(string path,string content, DaoFileType daoFileType = DaoFileType.None);
+        void WriteString(string path, string content, DaoFileType daoFileType = DaoFileType.None);
 
-        Task<ReadOrWriteResult> WriteAsync(string path,string content, DaoFileType daoFileType = DaoFileType.None);
+        Task<IWriteResult> WriteAsync(string path, string content, DaoFileType daoFileType = DaoFileType.None);
 
-        Task<TEntity> WriteXmlToEntityAsync<TEntity>(string path, DaoFileType daoFileType) where TEntity : class, new();
+        void WriteEntityToXml<TEntity>(TEntity entity, string path, DaoFileType daoFileType) where TEntity : class, new();
 
-        Task<string> WriteFilterAsync(string path, Expression<Func<string, bool>> func);
+        void WriteFilter(string path, Expression<Func<string, bool>> func);
     }
 }

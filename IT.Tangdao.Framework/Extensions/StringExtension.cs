@@ -116,6 +116,11 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 encoding = Encoding.UTF8;
             }
+            if (!File.Exists(path))
+            {
+                // 返回null或者空字符串，取决于您的需求
+                return null;
+            }
             string content=string.Empty;
 
             using (var stream= new StreamReader(path, encoding))
@@ -140,6 +145,8 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 encoding = Encoding.UTF8;
             }
+            // 确保目录存在
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllText(path, contents, encoding);
         }
 

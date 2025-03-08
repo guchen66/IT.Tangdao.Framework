@@ -10,35 +10,34 @@ namespace IT.Tangdao.Framework.Extensions
 {
     public static class TangdaoContainerBuilderExtension
     {
-        public static TangdaoProvider Builder(this ITangdaoContainer container)
+        /// <summary>
+        /// 单例模式
+        /// </summary>
+        /// <param name="container"></param>
+        /// <returns></returns>
+        public static void Singleton(this ITangdaoContainerBuilder container)
         {
-            ITangdaoAdapter tangdaoAdapter = (ITangdaoAdapter)container;
-           
-            return new TangdaoProvider(tangdaoAdapter);
+            // ((TangdaoContainerBuilder)container).Singleton();
         }
 
-        public static TangdaoProvider Builder(this TangdaoContainer container, ITangdaoAdapter tangdaoAdapter)
+        /// <summary>
+        /// 瞬态模式
+        /// </summary>
+        /// <param name="container"></param>
+        /// <returns></returns>
+        public static void Transient(this ITangdaoContainerBuilder container)
         {
-
-            return new TangdaoProvider(tangdaoAdapter);
+            // ((TangdaoContainerBuilder)container).Transient();
         }
-        /*  public static TangdaoProvider Builder(this ITangdaoContainer container, bool isFromContainer)
-          {
-              return container.Builder(new TangdaoProviderOptions { IsFromContainer = isFromContainer });
-          }
 
-          public static TangdaoProvider Builder(this ITangdaoContainer container, TangdaoProviderOptions options)
-          {
-              if (container is null)
-              {
-                  throw new ArgumentNullException(nameof(container));
-              }
-              if (options is null)
-              {
-                  throw new ArgumentNullException(nameof(options));
-              }
-
-              return new TangdaoProvider(container, options);
-          }*/
+        /// <summary>
+        /// 作用域模式
+        /// </summary>
+        /// <param name="container"></param>
+        /// <returns></returns>
+        public static void Scoped(this ITangdaoContainerBuilder container)
+        {
+            // ((TangdaoContainerBuilder)container).Scoped();
+        }
     }
 }

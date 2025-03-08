@@ -18,5 +18,11 @@ namespace IT.Tangdao.Framework
             return Current;
         }
 
+        public T Get<T>() => Current.Resolve<T>();
+    }
+
+    public class ServerLocator<TSource> : ServerLocator
+    {
+        public TSource TSources => Current.Resolve<TSource>();
     }
 }

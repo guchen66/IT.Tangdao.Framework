@@ -15,7 +15,7 @@ namespace IT.Tangdao.Framework.Extensions
 {
     public static class TangdaoViewExtension
     {
-        public static Task RunParentWindowAsync<TWindow>(this BaseDaoViewModel viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
+        public static Task RunParentWindowAsync<TWindow>(this DaoViewModelBase viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
         {
             var uiSyncContext = System.Windows.Threading.Dispatcher.CurrentDispatcher;
             var tc = new TaskCompletionSource<object>();
@@ -24,7 +24,7 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 TWindow view = new TWindow();
                 view.Closed += View_Closed;
-                ITangdaoWindow tangdaoWin = view.DataContext as ITangdaoWindow;
+                ITangdaoMessage tangdaoWin = view.DataContext as ITangdaoMessage;
                 view.Loaded += (obj, e) =>
                 {
                     tangdaoWin.Response(tangdaoParameter);
@@ -44,7 +44,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <param name="viewModel"></param>
         /// <param name="tangdaoParameter"></param>
         /// <returns></returns>
-        public static Task RunSameLevelWindowAsync<TWindow>(this BaseDaoViewModel viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
+        public static Task RunSameLevelWindowAsync<TWindow>(this DaoViewModelBase viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
         {
             TaskCompletionSource<object> tc = new TaskCompletionSource<object>();
 
@@ -52,7 +52,7 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 TWindow view = new TWindow();
                 view.Closed += View_Closed;
-                ITangdaoWindow tangdaoWin = view.DataContext as ITangdaoWindow;
+                ITangdaoMessage tangdaoWin = view.DataContext as ITangdaoMessage;
                 view.Loaded += (obj, e) =>
                 {
                     tangdaoWin.Response(tangdaoParameter);
@@ -80,7 +80,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <typeparam name="TWindow"></typeparam>
         /// <param name="viewModel"></param>
         /// <returns></returns>
-        public static object RunChildWindowCallBackListAsync<TWindow>(this BaseDaoViewModel viewModel, string name, Action<TWindow> action) where TWindow : Window, new()
+        public static object RunChildWindowCallBackListAsync<TWindow>(this DaoViewModelBase viewModel, string name, Action<TWindow> action) where TWindow : Window, new()
         {
             //获取当前窗体 正在活动的窗体
             var activeWindow1 = Application.Current.MainWindow;

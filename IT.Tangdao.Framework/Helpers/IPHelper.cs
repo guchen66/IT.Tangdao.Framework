@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoException;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,20 +15,21 @@ namespace IT.Tangdao.Framework.Helpers
         /// <summary>
         /// 打印本地所有IP，包括回路
         /// </summary>
-        public static void GetLocalIPByDns()
+        public static string GetLocalIPByDns()
         {
             IPHostEntry entry=Dns.GetHostEntry(Dns.GetHostName());
             IPAddress[] addresss=entry.AddressList;
             foreach (IPAddress addr in addresss)
             {
-                Console.WriteLine(addr);
+                return addr.ToString();
             }
+            throw new ContainerErrorException($"未找到IP");
         }
 
         /// <summary>
         /// 不包括主机，返回IP4
         /// </summary>
-        public static void GetLocalIP2()
+        public static string GetLocalIP2()
         {
             IPHostEntry entry = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress[] addresss = entry.AddressList;
@@ -35,20 +37,20 @@ namespace IT.Tangdao.Framework.Helpers
             {
                 if (ip.AddressFamily==System.Net.Sockets.AddressFamily.InterNetwork)
                 {
-                    Console.WriteLine(ip.ToString());
-                }
-               
+                    return ip.ToString();
+                }             
             }
+            throw new ContainerErrorException($"未找到IP");
         }
 
         /// <summary>
         /// 打印以太网IP4
         /// </summary>
-        public static void GetLocalIPByLinq()
+        public static string GetLocalIPByLinq()
         {
             if (!System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())
             {
-                Console.WriteLine("No Network Available");
+                throw new ContainerErrorException($"No Network Available");
             }
 
             IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
@@ -56,15 +58,15 @@ namespace IT.Tangdao.Framework.Helpers
             var ippaddress = host
                 .AddressList
                 .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
-            Console.WriteLine(ippaddress);
+           return ippaddress?.ToString();
         }
 
         /// <summary>
         /// 打印本地所有IP，包括回路
         /// </summary>
-        public static void GetLocalIP(NetworkInterfaceType _type)
+        public static string GetLocalIP(NetworkInterfaceType _type)
         {
-            string output = "";
+            string output = "127.0.0.1";
             foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
             {
                 if (item.NetworkInterfaceType == _type && item.OperationalStatus == OperationalStatus.Up)
@@ -78,10 +80,10 @@ namespace IT.Tangdao.Framework.Helpers
                     }
                 }
             }
-            Console.WriteLine("IP Address = " + output);
+            return output;
         }
 
-        public static void FindIPByName(string interfaceName)
+        public static string FindIPByName(string interfaceName)
         {
             NetworkInterface[] networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
             foreach (NetworkInterface ni in networkInterfaces)
@@ -94,17 +96,17 @@ namespace IT.Tangdao.Framework.Helpers
                     foreach (UnicastIPAddressInformation ip in ipProperties.UnicastAddresses)
                     {
                         Console.WriteLine($"Interface: {ni.Name} ({ni.Description}) - IP: {ip.Address}");
+                        return ip.Address.ToString();// 假设只查找第一个匹配的接口
                     }
-                    return; // 假设只查找第一个匹配的接口
                 }
             }
-            Console.WriteLine($"No network interface found with the name or description: {interfaceName}");
+            throw new ContainerErrorException($"No network interface found with the name or description: {interfaceName}");
         }
 
         /// <summary>
         /// 打印本地所有IP，包括回路
         /// </summary>
-        public static void GetLocalIPBySocket()
+        public static string GetLocalIPBySocket()
         {
             string ip = string.Empty;
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
@@ -113,7 +115,7 @@ namespace IT.Tangdao.Framework.Helpers
                 IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
                 ip = endPoint.Address.ToString();
             }
-            Console.WriteLine(ip);
+            return ip.ToString();
         }
     }
 }

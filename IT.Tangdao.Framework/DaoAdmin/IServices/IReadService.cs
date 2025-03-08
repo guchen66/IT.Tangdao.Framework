@@ -1,4 +1,5 @@
-﻿using IT.Tangdao.Framework.DaoEnums;
+﻿using IT.Tangdao.Framework.DaoAdmin.Services;
+using IT.Tangdao.Framework.DaoEnums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +14,21 @@ namespace IT.Tangdao.Framework.DaoAdmin.IServices
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
     public interface IReadService
-    {             
-        string Read(string path, DaoFileType daoFileType= DaoFileType.None);
+    {
+        string Read(string path, DaoFileType daoFileType = DaoFileType.None);
 
         Task<string> ReadAsync(string path, DaoFileType daoFileType = DaoFileType.None);
 
         Task<TEntity> ReadXmlToEntityAsync<TEntity>(string path, DaoFileType daoFileType) where TEntity : class, new();
 
         Task<string> QueryFilterAsync(string path, Expression<Func<string, bool>> func);
-       
+
+        void Load(string data);
+
+        void Load(string data, DaoFileType daoFileType);
+
+        IRead Current { get; set; }
+
+        IHardwaredevice Device { get; }
     }
 }

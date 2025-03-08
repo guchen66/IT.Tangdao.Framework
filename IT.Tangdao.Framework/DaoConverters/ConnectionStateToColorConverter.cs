@@ -29,10 +29,5 @@ namespace IT.Tangdao.Framework.DaoConverters
             // 默认情况下返回透明色
             return new SolidColorBrush(Colors.Transparent);
         }
-
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
