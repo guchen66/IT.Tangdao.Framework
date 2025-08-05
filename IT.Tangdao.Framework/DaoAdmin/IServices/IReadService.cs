@@ -23,11 +23,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.IServices
 
         Task<string> QueryFilterAsync(string path, Expression<Func<string, bool>> func);
 
-        void Load(string data);
-
-        void Load(string data, DaoFileType daoFileType);
-
-        IRead Current { get; set; }
+        IRead Current { get; }
 
         IHardwaredevice Device { get; }
     }

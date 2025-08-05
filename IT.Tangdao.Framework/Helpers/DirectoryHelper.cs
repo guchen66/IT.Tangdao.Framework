@@ -24,15 +24,56 @@ namespace IT.Tangdao.Framework.Helpers
         }
 
         /// <summary>
-        /// 通过名称获取目录
+        /// 递归搜索指定文件，优先当前目录，其次子目录（广度优先）
         /// </summary>
-        /// <returns></returns>
-        public static string SelectDirectoryByName(string resourceName)
+        /// <param name="fileName">目标文件名（如：appsettings.json）</param>
+        /// <param name="rootDir">起始搜索目录（默认当前目录）</param>
+        /// <returns>找到的第一个文件完整路径，未找到时返回null</returns>
+        public static string SelectDirectoryByName(string fileName, string rootDir = null)
         {
-            var folder = Directory.GetCurrentDirectory(); // 获取应用程序当前工作目录
-           
-            var path = Path.Combine(folder, resourceName); // 使用 Path.Combine 组合路径
-            return path;
+            if (rootDir == null)
+            {
+                rootDir = Directory.GetCurrentDirectory();
+            }
+
+            // 优先检查当前目录
+            var directPath = Path.Combine(rootDir, fileName);
+            if (File.Exists(directPath))
+            {
+                return directPath;
+            }
+
+            // 广度优先搜索子目录
+            var dirsToSearch = new Queue<string>();
+            dirsToSearch.Enqueue(rootDir);
+
+            while (dirsToSearch.Count > 0)
+            {
+                var currentDir = dirsToSearch.Dequeue();
+
+                try
+                {
+                    // 检查当前目录文件
+                    var filePath = Path.Combine(currentDir, fileName);
+                    if (File.Exists(filePath))
+                    {
+                        return filePath;
+                    }
+
+                    // 将子目录加入队列
+                    foreach (var subDir in Directory.GetDirectories(currentDir))
+                    {
+                        dirsToSearch.Enqueue(subDir);
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // 跳过无权限访问的目录
+                    continue;
+                }
+            }
+
+            return null; // 未找到
         }
 
         /// <summary>
@@ -58,7 +99,7 @@ namespace IT.Tangdao.Framework.Helpers
             }
         }
 
-        static IEnumerable<Type> GetTypesInfoByLinq(string lib, string folder, Type inter)
+        private static IEnumerable<Type> GetTypesInfoByLinq(string lib, string folder, Type inter)
         {
             // 加载指定的程序集
             Assembly callingAssembly = Assembly.Load(lib);
@@ -67,8 +108,28 @@ namespace IT.Tangdao.Framework.Helpers
             // 筛选出位于指定文件夹下，并且应用了指定特性的所有类
             IEnumerable<Type> modelTypes = allTypes
                 .Where(type => type.Namespace?.Contains(folder) == true && (inter == null || Attribute.IsDefined(type, inter)));
-            
+
             return modelTypes;
+        }
+
+        /// <summary>
+        /// 获取解决方案目录
+        /// </summary>
+        /// <returns></returns>
+        public static string GetSolutionPath()
+        {
+            string SolutionPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            return SolutionPath;
+        }
+
+        /// <summary>
+        /// 获取主程序所在目录
+        /// </summary>
+        /// <returns></returns>
+        public static string GetMainProgramPath()
+        {
+            string MainProgramPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            return MainProgramPath;
         }
     }
 }

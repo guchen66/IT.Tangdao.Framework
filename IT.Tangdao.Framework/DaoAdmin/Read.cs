@@ -1,6 +1,7 @@
 ﻿using IT.Tangdao.Framework.DaoAdmin;
 using IT.Tangdao.Framework.DaoCommon;
 using IT.Tangdao.Framework.DaoDtos.Globals;
+using IT.Tangdao.Framework.DaoEnums;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Helpers;
 using Newtonsoft.Json;
@@ -21,9 +22,30 @@ namespace IT.Tangdao.Framework.DaoAdmin
 {
     public sealed class Read : IRead
     {
-        public string XMLData { get; set; }
+        // 属性改造（自动同步_fileType）
+        private string _xmlData;
 
-        public string JsonData { get; set; }
+        public string XMLData
+        {
+            get => _xmlData;
+            set
+            {
+                _xmlData = value;
+                _fileType = DaoFileType.Xml; // 自动标记类型
+            }
+        }
+
+        private string _jsonData;
+
+        public string JsonData
+        {
+            get => _jsonData;
+            set
+            {
+                _jsonData = value;
+                _fileType = DaoFileType.Json; // 自动标记类型
+            }
+        }
 
         public string ReadObject
         {
@@ -40,6 +62,25 @@ namespace IT.Tangdao.Framework.DaoAdmin
             {
                 _readObject = readObject;
                 return this;
+            }
+        }
+
+        private DaoFileType _fileType;
+
+        public void Load()
+        {
+            switch (_fileType)
+            {
+                case DaoFileType.Xml:
+                    _ = XMLData;
+                    break;
+
+                case DaoFileType.Json:
+                    _ = JsonData;
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"不支持的文件类型: {_fileType}");
             }
         }
 
@@ -90,30 +131,6 @@ namespace IT.Tangdao.Framework.DaoAdmin
             }
         }
 
-        public IReadResult<List<T>> Descendants<T>(string rootElement, Func<XElement, T> selector) where T : class
-        {
-            try
-            {
-                var doc = XDocument.Parse(XMLData);
-
-                // 使用 Descendants 查找所有匹配的元素
-                var elements = doc.Descendants(rootElement).ToList();
-
-                if (elements == null || !elements.Any())
-                {
-                    return new IReadResult<List<T>>("未找到指定的元素。", false);
-                }
-
-                // 使用 selector 函数映射每个元素到 T 类型的对象
-                List<T> result = elements.Select(selector).ToList();
-                return new IReadResult<List<T>>(true, result: result);
-            }
-            catch (Exception ex)
-            {
-                return new IReadResult<List<T>>($"解析 XML 失败: {ex.Message}", false);
-            }
-        }
-
         public IReadResult SelectKeys()
         {
             List<string> keys = new List<string>();
@@ -143,12 +160,21 @@ namespace IT.Tangdao.Framework.DaoAdmin
             return new IReadResult(true, keys);
         }
 
+        /// <summary>
+        /// 跟据key读取指定value
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public IReadResult SelectValue(string key)
         {
             var path = DirectoryHelper.SelectDirectoryByName(JsonData);
             string jsonContent = File.ReadAllText(path);
             JObject jsonObject = JObject.Parse(jsonContent);
-            JToken valueToken = jsonObject[ReadObject][key];
+            if (ReadObject == null)
+            {
+                return new IReadResult("转换失败，未设置索引器", false);
+            }
+            JToken valueToken = jsonObject.SelectToken($"{ReadObject}.{key}");
 
             if (valueToken == null || valueToken.Type == JTokenType.Null)
             {

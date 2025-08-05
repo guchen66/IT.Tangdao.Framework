@@ -13,9 +13,11 @@ namespace IT.Tangdao.Framework.DaoSelectors
         /// 文件查询
         /// </summary>
         /// <returns></returns>
+        private static Lazy<IRead> _read = new Lazy<IRead>(() => new Read());
+
         public static IRead Queryable()
         {
-            return new Read();
+            return _read.Value;
         }
 
         /// <summary>

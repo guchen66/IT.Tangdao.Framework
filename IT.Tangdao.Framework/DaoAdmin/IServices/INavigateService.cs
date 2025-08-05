@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoAdmin.IServices
 {
-    public interface INavigateService
+    public interface INavigateService<T>
     {
+        T Default { get; set; }
+
         void OnNavigatedTo(string viewModelName, ITangdaoParameter tangdaoParameter);
     }
 }

@@ -22,16 +22,30 @@ namespace IT.Tangdao.Framework.DaoAdmin
 
         IReadResult<List<T>> SelectNodes<T>(string rootElement, Func<XElement, T> selector);
 
-        IReadResult<List<T>> Descendants<T>(string rootElement, Func<XElement, T> selector) where T : class;
-
         IReadResult SelectKeys();
 
+        /// <summary>
+        /// 跟据Key读取Value
+        /// 用于数组读取
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         IReadResult SelectValue(string key);
+
+        /// <summary>
+        /// 读取Json对象
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="Result"></param>
+        /// <returns></returns>
+       // IReadResult SelectJsonObject<TResult>(TResult @Result);
 
         IReadResult SelectConfig(string section);
 
         IReadResult SelectCustomConfig(string configName, string section);
 
         IRead this[string readObject] { get; }
+
+        void Load();
     }
 }

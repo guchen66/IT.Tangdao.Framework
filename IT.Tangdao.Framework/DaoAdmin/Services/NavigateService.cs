@@ -11,13 +11,16 @@ using System.Windows;
 
 namespace IT.Tangdao.Framework.DaoAdmin.Services
 {
-    public class NavigateService : INavigateService
+    public class NavigateService<T> : INavigateService<T>
     {
         private readonly ITangdaoProvider _provider;
 
-        public NavigateService(ITangdaoProvider provider)
+        public T Default { get; set; }
+
+        public NavigateService(ITangdaoProvider provider, T @default)
         {
             _provider = provider;
+            Default = @default;
         }
 
         public void OnNavigatedTo(string viewModelName, ITangdaoParameter tangdaoParameter)

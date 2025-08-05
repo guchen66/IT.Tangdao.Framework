@@ -17,19 +17,6 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
 {
     public class ReadService : IReadService
     {
-        public void Load(string data)
-        {
-            Current.XMLData = data;
-        }
-
-        public void Load(string data, DaoFileType daoFileType)
-        {
-            if (daoFileType == DaoFileType.Json)
-            {
-                Current.JsonData = data;
-            }
-        }
-
         public string Read(string path, DaoFileType daoFileType = DaoFileType.None)
         {
             string content = string.Empty;
@@ -101,7 +88,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             }
         }
 
-        public IRead Current { get; set; } = new Read();
+        public IRead Current => GetFile();
 
         private IRead GetFile()
         {
