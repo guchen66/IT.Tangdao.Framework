@@ -123,6 +123,16 @@ namespace IT.Tangdao.Framework.Helpers
         }
 
         /// <summary>
+        /// 获取解决方案Name
+        /// </summary>
+        /// <returns></returns>
+        public static string GetSolutionName()
+        {
+            string SolutionPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.Name;
+            return SolutionPath;
+        }
+
+        /// <summary>
         /// 获取主程序所在目录
         /// </summary>
         /// <returns></returns>

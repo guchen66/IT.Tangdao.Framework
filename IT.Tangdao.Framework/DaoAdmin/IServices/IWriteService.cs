@@ -15,7 +15,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.IServices
 
         Task<IWriteResult> WriteAsync(string path, string content, DaoFileType daoFileType = DaoFileType.None);
 
-        void WriteEntityToXml<TEntity>(TEntity entity, string path, DaoFileType daoFileType) where TEntity : class, new();
+        void WriteEntityToXml<TEntity>(TEntity entity, string path) where TEntity : class, new();
 
         void WriteFilter(string path, Expression<Func<string, bool>> func);
     }

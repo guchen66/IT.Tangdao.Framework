@@ -16,9 +16,11 @@ namespace IT.Tangdao.Framework.DaoAdmin
 
         string JsonData { get; set; }
 
-        IReadResult SelectNode(string text);
+        IReadResult SelectNode(string node);
 
         IReadResult SelectNodes(string path);
+
+        IReadResult<List<T>> SelectNodes<T>() where T : new();
 
         IReadResult<List<T>> SelectNodes<T>(string rootElement, Func<XElement, T> selector);
 
@@ -45,7 +47,8 @@ namespace IT.Tangdao.Framework.DaoAdmin
         IReadResult SelectCustomConfig(string configName, string section);
 
         IRead this[string readObject] { get; }
+        IRead this[int readIndex] { get; }
 
-        void Load();
+        void Load(string data);
     }
 }

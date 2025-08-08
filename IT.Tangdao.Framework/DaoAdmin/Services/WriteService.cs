@@ -40,9 +40,9 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             throw new NotImplementedException();
         }
 
-        public void WriteEntityToXml<TEntity>(TEntity entity, string path, DaoFileType daoFileType) where TEntity : class, new()
+        public void WriteEntityToXml<TEntity>(TEntity entity, string path) where TEntity : class, new()
         {
-            if (daoFileType == DaoFileType.Xml)
+            if (path != null)
             {
                 var info = XmlFolderHelper.SerializeXML<TEntity>(entity);
                 WriteString(path, info);

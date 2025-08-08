@@ -175,6 +175,67 @@ XML字符串反序列化为对象
 Student student=XmlFolderHelper.Deserialize<Student>(xml);
 ```
 
+使用SelectNode读取xml节点
+
+例如xml文档如下
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<UserInfo>
+  <Login Id="0">
+    <UserName>Admin</UserName>
+    <Password>2</Password>
+    <Role>管理员</Role>
+    <IsAdmin>True</IsAdmin>
+    <IP>192.168.0.1</IP>
+  </Login>
+  <Register Id="1">
+    <UserName>Ad</UserName>
+    <Password>12</Password>
+    <Role>普通用户</Role>
+    <IsAdmin>False</IsAdmin>
+    <IP>127.0.0.1</IP>
+  </Register>
+</UserInfo>
+```
+
+使用方式
+
+```
+// 正确调用（多节点必须指定索引）
+var ip1 = _readService.Current[1].SelectNode("IP").Value;
+
+// 错误调用（多节点未指定索引）
+var ip2 = _readService.Current.SelectNode("IP").Value; 
+// 返回错误："存在多个节点，请指定索引"
+
+// 正确调用（单节点可不指定索引）
+var ip3 = _readService.Current.SelectNode("IP").Value; 
+```
+
+优化繁琐的读取,不需要知道类的所有属性
+
+```
+  var readResult = _readService.Current.SelectNodes("ProcessItem", x => new ProcessItem
+  {
+      Name = x.Element("Name")?.Value,
+      IsFeeding = (bool)x.Element("IsFeeding"),
+      IsBoardMade = (bool)x.Element("IsBoardMade"),
+      IsBoardCheck = (bool)x.Element("IsBoardCheck"),
+      IsSeal = (bool)x.Element("IsSeal"),
+      IsSafe = (bool)x.Element("IsSafe"),
+      IsCharge = (bool)x.Element("IsCharge"),
+      IsBlanking = (bool)x.Element("IsBlanking"),
+  });
+
+```
+
+直接通过反射+泛型
+
+```
+ var readResult = _readService.Current.SelectNodes<ProcessItem>();
+```
+
 
 
 #### 4、增加一些常用的Helper类

@@ -21,7 +21,7 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 return int.Parse(str);
             }
-            catch (FormatException e) when (e.Message=="")
+            catch (FormatException e) when (e.Message == "")
             {
                 // 可以选择返回一个特殊值，比如 -1，或者抛出一个新的异常
                 return -1;
@@ -94,13 +94,13 @@ namespace IT.Tangdao.Framework.Extensions
         /// <param name="path"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public static StreamReader ToStreamReader(this string path,Encoding encoding=null)
+        public static StreamReader ToStreamReader(this string path, Encoding encoding = null)
         {
             if (encoding is null)
             {
                 encoding = Encoding.UTF8;
             }
-            var result= new StreamReader(path, encoding);
+            var result = new StreamReader(path, encoding);
             return result;
         }
 
@@ -121,9 +121,9 @@ namespace IT.Tangdao.Framework.Extensions
                 // 返回null或者空字符串，取决于您的需求
                 return null;
             }
-            string content=string.Empty;
+            string content = string.Empty;
 
-            using (var stream= new StreamReader(path, encoding))
+            using (var stream = new StreamReader(path, encoding))
             {
                 content = stream.ReadToEnd();
             }
@@ -156,13 +156,30 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 encoding = Encoding.UTF8;
             }
-            using (var fileStream=new FileStream(path,FileMode.OpenOrCreate))
+            using (var fileStream = new FileStream(path, FileMode.OpenOrCreate))
             {
                 fileStream.WriteByte(contents);
             }
-            
         }
 
+        /// <summary>
+        /// 安全读取文件（避免文件不存在的异常）
+        /// </summary>
+        /// <returns>返回文件内容，如果文件不存在返回null</returns>
+        public static byte[] SafeReadAllBytes(this string path)
+        {
+            return File.Exists(path) ? File.ReadAllBytes(path) : null;
+        }
+
+        /// <summary>
+        /// 安全读取文本（自动处理编码）
+        /// </summary>
+        public static string SafeReadAllText(this string path, Encoding encoding = null)
+        {
+            if (!File.Exists(path)) return null;
+            encoding = encoding ?? Encoding.UTF8;
+            return File.ReadAllText(path, encoding);
+        }
 
         /// <summary>
         /// 继续创建文件
@@ -174,6 +191,7 @@ namespace IT.Tangdao.Framework.Extensions
         {
             return new FileStream(localPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024 * 1024);
         }
+
 #if SUPPORTS_VALUETUPLE
 
         public static FileStream Slice(this FileStream stream, Tuple<long, long> block)
@@ -199,8 +217,6 @@ namespace IT.Tangdao.Framework.Extensions
 #endif
         // 只有当 SUPPORTS_VALUETUPLE 编译符号被定义时才包含此代码
 
-
-     
         /// <summary>
         /// 生成一个指定长度的随机字符串，RNGCryptoServiceProvider确保安全性
         /// 使用场景，生成随机密码，会话标识
