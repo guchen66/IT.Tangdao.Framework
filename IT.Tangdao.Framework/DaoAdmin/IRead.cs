@@ -8,13 +8,15 @@ using System.Xml.Linq;
 namespace IT.Tangdao.Framework.DaoAdmin
 {
     /// <summary>
-    /// 高级的读取接口，可以读取除了txt文件，xml文件之外的其他类型
+    /// 高级的读取接口，可以读取xml json config文件类型
     /// </summary>
     public interface IRead
     {
         string XMLData { get; set; }
 
         string JsonData { get; set; }
+
+        string ConfigData { get; set; }
 
         IReadResult SelectNode(string node);
 
@@ -43,6 +45,10 @@ namespace IT.Tangdao.Framework.DaoAdmin
        // IReadResult SelectJsonObject<TResult>(TResult @Result);
 
         IReadResult SelectConfig(string section);
+
+        IReadResult SelectConfig<T>(string section) where T : class, new();
+
+        IReadResult SelectConfigByJsonConvert<T>(string section) where T : class, new();
 
         IReadResult SelectCustomConfig(string configName, string section);
 

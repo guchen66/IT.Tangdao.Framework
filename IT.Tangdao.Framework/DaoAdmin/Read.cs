@@ -14,11 +14,6 @@ using System.Configuration;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Xml.Linq;
 
 namespace IT.Tangdao.Framework.DaoAdmin
@@ -45,6 +40,17 @@ namespace IT.Tangdao.Framework.DaoAdmin
             set
             {
                 _jsonData = value;
+            }
+        }
+
+        private string _configData;
+
+        public string ConfigData
+        {
+            get => _configData;
+            set
+            {
+                _configData = value;
             }
         }
 
@@ -99,10 +105,16 @@ namespace IT.Tangdao.Framework.DaoAdmin
                     JsonData = data;
                     break;
 
+                case DaoFileType.Config:
+                    ConfigData = data;
+                    break;
+
                 default:
                     throw new InvalidOperationException($"不支持的文件类型: {_fileType}");
             }
         }
+
+        #region-- 读取XML数据 --
 
         public IReadResult SelectNode(string node)
         {
@@ -111,41 +123,65 @@ namespace IT.Tangdao.Framework.DaoAdmin
                 return new IReadResult("未进行Load操作", false);
             }
 
-            var doc = XDocument.Parse(XMLData);
-            var root = doc.Root;
-
-            // 情况1：没有指定索引（Current.SelectNode）
-            if (ReadIndex < 0) // 假设未设置索引时 ReadIndex = -1
+            try
             {
-                // 如果是单节点结构，直接读取
-                if (root.Elements().Count() == 1)
+                var doc = XDocument.Parse(XMLData);
+                var root = doc.Root;
+                var xmlType = FileSelector.DetectXmlStructure(doc);
+
+                switch (xmlType)
                 {
-                    var element = root.Element(node);
-                    if (element == null)
-                    {
-                        return new IReadResult($"Element '{node}' not found.", false);
-                    }
-                    return new IReadResult(element.Value, true);
+                    case DaoXmlType.Empty:
+                        return new IReadResult("XML内容为空", false);
+
+                    case DaoXmlType.None:
+                        return new IReadResult("XML只有声明没有内容", false);
+
+                    case DaoXmlType.Single:
+                        // 单节点结构 - 直接查找目标节点
+                        var singleElement = root.Element(node) ?? root.Elements().First().Element(node);
+                        if (singleElement == null)
+                        {
+                            return new IReadResult($"节点 '{node}' 不存在", false);
+                        }
+                        return new IReadResult(singleElement.Value, true);
+
+                    case DaoXmlType.Multiple:
+                        if (ReadIndex < 0)
+                        {
+                            // 尝试直接查找节点(适用于扁平结构)
+                            var directElement = root.Element(node);
+                            if (directElement != null)
+                            {
+                                return new IReadResult(directElement.Value, true);
+                            }
+                            return new IReadResult("存在多个节点，请指定索引", false);
+                        }
+                        else
+                        {
+                            // 处理指定索引的情况
+                            var parentNode = root.Elements().ElementAtOrDefault(ReadIndex);
+                            if (parentNode == null)
+                            {
+                                return new IReadResult($"索引 {ReadIndex} 超出范围", false);
+                            }
+
+                            var targetElement = parentNode.Element(node);
+                            if (targetElement == null)
+                            {
+                                return new IReadResult($"子节点 '{node}' 不存在", false);
+                            }
+
+                            return new IReadResult(targetElement.Value, true);
+                        }
+
+                    default:
+                        return new IReadResult("未知的XML结构类型", false);
                 }
-                // 否则返回错误（因为不知道要读哪个父节点）
-                return new IReadResult("存在多个节点，请指定索引", false);
             }
-            // 情况2：指定了索引（Current[1].SelectNode）
-            else
+            catch (Exception ex)
             {
-                var parentNode = root.Elements().ElementAtOrDefault(ReadIndex);
-                if (parentNode == null)
-                {
-                    return new IReadResult($"索引 {ReadIndex} 超出范围", false);
-                }
-
-                var targetElement = parentNode.Element(node);
-                if (targetElement == null)
-                {
-                    return new IReadResult($"子节点 '{node}' 不存在", false);
-                }
-
-                return new IReadResult(targetElement.Value, true);
+                return new IReadResult($"XML解析错误: {ex.Message}", false);
             }
         }
 
@@ -189,6 +225,35 @@ namespace IT.Tangdao.Framework.DaoAdmin
                 return new IReadResult<List<T>>($"解析 XML 失败: {ex.Message}", false);
             }
         }
+
+        public IReadResult<List<T>> SelectNodes<T>() where T : new()
+        {
+            try
+            {
+                if (XMLData == null)
+                    return new IReadResult<List<T>>("未进行Load操作", false);
+
+                var doc = XDocument.Parse(XMLData);
+                var result = new List<T>();
+
+                foreach (var node in doc.Root.Elements())
+                {
+                    var instance = new T();
+                    FileSelector.MapXElementToObject(node, instance); // 自动映射
+                    result.Add(instance);
+                }
+
+                return new IReadResult<List<T>>(true, result);
+            }
+            catch (Exception ex)
+            {
+                return new IReadResult<List<T>>($"解析失败: {ex.Message}", false);
+            }
+        }
+
+        #endregion
+
+        #region-- 读取Json数据 --
 
         public IReadResult SelectKeys()
         {
@@ -251,6 +316,10 @@ namespace IT.Tangdao.Framework.DaoAdmin
             return new IReadResult(valueToken.ToString(), true);
         }
 
+        #endregion
+
+        #region-- 读取Config数据--
+
         /// <summary>
         /// 读取WPF自带的App.config
         /// 这两个引用没有传递值，是读取config的值，所以不需要使用ref，
@@ -261,6 +330,32 @@ namespace IT.Tangdao.Framework.DaoAdmin
         {
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
             Dictionary<string, string> dict = idict.Cast<DictionaryEntry>().ToDictionary(de => de.Key.ToString(), de => de.Value.ToString());
+            return new IReadResult(true, result: dict);
+        }
+
+        public IReadResult SelectConfig<T>(string section) where T : class, new()
+        {
+            IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
+
+            var dict = idict.Cast<DictionaryEntry>()
+                           .ToDictionary(
+                               de => de.Key.ToString(),
+                               de => Convert.ChangeType(de.Value, typeof(T)) as T
+                           );
+
+            return new IReadResult(true, result: dict);
+        }
+
+        public IReadResult SelectConfigByJsonConvert<T>(string section) where T : class, new()
+        {
+            T Target = new T();
+            IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
+            var dict = idict.Cast<DictionaryEntry>()
+                   .ToDictionary(
+                       de => de.Key.ToString(),
+                       de => JsonConvert.DeserializeObject<T>(de.Value.ToString())
+                   );
+
             return new IReadResult(true, result: dict);
         }
 
@@ -291,29 +386,6 @@ namespace IT.Tangdao.Framework.DaoAdmin
             return new IReadResult(true, result: dicts);
         }
 
-        public IReadResult<List<T>> SelectNodes<T>() where T : new()
-        {
-            try
-            {
-                if (XMLData == null)
-                    return new IReadResult<List<T>>("未进行Load操作", false);
-
-                var doc = XDocument.Parse(XMLData);
-                var result = new List<T>();
-
-                foreach (var node in doc.Root.Elements())
-                {
-                    var instance = new T();
-                    FileSelector.MapXElementToObject(node, instance); // 自动映射
-                    result.Add(instance);
-                }
-
-                return new IReadResult<List<T>>(true, result);
-            }
-            catch (Exception ex)
-            {
-                return new IReadResult<List<T>>($"解析失败: {ex.Message}", false);
-            }
-        }
+        #endregion
     }
 }

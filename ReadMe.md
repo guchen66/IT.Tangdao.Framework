@@ -18,12 +18,12 @@ MinidaoCommand.Create();
 
 #### 2、事件聚合器
 
-用于父子组件的通讯
-
 ```C#
-_eventTransmit.Publish<T>();
+ public IDaoEventAggregator _daoEventAggregator;
 
-_eventTransmit.Subscribe<T>(Execute);
+_daoEventAggregator.Publish<T>();
+
+_daoEventAggregator.Subscribe<T>(Execute);
 
 T:DaoEventBase
 ```

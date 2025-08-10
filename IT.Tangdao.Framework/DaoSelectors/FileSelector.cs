@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace IT.Tangdao.Framework.DaoSelectors
 {
-    public class FileSelector
+    internal class FileSelector
     {
         /// <summary>
         /// 文件查询
@@ -46,6 +46,10 @@ namespace IT.Tangdao.Framework.DaoSelectors
             }
             else if (trimmedContent.StartsWith("<") && trimmedContent.EndsWith(">"))
             {
+                if (trimmedContent.Contains("Configuration") || trimmedContent.Contains("AppSettings"))
+                {
+                    return DaoFileType.Config;
+                }
                 return DaoFileType.Xml;
             }
             // 可以添加更多文件类型的检测逻辑
@@ -54,6 +58,31 @@ namespace IT.Tangdao.Framework.DaoSelectors
                 // 如果都不匹配，可以尝试更复杂的检测或返回None
                 return DaoFileType.None;
             }
+        }
+
+        public static DaoXmlType DetectXmlStructure(XDocument doc)
+        {
+            if (doc == null) return DaoXmlType.Empty;
+
+            var root = doc.Root;
+
+            // 检查是否只有XML声明没有内容
+            if (root == null) return DaoXmlType.None;
+
+            // 检查根节点是否有子元素
+            if (!root.HasElements) return DaoXmlType.Empty;
+
+            // 获取根节点的直接子元素
+            var elements = root.Elements();
+
+            // 只有一个子元素的情况
+            if (elements.Count() == 1)
+            {
+                return DaoXmlType.Single;
+            }
+
+            // 多个子元素的情况
+            return DaoXmlType.Multiple;
         }
 
         public static void MapXElementToObject<T>(XElement node, T instance)

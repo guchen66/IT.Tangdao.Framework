@@ -17,8 +17,8 @@ namespace IT.Tangdao.Framework.Helpers
         /// </summary>
         public static string GetLocalIPByDns()
         {
-            IPHostEntry entry=Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress[] addresss=entry.AddressList;
+            IPHostEntry entry = Dns.GetHostEntry(Dns.GetHostName());
+            IPAddress[] addresss = entry.AddressList;
             foreach (IPAddress addr in addresss)
             {
                 return addr.ToString();
@@ -35,10 +35,10 @@ namespace IT.Tangdao.Framework.Helpers
             IPAddress[] addresss = entry.AddressList;
             foreach (IPAddress ip in addresss)
             {
-                if (ip.AddressFamily==System.Net.Sockets.AddressFamily.InterNetwork)
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                 {
                     return ip.ToString();
-                }             
+                }
             }
             throw new ContainerErrorException($"未找到IP");
         }
@@ -58,7 +58,7 @@ namespace IT.Tangdao.Framework.Helpers
             var ippaddress = host
                 .AddressList
                 .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
-           return ippaddress?.ToString();
+            return ippaddress?.ToString();
         }
 
         /// <summary>

@@ -72,6 +72,17 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
         /// <summary>
+        /// 检查字符串是否包含指定的子字符串（不区分大小写）
+        /// </summary>
+        public static bool ContainsIgnoreCase(this string source, string value)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (value == null) throw new ArgumentNullException(nameof(value));
+
+            return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
         /// 通过路径直接创建文件夹
         /// </summary>
         /// <param name="path"></param>
