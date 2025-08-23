@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -103,6 +104,54 @@ namespace IT.Tangdao.Framework.DaoSelectors
                 {
                     // 类型转换失败时跳过（或记录日志）
                 }
+            }
+        }
+
+        public static IEnumerable<string> SelectFilesByDaoFileType(string rootDir, DaoFileType fileType, bool searchSubdirectories = true)
+        {
+            if (fileType == DaoFileType.None)
+                return Enumerable.Empty<string>();
+
+            string extension = GetExtensionFromFileType(fileType);
+            if (string.IsNullOrEmpty(extension))
+                return Enumerable.Empty<string>();
+
+            var searchOption = searchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+
+            try
+            {
+                return Directory.EnumerateFiles(rootDir, $"*{extension}", searchOption);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Enumerable.Empty<string>();
+            }
+        }
+
+        public static string GetExtensionFromFileType(DaoFileType fileType)
+        {
+            switch (fileType)
+            {
+                case DaoFileType.Txt:
+                    return ".txt";
+
+                case DaoFileType.Xml:
+                    return ".xml";
+
+                case DaoFileType.Xlsx:
+                    return ".xlsx";
+
+                case DaoFileType.Xaml:
+                    return ".xaml";
+
+                case DaoFileType.Json:
+                    return ".json";
+
+                case DaoFileType.Config:
+                    return ".config";
+
+                default:
+                    return null;
             }
         }
 

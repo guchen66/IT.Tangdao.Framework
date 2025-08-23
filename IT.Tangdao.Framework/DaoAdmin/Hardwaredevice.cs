@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoAdmin.Results;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,25 +15,22 @@ namespace IT.Tangdao.Framework.DaoAdmin
 
         public bool IsConn { get; set; }
 
-        public async Task<IReadResult> Open()
+        public async Task<ReadResult> Open()
         {
-            IReadResult readResult = new IReadResult();
             await Task.Delay(1000);
-            return readResult;
+            return ReadResult.Success();
         }
 
-        public async Task<IReadResult> Close()
+        public async Task<ReadResult> Close()
         {
-            IReadResult readResult = new IReadResult();
             await Task.Delay(1000);
-            return readResult;
+            return ReadResult.Success();
         }
 
-        public async Task<IReadResult> Read()
+        public async Task<ReadResult> Read()
         {
-            IReadResult readResult = new IReadResult();
             await Task.Delay(1000);
-            return readResult;
+            return ReadResult.Success();
         }
     }
 }

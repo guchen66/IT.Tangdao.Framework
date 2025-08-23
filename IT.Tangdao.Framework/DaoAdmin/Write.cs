@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoAdmin.Results;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,14 +27,14 @@ namespace IT.Tangdao.Framework.DaoAdmin
             }
         }
 
-        public IWriteResult WriteObjectToXML<TTarget>()
+        public WriteResult WriteObjectToXML<TTarget>()
         {
-            return new IWriteResult("", true);
+            return WriteResult.Success("");
         }
 
-        public IWriteResult WriteObjectToJson()
+        public WriteResult WriteObjectToJson()
         {
-            return new IWriteResult("", true);
+            return WriteResult.Success("");
         }
 
         public void Save()

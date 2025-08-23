@@ -1,4 +1,5 @@
 ﻿using IT.Tangdao.Framework.DaoAdmin.IServices;
+using IT.Tangdao.Framework.DaoAdmin.Results;
 using IT.Tangdao.Framework.DaoDtos;
 using IT.Tangdao.Framework.DaoDtos.Globals;
 using IT.Tangdao.Framework.DaoEnums;
@@ -24,7 +25,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             path.UseFileWriteToTxt(content);
         }
 
-        public async Task<IWriteResult> WriteAsync(string path, string content, DaoFileType daoFileType = DaoFileType.None)
+        public async Task<WriteResult> WriteAsync(string path, string content, DaoFileType daoFileType = DaoFileType.None)
         {
             if (daoFileType == DaoFileType.None)
             {
@@ -32,7 +33,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
             }
             await new TimeSpan(1000);
             path.UseFileWriteToTxt(content);
-            return new IWriteResult(true, content);
+            return WriteResult.Success(content);
         }
 
         public void WriteFilter(string path, Expression<Func<string, bool>> func)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoAdmin.Results;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,14 +28,14 @@ namespace IT.Tangdao.Framework.DaoAdmin
         /// 硬件打开
         /// </summary>
         /// <returns></returns>
-        Task<IReadResult> Open();
+        Task<ReadResult> Open();
 
         /// <summary>
         /// 硬件关闭
         /// </summary>
         /// <returns></returns>
-        Task<IReadResult> Close();
+        Task<ReadResult> Close();
 
-        Task<IReadResult> Read();
+        Task<ReadResult> Read();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using IT.Tangdao.Framework.DaoAdmin;
+using IT.Tangdao.Framework.DaoAdmin.Results;
 using IT.Tangdao.Framework.Helpers;
 using Newtonsoft.Json.Linq;
 using System;
@@ -26,7 +27,7 @@ namespace IT.Tangdao.Framework.Providers
             JsonFileName = "appsettings.json";
         }
 
-        public IReadResult GetSection(string key)
+        public ReadResult GetSection(string key)
         {
             var path = DirectoryHelper.SelectDirectoryByName(JsonFileName);
             if (!File.Exists(path))
@@ -42,16 +43,16 @@ namespace IT.Tangdao.Framework.Providers
             JObject jsonObject = JObject.Parse(jsonContent);
             if (jsonObject == null)
             {
-                return new IReadResult("转换失败，json数据为空", false);
+                return ReadResult.Failure("转换失败，json数据为空");
             }
             JToken valueToken = jsonObject.SelectToken(tokenPath);
 
             if (valueToken == null || valueToken.Type == JTokenType.Null)
             {
                 // 键不存在或值为 null
-                return new IReadResult("转换失败，JToken为null", false);
+                return ReadResult.Failure("转换失败，JToken为null");
             }
-            return new IReadResult(valueToken.ToString(), true);
+            return ReadResult.Success(valueToken.ToString());
         }
     }
 }

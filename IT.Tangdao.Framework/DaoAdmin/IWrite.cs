@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoAdmin.Results;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,9 @@ namespace IT.Tangdao.Framework.DaoAdmin
 {
     public interface IWrite
     {
-        IWriteResult WriteObjectToXML<TTarget>();
+        WriteResult WriteObjectToXML<TTarget>();
 
-        IWriteResult WriteObjectToJson();
+        WriteResult WriteObjectToJson();
 
         void Save();
 
