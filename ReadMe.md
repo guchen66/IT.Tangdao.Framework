@@ -8,7 +8,7 @@
 
 1-1、用法
 
-```js
+```C#
 TangdaoCommand  taodao=new TangdaoCommand();
 TangdaoAsyncCommand taodaoAsync=new TangdaoAsyncCommand();
 MinidaoCommand.Create();
@@ -106,7 +106,7 @@ string xmlContent=TxtFolderHelper.ReadByFileStream(path);
 
 读取本地xml文件的方法
 
-```C#C#
+```C#
  string path = "E://Temp//Student.xml";
  string xmlContent=TxtFolderHelper.ReadByFileStream(path);
  Student student=XmlFolderHelper.Deserialize<Student>(xmlContent);
@@ -179,7 +179,7 @@ Student student=XmlFolderHelper.Deserialize<Student>(xml);
 
 例如xml文档如下
 
-```
+```C#
 <?xml version="1.0" encoding="utf-8"?>
 <UserInfo>
   <Login Id="0">
@@ -201,7 +201,7 @@ Student student=XmlFolderHelper.Deserialize<Student>(xml);
 
 使用方式
 
-```
+```C#
 // 正确调用（多节点必须指定索引）
 var ip1 = _readService.Current[1].SelectNode("IP").Value;
 
@@ -215,7 +215,7 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
 
 优化繁琐的读取,不需要知道类的所有属性
 
-```
+```C#
   var readResult = _readService.Current.SelectNodes("ProcessItem", x => new ProcessItem
   {
       Name = x.Element("Name")?.Value,
@@ -232,7 +232,7 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
 
 直接通过反射+泛型
 
-```
+```C#
  var readResult = _readService.Current.SelectNodes<ProcessItem>();
 ```
 
@@ -265,7 +265,7 @@ this.RunChildWindowAsync<LoginView>();
 
 在WPF可以这样使用
 
-```
+```C#
 public class MainWindowViewModel : BindableBase
  {
      private ObservableCollection<Student> _students;
@@ -309,7 +309,7 @@ public class MainWindowViewModel : BindableBase
 
 #### 8、增加IRouter路由导航
 
-```
+```C#
 Grid>
     <Grid.RowDefinitions>
         <RowDefinition Height="*" />
@@ -354,7 +354,7 @@ Grid>
 
 #### 9、时间轮
 
-```
+```C#
 class Program
 {
     static async Task Main(string[] args)
@@ -404,7 +404,7 @@ class Program
 
 在程序启动时注册事件
 
-```
+```C#
   protected override void OnLaunch()
   {
       base.OnLaunch();
@@ -422,7 +422,7 @@ class Program
 
 注册代码
 
-```
+```C#
  // 注册配置
  Bind<FileMonitorConfig>().ToFactory(container =>
  {
@@ -443,5 +443,22 @@ class Program
 
  // 注册监控服务
  Bind<IMonitorService>().To<FileMonitorService>().InSingletonScope();
+```
+
+#### 11、任务调度器TangdaoTaskScheduler
+
+```C#
+  TangdaoTaskScheduler.Execute(dao: daoTask =>
+  {
+      
+  });
+
+         
+  TangdaoTaskScheduler.Execute(daoAsync: daoTask =>
+  {
+     
+  });
+
+  TangdaoTaskScheduler.Execute(daoAsync => { }, dao => { });
 ```
 

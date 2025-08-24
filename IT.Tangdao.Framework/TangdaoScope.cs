@@ -36,7 +36,7 @@ namespace IT.Tangdao.Framework
     {
         private IServiceProvider _container;
 
-        //  private IServiceCollection _service;
+        // private IServiceCollection _service;
 
         public IServiceProvider ServiceContainer { get => _container; }
 
