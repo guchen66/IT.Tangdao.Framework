@@ -309,45 +309,206 @@ public class MainWindowViewModel : BindableBase
 
 #### 8、增加IRouter路由导航
 
+###### 1、简单的导航，具有翻页功能ISingleRouter
+
+使用方式，与ISingleNavigateView配合使用
+
+使用IOC容器注册所有的视图
+
+XAML Code：
+
+```
+ <!--  动态内容区  -->
+ <ContentControl
+     HorizontalContentAlignment="Stretch"
+     VerticalContentAlignment="Stretch"
+     s:View.Model="{Binding CurrentView}" />
+
+ <!--  智能控制栏  -->
+ <Border
+     Grid.Row="1"
+     Padding="10"
+     Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+     <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+         <!--  导航按钮  -->
+         <Button
+             Width="100"
+             Command="{s:Action Previous}"
+             Content="◄ 上一页"
+             IsEnabled="{Binding CanPrevious}" />
+
+         <!--  自动轮播开关 Mode=OneWay允许 UI 反映状态，但禁止 UI 修改状态  -->
+         <ToggleButton
+             Width="200"
+             Margin="20,0"
+             Background="{Binding IsAutoRotating, Converter={StaticResource BoolToColorConverter}}"
+             Command="{s:Action ToggleAutoCarousel}"
+             Content="{Binding AutoRotateStatusText}"
+             IsChecked="{Binding IsAutoRotating, Mode=OneWay}" />
+
+         <!--  导航按钮  -->
+         <Button
+             Width="100"
+             Command="{s:Action Next}"
+             Content="下一页 ►"
+             IsEnabled="{Binding CanNext}" />
+     </StackPanel>
+ </Border>
+```
+
+CS Code：
+
+```
+ public class GlobalPhotoViewModel : Screen
+ {
+     private readonly ISingleRouter _router;
+
+     public ISingleNavigateView CurrentView => _router.CurrentView;
+     public bool CanPrevious => _router.CanPrevious;
+     public bool CanNext => _router.CanNext;
+     public bool IsAutoRotating => _router.IsAutoRotating;
+     public string AutoRotateStatusText => _router.IsAutoRotating ? "自动轮播开启中" : "自动轮播已禁用";
+
+     public GlobalPhotoViewModel(ISingleRouter router)
+     {
+         _router = router;
+         _router.PropertyChanged += OnRouterPropertyChanged;
+         _router.NavigationChanged += OnRouterNavigationChanged;
+     }
+
+     public void Previous()
+     {
+         _router.Previous();
+     }
+
+     public void Next()
+     {
+         _router.Next();
+     }
+
+     public void ToggleAutoCarousel() => _router.ToggleAutoCarousel();
+
+     private void OnRouterPropertyChanged(object sender, PropertyChangedEventArgs e)
+     {
+         // 将路由器的属性变化转发到视图模型
+         NotifyOfPropertyChange(e.PropertyName);
+
+         if (e.PropertyName == nameof(ISingleRouter.IsAutoRotating))
+         {
+             NotifyOfPropertyChange(nameof(AutoRotateStatusText));
+         }
+     }
+
+     private void OnRouterNavigationChanged(object sender, EventArgs e)
+     {
+         NotifyOfPropertyChange(nameof(CurrentView));
+         NotifyOfPropertyChange(nameof(CanPrevious));
+         NotifyOfPropertyChange(nameof(CanNext));
+     }
+
+     protected override void OnDeactivate()
+     {
+         _router.IsAutoRotating = false;
+         base.OnDeactivate();
+     }
+ }
+```
+
+
+
+###### 2、工业级别导航，具有拦截器ITangdaoRouter
+
+使用时与ITangdaoPage配合
+
+XAML Code：
+
 ```C#
-Grid>
-    <Grid.RowDefinitions>
-        <RowDefinition Height="*" />
-        <RowDefinition Height="Auto" />
-    </Grid.RowDefinitions>
+  <!--  路由视图容器  -->
+  <ContentControl Grid.Row="0" Content="{Binding Router.CurrentView}" />
 
-    <!--  路由视图容器  -->
-    <ContentControl Grid.Row="0" Content="{Binding Router.CurrentView}" />
+  <!--  导航控制  -->
+  <StackPanel
+      Grid.Row="1"
+      HorizontalAlignment="Right"
+      Orientation="Horizontal">
 
-    <!--  导航控制  -->
-    <StackPanel
-        Grid.Row="1"
-        HorizontalAlignment="Right"
-        Orientation="Horizontal">
+      <Button
+          Margin="2"
+          Command="{Binding GoBackCommand}"
+          Content="◄"
+          IsEnabled="{Binding Router.CanGoBack}"
+          ToolTip="上一页" />
+      <Button
+          Margin="2"
+          Command="{Binding GoForwardCommand}"
+          Content="►"
+          IsEnabled="{Binding Router.CanGoForward}"
+          ToolTip="下一页" />
+      <Button
+          Margin="5"
+          Command="{s:Action GoToVacuumGaugeView}"
+          Content="真空表" />
+      <Button
+          Margin="5"
+          Command="{s:Action GoToDigitalSmartGaugeView}"
+          Content="数字智能测量仪" />
+  </StackPanel>
+```
 
-        <Button
-            Margin="2"
-            Command="{Binding GoBackCommand}"
-            Content="◄"
-            IsEnabled="{Binding Router.CanGoBack}"
-            ToolTip="上一页" />
-        <Button
-            Margin="2"
-            Command="{Binding GoForwardCommand}"
-            Content="►"
-            IsEnabled="{Binding Router.CanGoForward}"
-            ToolTip="下一页" />
+CS Code:
 
-        <Button
-            Margin="5"
-            Command="{Binding GoToStudentListCommand}"
-            Content="学生列表" />
-        <Button
-            Margin="5"
-            Command="{Binding GoToDashboardCommand}"
-            Content="仪表盘" />
-    </StackPanel>
-</Grid>
+```
+ public class PressureViewModel : BaseDeviceViewModel, IRouteComponent
+ {
+     public ITangdaoRouter Router { get; set; }
+     public IContainer _container;
+
+     public PressureViewModel(ITangdaoRouter router, IContainer container) : base("Pressure")
+     {
+         Router = router;
+         _container = container;
+         Router.RouteComponent = this;
+         Router.RegisterPage<DigitalSmartGaugeViewModel>();
+         Router.RegisterPage<DifferentialGaugeViewModel>();
+         Router.RegisterPage<VacuumGaugeViewModel>();
+         GoBackCommand = MinidaoCommand.Create(ExecuteGoBack);
+         GoForwardCommand = MinidaoCommand.Create(ExecuteGoForward);
+     }
+
+     private void ExecuteGoForward()
+     {
+         Router.GoForward();
+     }
+
+     private void ExecuteGoBack()
+     {
+         Router.GoBack();
+     }
+
+     public ICommand GoBackCommand { get; set; }
+     public ICommand GoForwardCommand { get; set; }
+
+     public void GoToDigitalSmartGaugeView()
+     {
+         Router.NavigateTo<DigitalSmartGaugeViewModel>();
+     }
+
+     public void GoToVacuumGaugeView()
+     {
+         Router.NavigateTo<VacuumGaugeViewModel>();
+     }
+
+     protected override void OnViewLoaded()
+     {
+         base.OnViewLoaded();
+     }
+
+     public ITangdaoPage ResolvePage(string route)
+     {
+         var result = _container.Get<ITangdaoPage>(route);
+         return result;
+     }
+ }
 ```
 
 
