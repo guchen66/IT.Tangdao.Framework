@@ -1,8 +1,10 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoAttributes;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Navigates
     public class SingleRouter : ISingleRouter, INotifyPropertyChanged
     {
         private readonly ObservableCollection<ISingleNavigateView> _views;
+        private readonly IReadOnlyDictionary<string, IReadOnlyList<ISingleNavigateView>> _viewGroups;
         private ISingleNavigateView _currentView;
         private int _currentIndex;
         private readonly DispatcherTimer _autoCarouselTimer;
@@ -20,6 +23,8 @@ namespace IT.Tangdao.Framework.DaoAdmin.Navigates
         public event PropertyChangedEventHandler PropertyChanged;
 
         public event EventHandler NavigationChanged;
+
+        public event EventHandler<string> GroupChanged; // 新增：组切换事件
 
         public ISingleNavigateView CurrentView
         {
@@ -56,14 +61,61 @@ namespace IT.Tangdao.Framework.DaoAdmin.Navigates
             }
         }
 
+        private string _currentGroupKey;
+
+        public string CurrentGroupKey
+        {
+            get => _currentGroupKey;
+            set
+            {
+                if (_currentGroupKey != value)
+                {
+                    _currentGroupKey = value;
+                    OnPropertyChanged();
+                    GroupChanged?.Invoke(this, value);
+                }
+            }
+        }
+
         public string AutoRotateStatusText => IsAutoRotating ? "自动轮播开启中" : "自动轮播已禁用";
 
         public IReadOnlyList<ISingleNavigateView> Views => _views;
 
         public SingleRouter(IEnumerable<ISingleNavigateView> views)
         {
-            _views = new ObservableCollection<ISingleNavigateView>(
-                views.OrderBy(v => v.DisplayOrder).ToList());
+            // 参数验证
+            if (views == null)
+                throw new ArgumentNullException(nameof(views));
+
+            var viewList = views.ToList();
+            if (viewList.Count == 0)
+                throw new ArgumentException("必须提供至少一个视图实现", nameof(views));
+            // 1. 先根据特性或默认值补齐分组键
+            // 1. 当场用特性或默认值计算分组键
+            _viewGroups = viewList
+                .GroupBy(v =>
+                {
+                    var attr = v.GetType().GetCustomAttribute<SingleNavigateScanAttribute>();
+                    return attr?.ViewScanName ?? "Default";
+                })
+                .ToDictionary(
+                    g => g.Key,
+                    g => (IReadOnlyList<ISingleNavigateView>)g
+                            .OrderBy(v => v.DisplayOrder)
+                            .ToList());
+
+            // 2. 默认启用第一个分组
+            var firstKey = _viewGroups.Keys.First();
+            _views = new ObservableCollection<ISingleNavigateView>(_viewGroups[firstKey]);
+            CurrentView = _views.FirstOrDefault();
+            // 策略优先，否则取第一组
+            //  CurrentGroupKey = singleNavigateConfig?.GroupKey ?? _viewGroups.Keys.First();
+            //if (!_viewGroups.TryGetValue(CurrentGroupKey, out var list))
+            //    CurrentGroupKey = _viewGroups.Keys.First(); // 兜底
+
+            //_views = new ObservableCollection<ISingleNavigateView>(list);
+            // 设置默认组（第一个分组）
+            // CurrentGroupKey = _viewGroups.Keys.FirstOrDefault();
 
             CurrentView = _views.FirstOrDefault();
 

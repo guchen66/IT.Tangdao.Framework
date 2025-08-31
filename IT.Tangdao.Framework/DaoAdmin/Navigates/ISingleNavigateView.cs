@@ -9,6 +9,15 @@ namespace IT.Tangdao.Framework.DaoAdmin.Navigates
     public interface ISingleNavigateView
     {
         string ViewName { get; }
+
+        /// <summary>
+        /// 用于排序
+        /// </summary>
         int DisplayOrder { get; }
+
+        /// <summary>
+        /// 用于分组
+        /// </summary>
+        string GroupKey { get; }
     }
 }
