@@ -1,5 +1,5 @@
-﻿using IT.Tangdao.Framework.DaoDtos.Items;
-using IT.Tangdao.Framework.DaoMvvm;
+﻿using IT.Tangdao.Framework.DaoMvvm;
+using IT.Tangdao.Framework.DaoParameters.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +12,9 @@ namespace IT.Tangdao.Framework.DaoSelectors
 {
     public class DateTimeSelector
     {
-        private static readonly Lazy<DateTimeItem> _dateTimeItem = new Lazy<DateTimeItem>(() => new DateTimeItem());
+        private static readonly Lazy<TangdaoClock> _dateTimeItem = new Lazy<TangdaoClock>(() => new TangdaoClock());
 
-        public static DateTimeItem Instance => _dateTimeItem.Value;
+        public static TangdaoClock Instance => _dateTimeItem.Value;
 
         // 可选：提供一个静态属性用于绑定
         public static DateTime CurrentDateTime => Instance.CurrentDate;

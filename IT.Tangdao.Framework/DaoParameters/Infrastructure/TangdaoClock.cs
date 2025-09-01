@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
-namespace IT.Tangdao.Framework.DaoDtos.Items
+namespace IT.Tangdao.Framework.DaoParameters.Infrastructure
 {
-    public class DateTimeItem : DaoViewModelBase
+    public class TangdaoClock : DaoViewModelBase
     {
         private DateTime _currentDate;
 
@@ -20,7 +20,7 @@ namespace IT.Tangdao.Framework.DaoDtos.Items
 
         private DispatcherTimer timer;
 
-        public DateTimeItem()
+        public TangdaoClock()
         {
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
