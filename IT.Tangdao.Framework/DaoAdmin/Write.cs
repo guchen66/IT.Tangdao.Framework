@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoAdmin
 {
-    public sealed class Write : IWrite
+    internal sealed class Write : IWrite
     {
         public object WriteObject
         {

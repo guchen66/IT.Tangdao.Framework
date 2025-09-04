@@ -1,28 +1,66 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoInterfaces;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework
 {
-    public sealed class TangdaoTaskAsync
+    public sealed class TangdaoTaskAsync : IMarkable, IDisposable
     {
-        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private readonly Stopwatch _sw = Stopwatch.StartNew();
+        private bool _disposed;
+        private readonly object _lock = new object();
 
-        public string Duration => _stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.fff");
-        public TimeSpan Elapsed => _stopwatch.Elapsed;
+        // 1. 对外只读状态
+        public TimeSpan Elapsed => _sw.Elapsed;
 
-        public TangdaoTaskAsync()
+        public string Duration => _sw.Elapsed.ToString(@"hh\\:mm\\:ss\\.fff");
+        public TaskStatus Status { get; private set; } = TaskStatus.Running;
+        public Exception Error { get; private set; }
+        public bool IsCompletedSuccessfully => Status == TaskStatus.RanToCompletion;
+
+        // 2. 取消令牌源（由调度器注入，业务代码只读）
+        public CancellationToken CancellationToken { get; internal set; }
+
+        // 3. 生命周期钩子（调度器调用）
+        public void MarkCompleted()
         {
-            _stopwatch.Start(); // 构造函数开始计时
+            lock (_lock)
+            {
+                if (_disposed) return;
+                Status = TaskStatus.RanToCompletion;
+            }
         }
 
-        // 可以添加一些辅助方法
-        public void Delay(int milliseconds)
+        public void MarkFaulted(Exception ex)
         {
-            Task.Delay(milliseconds).Wait();
+            lock (_lock)
+            {
+                if (_disposed) return;
+                Status = TaskStatus.Faulted;
+                Error = ex;
+            }
+        }
+
+        // 4. 业务侧 helpers
+        public void ThrowIfCancellationRequested()
+            => CancellationToken.ThrowIfCancellationRequested();
+
+        public void Dispose()
+        {
+            lock (_lock)
+            {
+                if (_disposed) return;
+                _disposed = true;
+                _sw.Stop();
+                Status = Status == TaskStatus.Running
+                            ? TaskStatus.Canceled
+                            : Status;
+            }
         }
     }
 }

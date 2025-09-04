@@ -12,7 +12,6 @@ namespace IT.Tangdao.Framework.DaoAdmin.IServices
     /// <summary>
     /// 定义读取文本的服务
     /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
     public interface IReadService
     {
         string Read(string path, DaoFileType daoFileType = DaoFileType.None);

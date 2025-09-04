@@ -19,7 +19,7 @@ using System.Xml.Linq;
 
 namespace IT.Tangdao.Framework.DaoAdmin
 {
-    public sealed class Read : IRead
+    internal sealed class Read : IRead
     {
         // 属性改造（自动同步_fileType）
         private string _xmlData;

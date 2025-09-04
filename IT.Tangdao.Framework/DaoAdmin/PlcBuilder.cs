@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoAdmin
 {
-    public class PlcBuilder: IPlcBuilder
+    public class PlcBuilder : IPlcBuilder
     {
         public PlcBuilder(ITangdaoContainer container)
         {

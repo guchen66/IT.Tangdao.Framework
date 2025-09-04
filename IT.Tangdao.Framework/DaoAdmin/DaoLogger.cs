@@ -14,18 +14,20 @@ namespace IT.Tangdao.Framework.DaoAdmin
     /// </summary>
     public class DaoLogger : IDaoLogger
     {
-        private static readonly IDictionary<Type, IDaoLogger> Loggers = new ConcurrentDictionary<Type, IDaoLogger>();
+        private static readonly ConcurrentDictionary<Type, IDaoLogger> Loggers = new ConcurrentDictionary<Type, IDaoLogger>();
 
         public static Func<Type, IDaoLogger> LoggerFactory { get; set; }
 
         public static IDaoLogger Get(Type type)
         {
-            if (!Loggers.ContainsKey(type))
+            //TryGetValue避免两次查找，直接返回logger
+            if (!Loggers.TryGetValue(type, out IDaoLogger logger))
             {
-                Loggers[type] = LoggerFactory?.Invoke(type) ?? new DaoLogger(type);
+                logger = LoggerFactory?.Invoke(type) ?? new DaoLogger(type);
+                Loggers[type] = logger; // 或者使用 TryAdd 更安全
             }
-           
-            return Loggers[type];
+
+            return logger;
         }
 
         private readonly Type _type;
@@ -76,7 +78,5 @@ namespace IT.Tangdao.Framework.DaoAdmin
             System.Diagnostics.Debug.Write(message);
             File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Tangdao.log"), message);
         }
-
-      
     }
 }

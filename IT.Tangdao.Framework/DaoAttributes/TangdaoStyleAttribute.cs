@@ -8,6 +8,7 @@ using System.Windows;
 
 namespace IT.Tangdao.Framework.DaoAttributes
 {
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
     public class TangdaoStyleAttribute : Attribute
     {
         public string StyleName { get; set; }

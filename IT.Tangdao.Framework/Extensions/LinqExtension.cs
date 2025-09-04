@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -69,6 +74,24 @@ namespace IT.Tangdao.Framework.Extensions
             }
 
             return source;
+        }
+
+        public static void AddRange<T>(this ObservableCollection<T> collection, IEnumerable<T> items)
+        {
+            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            if (items == null) throw new ArgumentNullException(nameof(items));
+
+            TangdaoTaskScheduler.Execute(dao: daoTask =>
+            {
+                // 先检查是否有元素
+                var itemList = items as IList<T> ?? items.ToList();
+                if (itemList.Count == 0) return;
+
+                foreach (var item in itemList)
+                {
+                    collection.Add(item);
+                }
+            });
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoInterfaces;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,16 +8,60 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework
 {
-    public sealed class TangdaoTask
+    public sealed class TangdaoTask : IMarkable, IDisposable
     {
-        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private readonly Stopwatch _sw = Stopwatch.StartNew();
+        private bool _disposed;                       // 防止重复 Dispose
+        private readonly object _lock = new object(); // 线程安全
 
-        public string Duration => _stopwatch.Elapsed.ToString(@"hh\:mm\:ss\.fff");
-        public TimeSpan Elapsed => _stopwatch.Elapsed;
+        #region ---- 对外只读状态 ----
 
-        public TangdaoTask()
+        public TimeSpan Elapsed => _sw.Elapsed;
+        public string Duration => _sw.Elapsed.ToString(@"hh\:mm\:ss\.fff");
+        public TaskStatus Status { get; private set; } = TaskStatus.Running;
+        public Exception Error { get; private set; }
+        public bool IsCompletedSuccessfully => Status == TaskStatus.RanToCompletion;
+
+        #endregion ---- 对外只读状态 ----
+
+        #region ---- 生命周期钩子（调度器会调用） ----
+
+        public void MarkCompleted()
         {
-            _stopwatch.Start(); // 构造函数开始计时
+            lock (_lock)
+            {
+                if (_disposed) return;
+                Status = TaskStatus.RanToCompletion;
+            }
         }
+
+        public void MarkFaulted(Exception ex)
+        {
+            lock (_lock)
+            {
+                if (_disposed) return;
+                Status = TaskStatus.Faulted;
+                Error = ex;
+            }
+        }
+
+        #endregion ---- 生命周期钩子（调度器会调用） ----
+
+        #region ---- IDisposable ----
+
+        public void Dispose()
+        {
+            lock (_lock)
+            {
+                if (_disposed) return;
+                _disposed = true;
+                _sw.Stop();
+                Status = Status == TaskStatus.Running
+                            ? TaskStatus.Canceled
+                            : Status;
+            }
+        }
+
+        #endregion ---- IDisposable ----
     }
 }

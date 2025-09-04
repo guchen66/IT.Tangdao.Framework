@@ -9,6 +9,5 @@ namespace IT.Tangdao.Framework
 {
     public interface ITangdaoContainerBuilder
     {
-       
     }
 }

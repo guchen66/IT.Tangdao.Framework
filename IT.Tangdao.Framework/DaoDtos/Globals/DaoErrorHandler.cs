@@ -7,15 +7,14 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoDtos.Globals
 {
-    [StringHandler]
-    public ref struct DaoErrorHandler
+    //[StringHandler]
+    public struct DaoErrorHandler
     {
         // Storage for the built-up string
-        StringBuilder builder;
+        private StringBuilder builder;
 
         public DaoErrorHandler(int literalLength, int formattedCount)
         {
-
             builder = new StringBuilder(literalLength);
             Console.WriteLine($"\tliteral length: {literalLength}, formattedCount: {formattedCount}");
         }

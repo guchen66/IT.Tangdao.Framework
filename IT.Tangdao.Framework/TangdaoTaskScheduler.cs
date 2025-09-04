@@ -1,67 +1,174 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoInterfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Threading;
+using Application = System.Windows.Application;
 
 namespace IT.Tangdao.Framework
 {
     public static class TangdaoTaskScheduler
     {
-        // 重载1：只执行UI任务（同步）
+        #region --------- 公共入口 ---------
+
+        /// <summary>
+        /// UI 线程同步执行（无 token，不可取消）
+        /// </summary>
         public static void Execute(Action<TangdaoTask> dao)
         {
             if (dao == null) throw new ArgumentNullException(nameof(dao));
-
-            var task = new TangdaoTask();
-
-            if (Application.Current != null)
+            TangdaoTask task = null;
+            try
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    dao(task); // 直接在UI线程执行Lambda中的代码
-                });
+                task = new TangdaoTask();
+                UI(() => dao(task));          // 同步 Invoke，执行完才退出
+                task.MarkCompleted();
+            }
+            catch (Exception ex)
+            {
+                task?.MarkFaulted(ex);
+                throw;
+            }
+            finally
+            {
+                task?.Dispose();              // lambda 执行完才释放
             }
         }
 
-        // 重载2：只执行异步任务
-        public static void Execute(Action<TangdaoTaskAsync> daoAsync)
+        /// <summary>
+        /// UI 线程异步执行（不可取消）
+        /// </summary>
+        public static void ExecuteAsync(Action<TangdaoTask> dao)
         {
-            if (daoAsync == null) throw new ArgumentNullException(nameof(daoAsync));
-
-            var asyncTask = new TangdaoTaskAsync();
-
-            // 在后台线程执行Lambda中的代码
-            Task.Run(() =>
+            if (dao == null) throw new ArgumentNullException(nameof(dao));
+            TangdaoTask task = null;
+            try
             {
-                daoAsync(asyncTask); // 直接在后台线程执行
-            });
+                task = new TangdaoTask();
+                UIAsync(() => dao(task));          // 同步 Invoke，执行完才退出
+                task.MarkCompleted();
+            }
+            catch (Exception ex)
+            {
+                task?.MarkFaulted(ex);
+                throw;
+            }
+            finally
+            {
+                task?.Dispose();              // lambda 执行完才释放
+            }
         }
 
-        // 重载3：先执行异步，再执行UI
-        public static void Execute(Action<TangdaoTaskAsync> daoAsync, Action<TangdaoTask> dao)
+        /// <summary>
+        /// 后台线程执行（可取消）
+        /// </summary>
+        public static void Execute(Action<TangdaoTaskAsync> daoAsync, CancellationToken token = default)
+        {
+            if (daoAsync == null) throw new ArgumentNullException(nameof(daoAsync));
+            _ = Task.Run(() =>
+            {
+                var task = new TangdaoTaskAsync
+                {
+                    CancellationToken = token   // 注入令牌
+                };
+                try
+                {
+                    daoAsync(task);
+                    task.MarkCompleted();
+                }
+                catch (Exception ex)
+                {
+                    task.MarkFaulted(ex);
+                    throw;
+                }
+                finally
+                {
+                    task.Dispose();
+                }
+            }, token);
+        }
+
+        /// <summary>
+        /// 先后台再 UI（可取消后台阶段）
+        /// </summary>
+        public static void Execute(Action<TangdaoTaskAsync> daoAsync, Action<TangdaoTask> dao, CancellationToken token = default)
         {
             if (daoAsync == null) throw new ArgumentNullException(nameof(daoAsync));
             if (dao == null) throw new ArgumentNullException(nameof(dao));
-
-            var asyncTask = new TangdaoTaskAsync();
-            var uiTask = new TangdaoTask();
-
-            // 先在后台线程执行异步任务
-            Task.Run(() =>
+            _ = Task.Run(async () =>
             {
-                daoAsync(asyncTask); // 执行异步代码
-
-                // 完成后回到UI线程执行UI任务
-                if (Application.Current != null)
+                TangdaoTaskAsync asyncTask = null;
+                try
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    // 第一阶段：后台异步任务
+                    asyncTask = new TangdaoTaskAsync { CancellationToken = token };
+                    await Task.Run(() =>
                     {
-                        dao(uiTask); // 执行UI代码
+                        daoAsync(asyncTask);
+                        asyncTask.MarkCompleted();
+                    }, token);
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                    asyncTask?.MarkFaulted(new TaskCanceledException("后台任务被取消"));
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    asyncTask?.MarkFaulted(ex);
+                    throw;
+                }
+                finally
+                {
+                    asyncTask?.Dispose();
+                }
+
+                // 第二阶段：UI任务
+                TangdaoTask uiTask = null;
+                try
+                {
+                    await UIAsync(() =>
+                    {
+                        uiTask = new TangdaoTask();
+                        dao(uiTask);
+                        uiTask.MarkCompleted();
                     });
                 }
-            });
+                catch (Exception ex)
+                {
+                    uiTask?.MarkFaulted(ex);
+                    throw;
+                }
+                finally
+                {
+                    uiTask?.Dispose();
+                }
+            }, token);
         }
+
+        #endregion --------- 公共入口 ---------
+
+        #region --------- 私有调度 ---------
+
+        private static Dispatcher Dispatcher =>
+            Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+
+        private static void UI(Action action)
+        {
+            if (Dispatcher.CheckAccess()) action();
+            else Dispatcher.Invoke(action);
+        }
+
+        private static Task UIAsync(Action action)
+            => Dispatcher.CheckAccess()
+               ? Task.CompletedTask
+               : Dispatcher.InvokeAsync(action, DispatcherPriority.Normal).Task;
+
+        #endregion --------- 私有调度 ---------
     }
 }

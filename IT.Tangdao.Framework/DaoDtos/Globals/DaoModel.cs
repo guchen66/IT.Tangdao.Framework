@@ -12,7 +12,7 @@ namespace IT.Tangdao.Framework.DaoDtos.Globals
 
         public static DaoModel<T> CreateInstance()
         {
-          return Instance = new Lazy<DaoModel<T>>(()=>new DaoModel<T>()).Value;
+            return Instance = new Lazy<DaoModel<T>>(() => new DaoModel<T>()).Value;
         }
     }
 }
