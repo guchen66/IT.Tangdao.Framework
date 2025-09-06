@@ -9,6 +9,6 @@ namespace IT.Tangdao.Framework.DaoAdmin.IServices
 {
     public interface IPlcReadService
     {
-        Task<TangdaoResponse> ReadAsync(string path);
+        // Task<TangdaoResponse> ReadAsync(string path);
     }
 }

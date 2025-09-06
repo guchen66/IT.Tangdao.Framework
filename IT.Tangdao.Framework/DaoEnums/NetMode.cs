@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoDtos
+namespace IT.Tangdao.Framework.DaoEnums
 {
-    public class TangdaoRequest
+    public enum NetMode
     {
+        Client,
+        Server,
     }
 }

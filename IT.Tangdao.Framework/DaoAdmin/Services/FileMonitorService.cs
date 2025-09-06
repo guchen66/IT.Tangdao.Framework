@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
@@ -313,7 +314,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
         {
             if (string.IsNullOrEmpty(content)) return string.Empty;
 
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            using (var sha256 = SHA256.Create())
             {
                 var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(content));
                 return Convert.ToBase64String(hash);
@@ -363,7 +364,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
                 }
             }
 
-            return changes.Any() ? string.Join("; ", changes.Take(3)) + (changes.Count > 3 ? "..." : "") : "格式变化";
+            return changes.Count > 0 ? string.Join("; ", changes.Take(3)) + (changes.Count > 3 ? "..." : "") : "格式变化";
         }
 
         private string CompareJsonChanges(string oldJson, string newJson)

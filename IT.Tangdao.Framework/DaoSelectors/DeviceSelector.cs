@@ -14,10 +14,5 @@ namespace IT.Tangdao.Framework.DaoSelectors
         {
             throw new NotImplementedException();
         }
-
-        public TangdaoResponse Select()
-        {
-            return new TangdaoResponse("");
-        }
     }
 }

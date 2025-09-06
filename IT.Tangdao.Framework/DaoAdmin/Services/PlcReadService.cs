@@ -10,9 +10,9 @@ namespace IT.Tangdao.Framework.DaoAdmin.Services
 {
     public class PlcReadService : IPlcReadService
     {
-        public Task<TangdaoResponse> ReadAsync(string path)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<TangdaoResponse> ReadAsync(string path)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

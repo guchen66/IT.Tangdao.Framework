@@ -1,4 +1,5 @@
-﻿using IT.Tangdao.Framework.DaoDtos;
+﻿using IT.Tangdao.Framework.DaoAdmin.Results;
+using IT.Tangdao.Framework.DaoDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +15,13 @@ namespace IT.Tangdao.Framework.DaoAdmin.IServices
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        Task<TangdaoResponse> ReadLocalFile(string filePath);
+        Task<ReadResult> ReadLocalFile(string filePath);
 
         /// <summary>
         /// 读取网络文件
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        Task<TangdaoResponse> ReadNetFile(string filePath);
+        Task<ReadResult> ReadNetFile(string filePath);
     }
 }
