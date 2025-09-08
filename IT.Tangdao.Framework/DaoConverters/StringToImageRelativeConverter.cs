@@ -9,27 +9,19 @@ using System.Windows.Media.Imaging;
 
 namespace IT.Tangdao.Framework.DaoConverters
 {
-    /// <summary>
-    /// 字符串同图像资源 jason
-    /// </summary>
-    public class StringToImageSourceConverter : ValueConverterBase
+    public class StringToImageRelativeConverter : NoBindingValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string path = (string)value;
             if (!string.IsNullOrEmpty(path))
             {
-                return new BitmapImage(new Uri(path, UriKind.Absolute));
+                return new BitmapImage(new Uri(path, UriKind.Relative)) { CacheOption = BitmapCacheOption.OnLoad };
             }
             else
             {
                 return null;
             }
-        }
-
-        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return null;
         }
     }
 }

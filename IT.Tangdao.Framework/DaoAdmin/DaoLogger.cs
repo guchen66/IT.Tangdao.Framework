@@ -70,7 +70,7 @@ namespace IT.Tangdao.Framework.DaoAdmin
             }
 
             message = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} " +
-                      $"[{Thread.CurrentThread.ManagedThreadId}] " +
+                      $"[{Environment.CurrentManagedThreadId}] " +
                       $"{category.ToUpper()} " +
                       $"{_type.FullName}{Environment.NewLine}" +
                       $"{message}{Environment.NewLine}";

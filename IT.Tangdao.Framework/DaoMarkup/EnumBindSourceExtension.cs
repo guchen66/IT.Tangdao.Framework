@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
 
-namespace IT.Tangdao.Framework.DaoConverters
+namespace IT.Tangdao.Framework.DaoMarkup
 {
-    public class EnumBindSourceValueConverter : MarkupExtension
+    public class EnumBindSourceExtension : MarkupExtension
     {
         private Type _enumType;
 

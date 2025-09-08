@@ -623,3 +623,5 @@ class Program
   TangdaoTaskScheduler.Execute(daoAsync => { }, dao => { });
 ```
 
+#### 12、转换器
+

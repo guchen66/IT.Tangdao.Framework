@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace IT.Tangdao.Framework.DaoConverters
+namespace IT.Tangdao.Framework.DaoMarkup
 {
     public class BoolToStringModeExtension : MarkupExtension
     {
@@ -28,24 +29,23 @@ namespace IT.Tangdao.Framework.DaoConverters
             // 返回绑定对象
             return Binding.ProvideValue(serviceProvider);
         }
-    }
 
-    // 辅助转换器
-    public class BoolToStringConverter : IValueConverter
-    {
-        public string TrueValue { get; set; }
-        public string FalseValue { get; set; }
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        private class BoolToStringConverter : IValueConverter
         {
-            if (value is bool boolValue)
-                return boolValue ? TrueValue : FalseValue;
-            return value; // 如果不是 bool，返回原值
-        }
+            public string TrueValue { get; set; }
+            public string FalseValue { get; set; }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotSupportedException();
+            public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+            {
+                if (value is bool boolValue)
+                    return boolValue ? TrueValue : FalseValue;
+                return value; // 如果不是 bool，返回原值
+            }
+
+            public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

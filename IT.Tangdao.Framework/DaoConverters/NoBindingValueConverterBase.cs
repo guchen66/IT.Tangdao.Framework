@@ -9,18 +9,11 @@ using System.Windows.Markup;
 
 namespace IT.Tangdao.Framework.DaoConverters
 {
-    public abstract class NoBindingValueConverterBase : MarkupExtension, IValueConverter
+    public abstract class NoBindingValueConverterBase : ValueConverterBase
     {
-        public abstract object Convert(object value, Type targetType, object parameter, CultureInfo culture);
-
-        public virtual object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Binding.DoNothing;
-        }
-
-        public override object ProvideValue(IServiceProvider serviceProvider)
-        {
-            return this;
         }
     }
 }
