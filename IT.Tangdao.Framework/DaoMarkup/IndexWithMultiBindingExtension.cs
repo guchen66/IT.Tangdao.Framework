@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.Windows.Markup;
 using System.Windows;
 using IT.Tangdao.Framework.DaoConverters;
+using IT.Tangdao.Framework.DaoConverters.Wpf;
 
 namespace IT.Tangdao.Framework.DaoMarkup
 {

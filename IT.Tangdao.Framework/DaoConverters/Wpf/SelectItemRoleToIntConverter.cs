@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace IT.Tangdao.Framework.DaoConverters
+namespace IT.Tangdao.Framework.DaoConverters.Wpf
 {
     public class SelectItemRoleToIntConverter : NoBindingValueConverterBase
     {

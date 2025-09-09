@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoConverters
+namespace IT.Tangdao.Framework.DaoConverters.Wpf
 {
     /// <summary>
     /// 获得枚举的描述

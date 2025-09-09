@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace IT.Tangdao.Framework.DaoConverters
+namespace IT.Tangdao.Framework.DaoConverters.Wpf
 {
     public class ListViewBackgroundConverter : NoBindingValueConverterBase
     {

@@ -7,13 +7,17 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace IT.Tangdao.Framework.DaoConverters
+namespace IT.Tangdao.Framework.DaoConverters.Wpf
 {
-    public class ColorToBrushConverter : NoBindingValueConverterBase
+    public class StringToBrushConverter : NoBindingValueConverterBase
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return new SolidColorBrush((Color)value);
+            if (value is string colorHex && ColorConverter.ConvertFromString(colorHex) is Color color)
+            {
+                return new SolidColorBrush(color);
+            }
+            return Brushes.Transparent;
         }
     }
 }

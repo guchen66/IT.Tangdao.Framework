@@ -14,9 +14,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Results
         public T Data { get; protected set; }
 
         // 成功方法
-        public static ReadResult<T> Success(T data, string result = null,
-                                         string message = "读取成功",
-                                         long size = 0, string format = null)
+        public static ReadResult<T> Success(T data, string result = null, string message = "读取成功", long size = 0, string format = null)
         {
             return new ReadResult<T>
             {
@@ -31,8 +29,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Results
         }
 
         // 失败方法（泛型版本需要）
-        public new static ReadResult<T> Failure(string message, Exception exception = null,
-                                             string result = null)
+        public new static ReadResult<T> Failure(string message, Exception exception = null, string result = null)
         {
             return new ReadResult<T>
             {

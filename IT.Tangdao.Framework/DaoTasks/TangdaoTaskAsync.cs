@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework
+namespace IT.Tangdao.Framework.DaoTasks
 {
     public sealed class TangdaoTaskAsync : IMarkable, IDisposable
     {

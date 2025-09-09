@@ -86,7 +86,7 @@ container.RegisterType<IWriteService,WriteService>();
 
 #### 3、扩展方法
 
-3-1、读写
+###### 3-1、读写
 
 StringExtension 可以方便一些代码
 
@@ -114,7 +114,7 @@ string xmlContent=TxtFolderHelper.ReadByFileStream(path);
 
 也可以使用接口读取
 
-xml文件是
+###### 3-2、xml文件是
 
 ```C#
 <?xml version="1.0" encoding="utf-8"?>
@@ -234,6 +234,38 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
 
 ```C#
  var readResult = _readService.Current.SelectNodes<ProcessItem>();
+```
+
+###### 3-3、config的读取
+
+配置
+
+```
+<configuration>
+	<configSections>
+		<section name="Menu" type="System.Configuration.DictionarySectionHandler" />
+		<section name="Student" type="System.Configuration.DictionarySectionHandler" />
+	</configSections>
+	<Menu>
+		<add key="0" value="我的样本" />
+		<add key="1" value="动态记录" />
+		<add key="2" value="存储" />
+		<add key="3" value="实验" />
+	</Menu>
+	<Student>
+		<add key="Id" value="1" />
+		<add key="Name" value="张三" />
+		<add key="Age" value="18" />
+		<add key="Source" value="18" />
+	</Student>
+</configuration>
+```
+
+读取
+
+```
+ Dictionary<string, string> MenuList = _readService.Current.SelectConfig("Menu").ToDictionary();
+ var student = _readService.Current.SelectConfig("Student").ToObject<Student>();
 ```
 
 
@@ -622,6 +654,4 @@ class Program
 
   TangdaoTaskScheduler.Execute(daoAsync => { }, dao => { });
 ```
-
-#### 12、转换器
 

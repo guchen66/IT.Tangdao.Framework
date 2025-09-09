@@ -5,7 +5,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows;
 
-namespace IT.Tangdao.Framework.DaoConverters
+namespace IT.Tangdao.Framework.DaoConverters.Wpf
 {
     public class BoolToColorConverter : DependencyObject, IValueConverter
     {

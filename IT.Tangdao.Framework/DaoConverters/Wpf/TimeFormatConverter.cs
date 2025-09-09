@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoConverters
+namespace IT.Tangdao.Framework.DaoConverters.Wpf
 {
-    public class TimeFormatConverter: ValueConverterBase
+    public class TimeFormatConverter : ValueConverterBase
     {
         public override object Convert(object o, Type type, object parameter, CultureInfo culture)
         {
@@ -17,8 +17,10 @@ namespace IT.Tangdao.Framework.DaoConverters
             {
                 case "String":
                     return date.ToString("yyyy-MM-dd:HH:mm:ss", culture);
+
                 case "Brush":
                     return Brushes.Red;
+
                 default:
                     return o;
             }
