@@ -29,5 +29,23 @@ namespace IT.Tangdao.Framework.Extensions
 
             return DictToObject.Convert<T>(dict);
         }
+
+        public static List<string> FirstOrDefault(this ReadResult result, string keyValue = null)
+        {
+            var dict = result.ToDictionary();
+
+            if (string.IsNullOrEmpty(keyValue) || string.Equals(keyValue, "value", StringComparison.OrdinalIgnoreCase))
+            {
+                return dict.Values.ToList();
+            }
+
+            if (string.Equals(keyValue, "key", StringComparison.OrdinalIgnoreCase))
+            {
+                return dict.Keys.ToList();
+            }
+
+            // 如果传入其他值，可以选择抛出异常或返回默认值
+            return dict.Values.ToList(); // 或者抛出 ArgumentException
+        }
     }
 }

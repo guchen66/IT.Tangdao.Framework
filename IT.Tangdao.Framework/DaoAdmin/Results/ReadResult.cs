@@ -19,8 +19,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Results
         { }
 
         // 成功方法
-        public static ReadResult Success(string result = null, string message = "读取成功",
-                                      long size = 0, string format = null)
+        public static ReadResult Success(string result = null, string message = "读取成功", long size = 0, string format = null)
         {
             return new ReadResult
             {
@@ -33,8 +32,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Results
             };
         }
 
-        public new static ReadResult Failure(string message, Exception exception = null,
-                                     string result = null)
+        public new static ReadResult Failure(string message, Exception exception = null, string result = null)
         {
             return new ReadResult
             {

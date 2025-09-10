@@ -19,10 +19,9 @@ namespace IT.Tangdao.Framework.DaoAttributes
             _message = message;
         }
 
-        public bool ValidData(object obj)
+        public static bool ValidData(object obj)
         {
             return !string.IsNullOrEmpty(obj?.ToString());
         }
-
     }
 }

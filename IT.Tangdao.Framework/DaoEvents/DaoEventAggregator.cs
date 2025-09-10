@@ -297,7 +297,7 @@ namespace IT.Tangdao.Framework.DaoEvents
         /// </summary>
         /// <typeparam name="T">事件类型，必须继承自DaoEventBase并有无参构造函数</typeparam>
         /// <returns>对应类型的空事件对象</returns>
-        private T GetEmptyEvent<T>() where T : DaoEventBase, new()
+        private static T GetEmptyEvent<T>() where T : DaoEventBase, new()
         {
             // 从缓存中获取或创建空事件对象
             return (T)_emptyEvents.GetOrAdd(typeof(T), _ => new T());

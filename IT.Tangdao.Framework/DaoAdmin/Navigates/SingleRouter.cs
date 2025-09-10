@@ -169,7 +169,7 @@ namespace IT.Tangdao.Framework.DaoAdmin.Navigates
         public void AddView(ISingleNavigateView view)
         {
             _views.Add(view);
-            _views.OrderBy(v => v.DisplayOrder);
+            _ = _views.OrderBy(v => v.DisplayOrder);
             RefreshNavigationState();
         }
 

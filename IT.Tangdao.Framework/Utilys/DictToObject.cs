@@ -18,13 +18,16 @@ namespace IT.Tangdao.Framework.Utilys
 
             T obj = new T();
 
+            //反射拿到 T 的所有公共属性（只认属性，不认字段）。
             var props = TypeDescriptor.GetProperties(typeof(T))
                           .Cast<PropertyDescriptor>()
                           .ToList();
-            var hit = props.Where(p => dict.ContainsKey(p.Name)).OrderBy(p => p.Name).ToList();
-            foreach (var p in props)
+
+            //只保留字典里存在同名键的属性
+            var hits = props.Where(p => dict.ContainsKey(p.Name)).OrderBy(p => p.Name).ToList();
+            foreach (var p in hits)
             {
-                string raw = dict[p.Name];
+                if (!dict.TryGetValue(p.Name, out var raw)) continue; // 跳过缺失键
                 p.SetValue(obj, ConvertSingleValue(raw, p.PropertyType));
             }
             return obj;

@@ -274,6 +274,19 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
 
 DirectoryHelper
 
+
+
+```
+var maybe = TangdaoOptional<string>.Some("Hello")
+                                   .Where(s => s.Length > 3)
+                                   .Select(s => s.ToUpper())
+                                   .ValueOrDefault("NONE");
+
+Console.WriteLine(maybe);   // HELLO
+```
+
+
+
 #### 5、强制组件通信
 
 ```C#

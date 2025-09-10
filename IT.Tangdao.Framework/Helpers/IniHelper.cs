@@ -1,83 +1,164 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Helpers
 {
-    public class IniHelper
+    /// <summary>
+    /// 轻量级 INI 文件帮助类（基于 Win32 API，无依赖）
+    /// </summary>
+    public sealed class IniHelper
     {
-        private NameValueCollection _values;
-        private string[] keys;
-        private string DefaultPath { get; set; }
+        #region Win32 P/Invoke
 
-        public IniHelper()
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern uint WritePrivateProfileString(
+            string lpSection, string lpKey, string lpString, string lpFileName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern uint GetPrivateProfileString(string lpSection, string lpKey, string lpDefault, char[] lpReturnedString, uint nSize, string lpFileName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern uint GetPrivateProfileSectionNames(
+            IntPtr lpszReturnBuffer, uint nSize, string lpFileName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern uint GetPrivateProfileSection(
+            string lpSection, IntPtr lpReturnedString, uint nSize, string lpFileName);
+
+        #endregion Win32 P/Invoke
+
+        private readonly string _filePath;
+        private readonly object _lock = new object();
+
+        /// <summary>
+        /// 初始化并指定 INI 文件路径（若不存在会自动创建）
+        /// </summary>
+        public IniHelper(string filePath)
         {
-           // DefaultPath = DirEx.CurrentDir() + "Config\\Setting.ini";                 //默认读取PLC的路径
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentException("INI file path is empty.", nameof(filePath));
+
+            _filePath = Path.GetFullPath(filePath);
+            Directory.CreateDirectory(Path.GetDirectoryName(_filePath));
         }
 
-        // 链式调用：SelectSection 方法现在返回 PlcProvider 实例
-     /*   public IniHelper SelectSection(string section)
+        #region 基础读写
+
+        /// <summary>
+        /// 写入字符串（若 section/key 为 null 则写入空值）
+        /// </summary>
+        public void WriteString(string section, string key, string value)
         {
-            IniFile ini = new IniFile(DefaultPath);
-            _values = ini.GetSectionValues(section);
-            return this; // 返回当前实例
+            lock (_lock)
+                _ = WritePrivateProfileString(section, key, value ?? string.Empty, _filePath);
         }
 
-        public IniHelper SelectValue(string section)
+        /// <summary>
+        /// 读取字符串，缺失时返回 <paramref name="defaultValue"/>
+        /// </summary>
+        public string ReadString(string section, string key, string defaultValue = "")
         {
-            IniFile ini = new IniFile(DefaultPath);
-            keys = ini.GetKeys(section);
-            return this; // 返回当前实例
+            const int BufLen = 1024;                 // 1K 缓冲，够用
+            char[] buffer = new char[BufLen];        // 零分配只在托管堆一次
+
+            uint len;
+            lock (_lock)
+                len = GetPrivateProfileString(section, key, defaultValue ?? string.Empty, buffer, (uint)buffer.Length, _filePath);
+
+            // len 不包含末尾 '\0'
+            return new string(buffer, 0, (int)len);
         }
 
-        // 链式调用：GetKey 方法现在返回 string 类型
-        public string GetKey(string key)
+        /// <summary>
+        /// 写入 32 位有符号整数
+        /// </summary>
+        public void WriteInt(string section, string key, int value) =>
+            WriteString(section, key, value.ToString());
+
+        /// <summary>
+        /// 读取 32 位有符号整数，缺失返回 <paramref name="defaultValue"/>
+        /// </summary>
+        public int ReadInt(string section, string key, int defaultValue = 0) =>
+            int.TryParse(ReadString(section, key), out var v) ? v : defaultValue;
+
+        /// <summary>
+        /// 写入布尔（true/false）
+        /// </summary>
+        public void WriteBool(string section, string key, bool value) =>
+            WriteString(section, key, value ? "true" : "false");
+
+        /// <summary>
+        /// 读取布尔，缺失返回 <paramref name="defaultValue"/>
+        /// </summary>
+        public bool ReadBool(string section, string key, bool defaultValue = false) =>
+            bool.TryParse(ReadString(section, key), out var v) ? v : defaultValue;
+
+        #endregion 基础读写
+
+        #region 批量枚举
+
+        /// <summary>
+        /// 获取 INI 中所有段落名
+        /// </summary>
+        public IEnumerable<string> GetSectionNames()
         {
-            if (_values != null && _values.AllKeys.Contains(key))
+            const uint BUF_LEN = 32 * 1024; // 32k 缓冲
+            var p = Marshal.AllocHGlobal((int)BUF_LEN);
+            try
             {
-                return _values[key]; // 返回找到的键对应的值
+                uint len;
+                lock (_lock)
+                    len = GetPrivateProfileSectionNames(p, BUF_LEN, _filePath);
+
+                return BufferToStringList(p, len);
             }
-            return null; // 如果键不存在，返回null
+            finally
+            {
+                Marshal.FreeHGlobal(p);
+            }
         }
 
-        public void WriteValue(string key, string value)
+        /// <summary>
+        /// 获取指定段落下所有键值对（格式 key=value）
+        /// </summary>
+        public IEnumerable<string> GetSection(string section)
         {
-            IniFile ini = new IniFile(DefaultPath);
+            const uint BUF_LEN = 32 * 1024;
+            var p = Marshal.AllocHGlobal((int)BUF_LEN);
+            try
+            {
+                uint len;
+                lock (_lock)
+                    len = GetPrivateProfileSection(section, p, BUF_LEN, _filePath);
 
-            ini.Write("PlcInfo2", key, value);
-            ini.UpdateFile();
-        }*/
-
-        // 声明INI文件的写操作函数 WritePrivateProfileString()
-        [System.Runtime.InteropServices.DllImport("kernel32")]
-        private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
-
-        // 声明INI文件的读操作函数 GetPrivateProfileString()
-        [System.Runtime.InteropServices.DllImport("kernel32")]
-        private static extern int GetPrivateProfileString(string section, string key, string def, System.Text.StringBuilder retVal, int size, string filePath);
-
-
-        /// 写入INI的方法
-        public void INIWrite(string section, string key, string value, string path)
-        {
-            // section=配置节点名称，key=键名，value=返回键值，path=路径
-            WritePrivateProfileString(section, key, value, path);
+                return BufferToStringList(p, len);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(p);
+            }
         }
 
-        //读取INI的方法
-        public string INIRead(string section, string key, string path)
+        /// <summary>
+        /// 把原生双 '\0' 结束的缓冲拆成 C# 字符串列表
+        /// </summary>
+        private static readonly char[] NullTerminator = { '\0' };
+
+        private static IEnumerable<string> BufferToStringList(IntPtr p, uint len)
         {
-            // 每次从ini中读取多少字节
-            System.Text.StringBuilder temp = new System.Text.StringBuilder(255);
+            if (len == 0) yield break;
 
-            // section=配置节点名称，key=键名，temp=上面，path=路径
-            GetPrivateProfileString(section, key, "", temp, 255, path);
-            return temp.ToString();
-
+            var raw = Marshal.PtrToStringAuto(p, (int)len) ?? string.Empty;
+            foreach (var token in raw.Split(NullTerminator, StringSplitOptions.RemoveEmptyEntries))
+                yield return token;
         }
 
+        #endregion 批量枚举
     }
 }

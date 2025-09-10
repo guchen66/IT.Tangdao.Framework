@@ -213,7 +213,7 @@ namespace IT.Tangdao.Framework.DaoAdmin
                 var doc = XDocument.Parse(XMLData);
                 var elements = doc.Root.Elements().Select(node => node).ToList();
 
-                if (elements == null || !elements.Any())
+                if (elements == null || elements.Count == 0)
                 {
                     return ReadResult<List<T>>.Failure("未找到指定的元素。");
                 }
@@ -331,6 +331,7 @@ namespace IT.Tangdao.Framework.DaoAdmin
         {
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
             Dictionary<string, string> dict = idict.Cast<DictionaryEntry>().ToDictionary(de => de.Key.ToString(), de => de.Value.ToString());
+
             return ReadResult<Dictionary<string, string>>.Success(dict);
         }
 

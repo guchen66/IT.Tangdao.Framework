@@ -105,9 +105,13 @@ namespace IT.Tangdao.Framework.DaoComponents
 
             var properties = RootContext == null ? Properties : RootContext.Properties;
 
-            return !properties.ContainsKey(key)
-                ? default
-                : (TComponentOptions)properties[key];
+            // 直接使用 TryGetValue 的 out 参数，避免二次查找
+            if (properties.TryGetValue(key, out object value))
+            {
+                return (TComponentOptions)value;
+            }
+
+            return default;
         }
 
         /// <summary>
