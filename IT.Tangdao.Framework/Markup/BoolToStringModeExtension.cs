@@ -9,12 +9,24 @@ using System.Windows.Markup;
 
 namespace IT.Tangdao.Framework.Markup
 {
+    /// <summary>
+    /// Bool-String转换器，可以指定显示结果
+    /// </summary>
     public class BoolToStringModeExtension : MarkupExtension
     {
+        /// <summary>
+        /// 绑定值为true的默认显示值
+        /// </summary>
         public string TrueValue { get; set; } = "True";  // 默认值
+
+        /// <summary>
+        /// 绑定值为false的默认显示值
+        /// </summary>
         public string FalseValue { get; set; } = "False"; // 默认值
 
-        // 绑定的数据源属性（bool 类型）
+        /// <summary>
+        /// 绑定的数据源属性（bool 类型）
+        /// </summary>
         public Binding Binding { get; set; }
 
         public override object ProvideValue(IServiceProvider serviceProvider)

@@ -89,12 +89,11 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 Directory.CreateDirectory(directory);
             }
-
             return path;
         }
 
         /// <summary>
-        /// 继续创建流
+        /// 链式调用，可调用CreateFolder方法后继续创建流
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
@@ -121,10 +120,10 @@ namespace IT.Tangdao.Framework.Extensions
             {
                 encoding = Encoding.UTF8;
             }
+
             if (!File.Exists(path))
             {
-                // 返回null或者空字符串，取决于您的需求
-                return null;
+                throw new FileNotFoundException("文件路径不存在");
             }
             string content = string.Empty;
 
@@ -135,6 +134,12 @@ namespace IT.Tangdao.Framework.Extensions
             return content;
         }
 
+        /// <summary>
+        /// 打开文件并阅读
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
         public static Stream UseFileOpenRead(this string path, Encoding encoding = null)
         {
             if (encoding is null)
@@ -144,6 +149,12 @@ namespace IT.Tangdao.Framework.Extensions
             return File.OpenRead(path);
         }
 
+        /// <summary>
+        /// 向指定文本写入内容，注意path不能是文件夹
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="contents"></param>
+        /// <param name="encoding"></param>
         public static void UseFileWriteToTxt(this string path, string contents, Encoding encoding = null)
         {
             if (encoding == null)
@@ -155,6 +166,12 @@ namespace IT.Tangdao.Framework.Extensions
             File.WriteAllText(path, contents, encoding);
         }
 
+        /// <summary>
+        /// 向指定文本写入byte内容，注意path不能是文件夹
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="contents"></param>
+        /// <param name="encoding"></param>
         public static void UseFileWriteByteToTxt(this string path, byte contents, Encoding encoding = null)
         {
             if (encoding == null)
@@ -220,30 +237,6 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
 #endif
-        // 只有当 SUPPORTS_VALUETUPLE 编译符号被定义时才包含此代码
-
-        /// <summary>
-        /// 生成一个指定长度的随机字符串，RNGCryptoServiceProvider确保安全性
-        /// 使用场景，生成随机密码，会话标识
-        /// </summary>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        public static string TryToRandomString(int length)
-        {
-            var b = new byte[4];
-            new RNGCryptoServiceProvider().GetBytes(b);
-            var r = new Random(BitConverter.ToInt32(b, 0));
-            var ret = string.Empty;
-            const string str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            for (var i = 0; i < length; i++)
-                ret += str.Substring(r.Next(0, str.Length - 1), 1);
-            return ret;
-        }
-
-        /// <summary>
-        /// 这个字段可以作为日志标识符使用
-        /// </summary>
-        public static string LogId => TryToRandomString(48);
 
         /// <summary>
         /// 在一个段落中，获取两个指定字符串之间的文本
@@ -259,7 +252,12 @@ namespace IT.Tangdao.Framework.Extensions
             return rg.Match(text).Value;
         }
 
-        public static bool IsEmailAddress(this string @this)
+        /// <summary>
+        /// 判空，字符串不能为null，string.Empty,""," "
+        /// </summary>
+        /// <param name="this"></param>
+        /// <returns></returns>
+        public static bool IsNotNullable(this string @this)
         {
             return !string.IsNullOrEmpty(@this) && !string.IsNullOrWhiteSpace(@this);
         }

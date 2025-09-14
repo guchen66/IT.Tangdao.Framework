@@ -668,3 +668,51 @@ class Program
   TangdaoTaskScheduler.Execute(daoAsync => { }, dao => { });
 ```
 
+#### 12、Markup的扩展
+
+###### 1、对Combobox进行定制列表
+
+```
+public class ComboboxOptions
+{
+    public static void SetTheme()
+    {
+        OptionListExtension.OptionsPool["Accuracy"] = new[] { "X1", "Y1", "X2", "Y2" };
+    }
+}
+```
+
+在启动时自定义设置自己需要的字典
+
+然后当使用Combobox的下拉列表时候，可缓存直接使用，当多个视图都需要使用同一个下拉列表的时候非常方便
+
+```
+  xmlns:markup="clr-namespace:IT.Tangdao.Framework.Markup;assembly=IT.Tangdao.Framework"
+   <ComboBox x:Name="com" ItemsSource="{markup:OptionList Key=Accuracy}"  />
+```
+
+并且你什么都不写的时候我具有缺省默认数据
+
+```
+ OptionsPool["Default"] = new[] { "全部", "Load", "Upload" };
+```
+
+如果你不想在程序启动使用代码复用，也可以直接写
+
+```
+<ComboBox ItemsSource="{markup:OptionList Values='X1,Y1,X2,Y2'}" />
+```
+
+
+
+###### 2、 Bool-String转换器，可以指定显示结果
+
+常规的bool转string需要在ViewModel设置想要动态改变还需要写触发器,我可以自己指定
+
+```
+ <TextBlock Text="{marup:BoolToStringMode Binding={Binding BoolValue}, FalseValue='{x:Static textStatus:TextStatus.Falied}', TrueValue='{x:Static textStatus:TextStatus.Sucess}'}" />
+```
+
+###### 3、列表绑定枚举时使用
+
+###### 4、获取当前控件所在的Window实例

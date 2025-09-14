@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Helpers
 {
+    /// <summary>
+    /// 文件加密帮助类
+    /// </summary>
     public static class CryptoHelper
     {
         // 密钥和初始化向量（IV）应该是安全生成的，并妥善保管

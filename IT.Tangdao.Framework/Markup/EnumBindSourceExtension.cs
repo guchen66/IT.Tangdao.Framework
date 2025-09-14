@@ -7,6 +7,9 @@ using System.Windows.Markup;
 
 namespace IT.Tangdao.Framework.Markup
 {
+    /// <summary>
+    /// 列表绑定枚举时使用
+    /// </summary>
     public class EnumBindSourceExtension : MarkupExtension
     {
         private Type _enumType;

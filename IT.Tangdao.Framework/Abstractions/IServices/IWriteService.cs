@@ -10,14 +10,36 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Abstractions.IServices
 {
+    /// <summary>
+    /// 写入文件服务
+    /// </summary>
     public interface IWriteService
     {
+        /// <summary>
+        /// 本地写入Txt文本
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="content"></param>
+        /// <param name="daoFileType"></param>
         void WriteString(string path, string content, DaoFileType daoFileType = DaoFileType.None);
 
+        /// <summary>
+        /// 本地异步写入Txt文本
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="content"></param>
+        /// <param name="daoFileType"></param>
+        /// <returns></returns>
         Task<WriteResult> WriteAsync(string path, string content, DaoFileType daoFileType = DaoFileType.None);
 
         void WriteEntityToXml<TEntity>(TEntity entity, string path) where TEntity : class, new();
 
-        void WriteFilter(string path, Expression<Func<string, bool>> func);
+        /// <summary>
+        /// 批量写入指定文件
+        /// </summary>
+        /// <returns></returns>
+        WriteResult BatchReadFileAsync(string path, DaoFileType daoFileType = DaoFileType.Txt);
+
+        IWrite Current { get; }
     }
 }

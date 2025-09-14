@@ -15,6 +15,8 @@ namespace IT.Tangdao.Framework.Abstractions.Services
 {
     public class WriteService : IWriteService
     {
+        public IWrite Current => throw new NotImplementedException();
+
         public void WriteString(string path, string content, DaoFileType daoFileType = DaoFileType.None)
         {
             if (daoFileType == DaoFileType.None)
@@ -51,6 +53,11 @@ namespace IT.Tangdao.Framework.Abstractions.Services
             {
                 TangdaoGuards.ThrowIfNull(entity);
             }
+        }
+
+        public WriteResult BatchReadFileAsync(string path, DaoFileType daoFileType = DaoFileType.Txt)
+        {
+            throw new NotImplementedException();
         }
     }
 }
