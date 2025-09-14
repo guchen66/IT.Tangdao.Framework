@@ -1,5 +1,6 @@
 ﻿using IT.Tangdao.Framework.DaoInterfaces;
-using IT.Tangdao.Framework.DaoParameters.Infrastructure;
+using IT.Tangdao.Framework.Parameters.EventArg;
+using IT.Tangdao.Framework.Parameters.Infrastructure;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

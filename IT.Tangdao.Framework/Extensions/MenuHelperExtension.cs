@@ -1,4 +1,5 @@
-﻿using IT.Tangdao.Framework.DaoParameters.Infrastructure;
+﻿using IT.Tangdao.Framework.Parameters.EventArg;
+using IT.Tangdao.Framework.Parameters.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

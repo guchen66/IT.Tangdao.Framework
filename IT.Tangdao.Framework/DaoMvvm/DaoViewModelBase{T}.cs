@@ -1,7 +1,7 @@
-﻿using IT.Tangdao.Framework.DaoAdmin.IServices;
-using IT.Tangdao.Framework.DaoCommands;
+﻿using IT.Tangdao.Framework.Abstractions.IServices;
+using IT.Tangdao.Framework.Commands;
 using IT.Tangdao.Framework.DaoCommon;
-using IT.Tangdao.Framework.DaoParameters.EventArg;
+using IT.Tangdao.Framework.Parameters.EventArg;
 using IT.Tangdao.Framework.Helpers;
 using System;
 using System.Collections;

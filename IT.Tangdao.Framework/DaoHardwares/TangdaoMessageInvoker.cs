@@ -1,5 +1,4 @@
 ﻿using IT.Tangdao.Framework.DaoDtos;
-using IT.Tangdao.Framework.DaoDtos.Globals;
 using System;
 using System.Collections.Generic;
 using System.IO;

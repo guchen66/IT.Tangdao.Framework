@@ -9,8 +9,17 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Extensions
 {
+    /// <summary>
+    /// Type类型常用扩展方法
+    /// </summary>
     public static class TangdaoTypeExtension
     {
+        /// <summary>
+        /// 判断当前类型是否为常见的整数主键类型（int / long）。
+        /// </summary>
+        public static bool IsIntegerKey(this Type type)
+            => type == typeof(int) || type == typeof(long);
+
         /// <summary>
         ///  一个类是否具有无参构造器
         /// </summary>
@@ -240,7 +249,7 @@ namespace IT.Tangdao.Framework.Extensions
 
             constraints.AddRange(interfaceConstraints);
 
-            return constraints.Any() ? string.Join(", ", constraints) : "无约束";
+            return constraints.Count > 0 ? string.Join(", ", constraints) : "无约束";
         }
 
         /// <summary>

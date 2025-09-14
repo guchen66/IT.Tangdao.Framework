@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.DaoEvents.Delegates;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ namespace IT.Tangdao.Framework.DaoEvents
 {
     public class DaoEventAggregator : IDaoEventAggregator
     {
-        private class WeakHandler
+        private sealed class WeakHandler
         {
             internal readonly WeakReference _targetWeakRef;  // 对目标对象的弱引用
             internal readonly MethodInfo _method;

@@ -1,17 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net461;net471;net48</TargetFrameworks>
+		<TargetFrameworks>net46;net461;net47;net471;net472;net48</TargetFrameworks>
 		<UseWPF>true</UseWPF>
 		<Title>一个简易开发的工具类库包</Title>
 		<Authors>liuxin</Authors>
-		<Version>4.0.2</Version>
+		<Version>4.0.4</Version>
 		<Description>一个工具类库包</Description>
-		<RepositoryUrl></RepositoryUrl>
+		<RepositoryUrl>https://github.com/guchen66/IT.Tangdao.Framework</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<AssemblyVersion>3.0.14</AssemblyVersion>
 		<Platforms>AnyCPU;ARM64;x64</Platforms>
+		<PackageProjectUrl>https://github.com/guchen66/IgniteApp</PackageProjectUrl>
+		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'net47' Or '$(TargetFramework)' == 'net48' ">
 		<DefineConstants>$(DefineConstants);SUPPORTS_VALUETUPLE</DefineConstants>
@@ -20,6 +25,10 @@
 		<None Include="..\LICENSE.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\ReadMe.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
 	<ItemGroup>

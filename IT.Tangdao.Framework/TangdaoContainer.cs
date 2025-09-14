@@ -7,14 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using IT.Tangdao.Framework.DaoCommon;
-using IT.Tangdao.Framework.DaoComponents;
-using IT.Tangdao.Framework.DaoDtos.Globals;
-using IT.Tangdao.Framework.DaoEnums;
-using IT.Tangdao.Framework.DaoEvents;
+using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.DaoException;
 using IT.Tangdao.Framework.DaoMvvm;
 using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Providers;
 
 namespace IT.Tangdao.Framework
 {
@@ -40,7 +36,7 @@ namespace IT.Tangdao.Framework
                 Lifecycle = Lifecycle.Transient,
             };
 
-            ChannelEvent.SetContext<TService>(context);
+            TangdaoContext.SetContext<TService>(context);
             return this;
         }
 
@@ -62,7 +58,7 @@ namespace IT.Tangdao.Framework
             // 存储接口和实现类的映射
             context.InterfaceToImplementationMapping[serviceType] = implementationType;
 
-            ChannelEvent.SetContext<TService>(context);
+            TangdaoContext.SetContext<TService>(context);
             return this;
         }
 

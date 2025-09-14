@@ -1,16 +1,4 @@
-﻿using IT.Tangdao.Framework.DaoCommon;
-using IT.Tangdao.Framework.DaoComponents;
-using IT.Tangdao.Framework.DaoDtos.Globals;
-using IT.Tangdao.Framework.DaoDtos.Options;
-using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Providers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Remoting.Contexts;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace IT.Tangdao.Framework
 {

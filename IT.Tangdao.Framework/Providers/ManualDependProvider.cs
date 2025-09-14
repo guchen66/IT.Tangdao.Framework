@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.DaoComponents;
+﻿using IT.Tangdao.Framework.Component;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Providers
 {
-    internal class ManualDependProvider
+    internal sealed class ManualDependProvider
     {
         private static List<DaoComponentContext> _daoComponents = new List<DaoComponentContext>();
 
@@ -23,7 +23,7 @@ namespace IT.Tangdao.Framework.Providers
 
             // 初始化组件依赖链
             var dependLinkList = new List<Type> { componentType };
-            _daoComponents.Add(rootComponentContext); 
+            _daoComponents.Add(rootComponentContext);
 
             // 创建组件依赖链
             //  CreateDependLinkList(componentType, ref dependLinkList, ref componentContextLinkList);

@@ -40,7 +40,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// 从ViewModel直接打开窗体
         /// 并且传递参数或者委托到一个平级的窗体
         /// </summary>
-        /// <typeparam name="TView"></typeparam>
+        /// <typeparam name="TWindow"></typeparam>
         /// <param name="viewModel"></param>
         /// <param name="tangdaoParameter"></param>
         /// <returns></returns>
@@ -90,7 +90,6 @@ namespace IT.Tangdao.Framework.Extensions
             //是从主窗体打开子窗体，然后子窗体选择列表的一项，将单个数据发送给主窗体
             Thread thread = new Thread(() =>
             {
-
                 TWindow view = new TWindow();
                 view.Owner = activeWindow;
                 Binding binding = new Binding();
@@ -111,10 +110,11 @@ namespace IT.Tangdao.Framework.Extensions
             //新线程启动，将Task实例返回，接收await操作符
             return tc.Task;
         }
+
         /// <summary>
         /// 使用时，可以使用Wait等待，仅此打开一个窗体，也可以使用await异步打开
         /// </summary>
-        /// <typeparam name="TView"></typeparam>
+        /// <typeparam name="TWindow"></typeparam>
         /// <param name="button"></param>
         /// <param name="owner"></param>
         /// <returns></returns>
@@ -148,8 +148,5 @@ namespace IT.Tangdao.Framework.Extensions
         {
             System.Windows.Threading.Dispatcher.ExitAllFrames();
         }
-
-       
     }
-
 }

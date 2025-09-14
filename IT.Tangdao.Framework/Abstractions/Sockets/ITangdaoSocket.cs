@@ -1,0 +1,32 @@
+﻿using IT.Tangdao.Framework.Enums;
+using IT.Tangdao.Framework.Parameters.EventArg;
+using IT.Tangdao.Framework.Parameters.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace IT.Tangdao.Framework.Abstractions.SocketMessages
+{
+    public interface ITangdaoSocket
+    {
+        NetMode Mode { get; }
+        NetConnectionType ConnectionType { get; }
+        bool IsConnected { get; }
+        ITangdaoUri Uri { get; }
+
+        Task<bool> ConnectAsync();
+
+        Task DisconnectAsync();
+
+        Task SendAsync(string message);
+
+        Task<string> ReceiveAsync();
+
+        event EventHandler<string> MessageReceived;
+
+        event EventHandler<Exception> ErrorOccurred;
+    }
+}

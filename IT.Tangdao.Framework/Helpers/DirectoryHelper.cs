@@ -95,7 +95,7 @@ namespace IT.Tangdao.Framework.Helpers
             catch (Exception ex)
             {
                 Console.WriteLine($"获取类失败：{ex.Message}");
-                return new Type[0]; // 返回空数组或者抛出异常，根据实际需求进行处理
+                return Array.Empty<Type>(); //new Type[0]; 避免长度为0的数组分配 // 返回空数组或者抛出异常，根据实际需求进行处理
             }
         }
 

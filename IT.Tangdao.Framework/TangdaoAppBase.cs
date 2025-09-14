@@ -1,5 +1,4 @@
-﻿using IT.Tangdao.Framework.DaoTemplates;
-using IT.Tangdao.Framework.Extensions;
+﻿using IT.Tangdao.Framework.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +8,7 @@ using System.Windows;
 
 namespace IT.Tangdao.Framework
 {
-    public abstract class TangdaoAppBase:Application, IDataTemplateHost
+    public abstract class TangdaoAppBase : Application//, IDataTemplateHost
     {
         private ITangdaoProvider _provider;
 
@@ -19,11 +18,11 @@ namespace IT.Tangdao.Framework
 
         public ITangdaoContainer TangdaoContainer { get => _container; }
 
-        private TangdaoDataTemplates _tangdaoDemplates;
+        //  private TangdaoDataTemplates _tangdaoDemplates;
 
-        public TangdaoDataTemplates TangdaoDataTemplates => _tangdaoDemplates ?? (_tangdaoDemplates = new TangdaoDataTemplates());
+        //  public TangdaoDataTemplates TangdaoDataTemplates => _tangdaoDemplates ?? (_tangdaoDemplates = new TangdaoDataTemplates());
 
-        bool IDataTemplateHost.IsDataTemplatesInitialized => _tangdaoDemplates != null;
+        //   bool IDataTemplateHost.IsDataTemplatesInitialized => _tangdaoDemplates != null;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -32,13 +31,13 @@ namespace IT.Tangdao.Framework
             _container = new TangdaoContainer();
             _provider = TangdaoContainer.Builder();
             Init();
-
         }
+
         protected TangdaoAppBase()
         {
-           /* Container = new TangdaoContainer();
-            _provider = Container.Builder();
-            Init();*/
+            /* Container = new TangdaoContainer();
+             _provider = Container.Builder();
+             Init();*/
         }
 
         public virtual void Init()
@@ -46,13 +45,13 @@ namespace IT.Tangdao.Framework
             InitServerLocator();
             InitIoc();
             InitWindow();
-                    
         }
 
         protected void InitWindow()
         {
             CreateWindow().Show();
         }
+
         protected void InitIoc()
         {
             ConfigureIOC(this.TangdaoContainer);

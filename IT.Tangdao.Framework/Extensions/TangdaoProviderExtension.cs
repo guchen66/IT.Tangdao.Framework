@@ -1,4 +1,5 @@
-﻿using IT.Tangdao.Framework.DaoEnums;
+﻿using IT.Tangdao.Framework.DaoCommon;
+using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.DaoEvents;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace IT.Tangdao.Framework.Extensions
     {
         public static TService Resolve<TService>(this ITangdaoProvider provider)
         {
-            var context = ChannelEvent.GetContext<TService>();
+            var context = TangdaoContext.GetContext<TService>();
             if (context == null)
             {
                 throw new InvalidOperationException($"Unable to resolve type: {typeof(TService)}");
@@ -84,7 +85,7 @@ namespace IT.Tangdao.Framework.Extensions
                 // 如果参数类型是接口，则从映射中查找对应的实现类
                 if (parameterType.IsInterface)
                 {
-                    var context = ChannelEvent.GetContext(parameterType);
+                    var context = TangdaoContext.GetContext(parameterType);
                     object[] parameterValues = new object[context.ParameterInfos.Length];
                     if (context == null || !context.InterfaceToImplementationMapping.TryGetValue(parameterType, out var implementationType))
                     {

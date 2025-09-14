@@ -1,7 +1,7 @@
-﻿using IT.Tangdao.Framework.DaoAdmin;
-using IT.Tangdao.Framework.DaoAdmin.IServices;
-using IT.Tangdao.Framework.DaoAdmin.Services;
-using IT.Tangdao.Framework.DaoEnums;
+﻿using IT.Tangdao.Framework.Abstractions;
+using IT.Tangdao.Framework.Abstractions.IServices;
+using IT.Tangdao.Framework.Abstractions.Services;
+using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Extensions;
 using System;
 using System.Collections.Generic;

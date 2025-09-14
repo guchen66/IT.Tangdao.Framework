@@ -1,4 +1,5 @@
-﻿using IT.Tangdao.Framework.DaoEnums;
+﻿using IT.Tangdao.Framework.DaoCommon;
+using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.DaoEvents;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,7 @@ namespace IT.Tangdao.Framework
         public void Singleton()
         {
             // 获取单例实例
-            ChannelEvent.GetInstance<TService>(TangdaoContainerBuilder.Builder());
+            TangdaoContext.GetInstance<TService>(TangdaoContainerBuilder.Builder());
         }
     }
 }
