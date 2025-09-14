@@ -6,6 +6,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Documents;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -63,6 +64,102 @@ namespace IT.Tangdao.Framework.Extensions
         public static bool TryToBool(this string str, out bool result)
         {
             return bool.TryParse(str, out result);
+        }
+
+        /// <summary>
+        /// 把仅含一个逗号的字符串按逗号切成左右两部分，返回元组。
+        /// 若逗号数量 ≠ 1，抛 FormatException。
+        /// </summary>
+        public static Tuple<string, string> TryToTupleFromSingleComma(this string source)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            int first = source.IndexOf(',');
+            if (first == -1 || source.IndexOf(',', first + 1) != -1)
+                throw new FormatException("字符串必须且只能包含一个逗号。");
+            string left = source.Substring(0, first);
+            string right = source.Substring(first + 1);
+            return Tuple.Create(left, right);
+        }
+
+        /// <summary>
+        /// 对字符串添加大括号
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string TryInsertBraces(this string str)
+        {
+            return $"{{{str}}}";
+        }
+
+        /// <summary>
+        /// 尝试对字符串添加中括号
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string TryInsertBrackets(this string str)
+        {
+            return $"[{str}]";
+        }
+
+        /// <summary>
+        /// 对字符串添加小括号
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string TryInsertParentheses(this string str)
+        {
+            return $"({str})";
+        }
+
+        /// <summary> 用任意字符在两侧各包 n 个 </summary>
+        public static string TryWrap(this string str, char c, int n = 1)
+        {
+            return str.PadLeft(str.Length + n, c).PadRight(str.Length + n * 2, c);
+        }
+
+        /// <summary>
+        /// 如果字符串头尾同时出现一对大括号，则去掉它们；否则返回原串。
+        /// </summary>
+        public static string TryRemoveBraces(this string str)
+        {
+            if (string.IsNullOrEmpty(str)) return str;
+            return str.Length >= 2 && str[0] == '{' && str[str.Length - 1] == '}'
+                ? str.Substring(1, str.Length - 2)
+                : str;
+        }
+
+        /// <summary>
+        /// 如果字符串头尾同时出现一对中括号，则去掉它们；否则返回原串。
+        /// </summary>
+        public static string TryRemoveBrackets(this string str)
+        {
+            if (string.IsNullOrEmpty(str)) return str;
+            return str.Length >= 2 && str[0] == '[' && str[str.Length - 1] == ']'
+                ? str.Substring(1, str.Length - 2)
+                : str;
+        }
+
+        /// <summary>
+        /// 如果字符串头尾同时出现一对小括号，则去掉它们；否则返回原串。
+        /// </summary>
+        public static string TryRemoveParentheses(this string str)
+        {
+            if (string.IsNullOrEmpty(str)) return str;
+            return str.Length >= 2 && str[0] == '(' && str[str.Length - 1] == ')'
+                ? str.Substring(1, str.Length - 2)
+                : str;
+        }
+
+        /// <summary>
+        /// 如果字符串头尾同时出现一对尖括号，则去掉它们；否则返回原串。
+        /// </summary>
+        public static string TryRemoveAngleBrackets(this string str)
+        {
+            if (string.IsNullOrEmpty(str)) return str;
+            return str.Length >= 2 && str[0] == '<' && str[str.Length - 1] == '>'
+                ? str.Substring(1, str.Length - 2)
+                : str;
         }
 
         /// <summary>
