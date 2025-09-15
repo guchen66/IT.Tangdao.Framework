@@ -126,7 +126,7 @@ namespace IT.Tangdao.Framework.Abstractions
             try
             {
                 var doc = XDocument.Parse(XMLData);
-                var root = doc.Root;
+                var root = doc.RootElement();
                 var xmlType = FileSelector.DetectXmlStructure(doc);
 
                 switch (xmlType)
@@ -186,19 +186,19 @@ namespace IT.Tangdao.Framework.Abstractions
         }
 
         /// <summary>
+        /// 这里的path是uri地址，不是XML具体数据
         /// </summary>
-        /// <param name="path">这里的path是uri地址，不是XML具体数据</param>
+        /// <param name="uriPath"></param>
         /// <returns></returns>
-        public ReadResult SelectNodes(string path)
+        public ReadResult SelectNodes(string uriPath)
         {
-            XElement xElement = XElement.Load(path);
-            List<XElement> xElements = xElement.Descendants().ToList();
-
+            XElement xElement = uriPath.LoadFromFile().Root;
+            IEnumerable<XElement> xElements = xElement.Descendants();
             if (xElements == null)
             {
-                return ReadResult.Failure($"Element '{path}' not found.");
+                return ReadResult.Failure($"Element '{uriPath}' not found.");
             }
-            return ReadResult<List<XElement>>.Success(xElements);
+            return ReadResult<IEnumerable<XElement>>.Success(xElements);
         }
 
         public ReadResult<List<T>> SelectNodes<T>(string rootElement, Func<XElement, T> selector)

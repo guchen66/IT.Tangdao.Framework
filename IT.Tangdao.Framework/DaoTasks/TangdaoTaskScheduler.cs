@@ -9,6 +9,9 @@ using System.Windows.Threading;
 
 namespace IT.Tangdao.Framework.DaoTasks
 {
+    /// <summary>
+    /// Tangdao任务调度器
+    /// </summary>
     public static class TangdaoTaskScheduler
     {
         #region --------- 公共入口 ---------

@@ -102,23 +102,34 @@ namespace IT.Tangdao.Framework.Selectors
             return DaoXmlType.Multiple;
         }
 
+        /// <summary>
+        /// 把 XElement 节点的**同名子元素**映射到已有对象的可写属性上。
+        /// 只映射 public 实例属性，且节点名必须与属性名完全一致（大小写敏感）。
+        /// 类型转换失败时静默跳过，不会抛异常。
+        /// </summary>
+        /// <typeparam name="T">目标类型</typeparam>
+        /// <param name="node">XML 节点</param>
+        /// <param name="instance">**已创建**的实例，字段会被填充</param>
         public static void MapXElementToObject<T>(XElement node, T instance)
         {
+            // 1. 取出所有公共可写属性
             var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             foreach (var prop in properties)
             {
-                var element = node.Element(prop.Name); // 自动匹配同名节点
-                if (element == null) continue;
+                // 2. 按属性名去找同名子元素
+                var element = node.Element(prop.Name);
+                if (element == null) continue;          // 没有对应节点就跳过
 
                 try
                 {
+                    // 3. 把字符串值转成属性类型，再反射赋值
                     object value = Convert.ChangeType(element.Value, prop.PropertyType);
                     prop.SetValue(instance, value);
                 }
                 catch
                 {
-                    // 类型转换失败时跳过（或记录日志）
+                    // 4. 转换失败（如格式不对、只读属性等）直接忽略
                 }
             }
         }
