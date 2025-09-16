@@ -15,6 +15,7 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using IT.Tangdao.Framework.Utilys;
 
 namespace IT.Tangdao.Framework.Abstractions
 {
@@ -325,13 +326,13 @@ namespace IT.Tangdao.Framework.Abstractions
         /// 这两个引用没有传递值，是读取config的值，所以不需要使用ref，
         /// 使用了struct后，如果传递数据的扩展方法，需要加上ref
         /// </summary>
-        /// <param name="menuList"></param>
+        /// <param name="section"></param>
         public ReadResult SelectConfig(string section)
         {
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
-            Dictionary<string, string> dict = idict.Cast<DictionaryEntry>().ToDictionary(de => de.Key.ToString(), de => de.Value.ToString());
+            TangdaoSortedDictionary<string, string> dict = idict.Cast<DictionaryEntry>().ToTangdaoSortedDictionary();
 
-            return ReadResult<Dictionary<string, string>>.Success(dict);
+            return ReadResult<TangdaoSortedDictionary<string, string>>.Success(dict);
         }
 
         public ReadResult SelectConfig<T>(string section) where T : class, new()

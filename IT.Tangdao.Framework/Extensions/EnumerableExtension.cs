@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.DaoInterfaces;
+using IT.Tangdao.Framework.Utilys;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -44,6 +46,28 @@ namespace IT.Tangdao.Framework.Extensions
                 callback?.Invoke(item);
                 yield return item;
             }
+        }
+
+        /// <summary>
+        /// 任意键值序列 → TangdaoSortedDictionary，可选自定义比较器
+        /// </summary>
+        public static TangdaoSortedDictionary<TKey, TValue> ToTangdaoSortedDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source, IComparer<TKey> comparer = null)
+        {
+            var dict = new TangdaoSortedDictionary<TKey, TValue>(comparer);
+            foreach (var kv in source)
+                dict.Add(kv.Key, kv.Value);
+            return dict;
+        }
+
+        /// <summary>
+        /// 兼容老版 (IDictionary) 的快捷重载
+        /// </summary>
+        public static TangdaoSortedDictionary<string, string> ToTangdaoSortedDictionary(this IEnumerable<DictionaryEntry> source, IComparer<string> comparer = null)
+        {
+            var dict = new TangdaoSortedDictionary<string, string>(comparer);
+            foreach (DictionaryEntry de in source)
+                dict.Add(de.Key.ToString(), de.Value.ToString());
+            return dict;
         }
 
         /// <summary>
