@@ -5,7 +5,7 @@
 		<UseWPF>true</UseWPF>
 		<Title>一个简易开发的工具类库包</Title>
 		<Authors>liuxin</Authors>
-		<Version>4.0.4</Version>
+		<Version>4.0.5</Version>
 		<Description>一个工具类库包</Description>
 		<RepositoryUrl>https://github.com/guchen66/IT.Tangdao.Framework</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>

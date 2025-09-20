@@ -1,6 +1,7 @@
 ﻿using IT.Tangdao.Framework.Helpers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
@@ -171,6 +172,92 @@ namespace IT.Tangdao.Framework.Extensions
             if (value == null) throw new ArgumentNullException(nameof(value));
 
             return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// 不区分大小写比较两个字符串是否相等。
+        /// 与 string.Equals(a, b, StringComparison.OrdinalIgnoreCase) 行为一致。
+        /// </summary>
+        public static bool EqualsIgnoreCase(this string @this, string value)
+        {
+            return string.Equals(@this, value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 检查字符串是否以指定值开头（不区分大小写）
+        /// </summary>
+        public static bool StartsWithIgnoreCase(this string source, string value)
+        {
+            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(value))
+                return false;
+
+            return source.StartsWith(value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 检查字符串是否以指定值结尾（不区分大小写）
+        /// </summary>
+        public static bool EndsWithIgnoreCase(this string source, string value)
+        {
+            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(value))
+                return false;
+
+            return source.EndsWith(value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 比较字符串（不区分大小写），返回排序结果
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static int CompareIgnoreCase(this string source, string value)
+        {
+            return string.Compare(source, value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 链式创建BinaryWriter
+        /// </summary>
+        public static BinaryWriter ToBinaryWriter(this string filePath, FileMode fileMode = FileMode.Create)
+        {
+            var fileStream = new FileStream(filePath, fileMode);
+            return new BinaryWriter(fileStream);
+        }
+
+        /// <summary>
+        /// 链式创建BinaryReader
+        /// </summary>
+        public static BinaryReader ToBinaryReader(this string filePath, FileMode fileMode = FileMode.Open)
+        {
+            var fileStream = new FileStream(filePath, fileMode);
+            return new BinaryReader(fileStream);
+        }
+
+        /// <summary>
+        /// 使用BinaryWriter写入字符串并自动清理资源
+        /// </summary>
+        public static string UseBinaryWriteString(this string filePath, string content)
+        {
+            filePath.CreateFolder(); // 确保目录存在
+
+            using (var bw = filePath.ToBinaryWriter())
+            {
+                bw.Write(content);
+            }
+            return filePath; // 返回路径以便继续链式调用
+        }
+
+        /// <summary>
+        /// 使用BinaryReader读取字符串
+        /// </summary>
+        public static string UseBinaryReadString(this string filePath)
+        {
+            if (!File.Exists(filePath))
+                return null;
+
+            using (var br = filePath.ToBinaryReader())
+            {
+                return br.ReadString();
+            }
         }
 
         /// <summary>

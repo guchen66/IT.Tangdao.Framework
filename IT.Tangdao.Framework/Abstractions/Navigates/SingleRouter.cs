@@ -12,6 +12,7 @@ using System.Windows.Threading;
 
 namespace IT.Tangdao.Framework.Abstractions.Navigates
 {
+    /// <inheritdoc/>
     public class SingleRouter : ISingleRouter, INotifyPropertyChanged
     {
         private readonly ObservableCollection<ISingleNavigateView> _views;

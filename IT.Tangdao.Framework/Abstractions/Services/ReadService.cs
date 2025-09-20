@@ -97,7 +97,7 @@ namespace IT.Tangdao.Framework.Abstractions.Services
         /// <summary>
         /// 私有过滤：只返回指定后缀的文件路径。
         /// </summary>
-        private IEnumerable<string> QueryFilter(string directoryPath, DaoFileType type)
+        private static IEnumerable<string> QueryFilter(string directoryPath, DaoFileType type)
         {
             switch (type)
             {

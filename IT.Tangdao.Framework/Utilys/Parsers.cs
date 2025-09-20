@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Utilys
 {
-    public static class Parsers
+    internal static class Parsers
     {
         public static readonly Dictionary<Type, Func<string, object>> Table =
             new Dictionary<Type, Func<string, object>>()

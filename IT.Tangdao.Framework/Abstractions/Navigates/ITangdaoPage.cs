@@ -6,18 +6,31 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Abstractions.Navigates
 {
+    /// <summary>
+    /// ITangdaoRouter配套页面
+    /// </summary>
     public interface ITangdaoPage
     {
-        // 页面标题（可选）
+        /// <summary>
+        /// 页面标题（可选）
+        /// </summary>
         string PageTitle { get; }
 
-        // 页面加载时执行
+        /// <summary>
+        /// 页面加载时执行
+        /// </summary>
+        /// <param name="parameter"></param>
         void OnNavigatedTo(ITangdaoParameter parameter = null);
 
-        // 页面离开时执行
+        /// <summary>
+        /// 页面离开时执行
+        /// </summary>
         void OnNavigatedFrom();
 
-        // 页面是否允许离开（用于阻止导航）
+        /// <summary>
+        /// 页面是否允许离开（用于阻止导航）
+        /// </summary>
+        /// <returns></returns>
         bool CanNavigateAway();
     }
 }

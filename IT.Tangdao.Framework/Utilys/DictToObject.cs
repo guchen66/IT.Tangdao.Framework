@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Utilys
 {
-    public static class DictToObject
+    internal static class DictToObject
     {
         /// <summary>
         /// 字典→POCO  主入口

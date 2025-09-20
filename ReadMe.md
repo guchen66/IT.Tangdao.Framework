@@ -268,9 +268,29 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
  var student = _readService.Current.SelectConfig("Student").ToObject<Student>();
 ```
 
+###### 3-4、基于ViewModel命名约定的隐式键展开容器字典
 
+```
+ public class Test
+ {
+     public static MultiKeyDictionary<string> keyValuePairs = new MultiKeyDictionary<string>();
 
-#### 4、增加一些常用的Helper类
+     public static MultiKeyDictionary<string> Print()
+     {
+         keyValuePairs["Sample"] = "Test";
+         //keyValuePairs["SampleView"] = "Test";
+         // keyValuePairs["SampleViewModel"] = "Test";
+
+         return keyValuePairs;
+     }
+ }
+```
+
+内部跟据View和ViewModel后缀自动绑定字典
+
+增加自定义排序字典TangdaoSortedDictionary，以及对它的扩展
+
+#### 4、增加一些常用的帮助类
 
 DirectoryHelper
 

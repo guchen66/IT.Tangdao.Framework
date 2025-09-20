@@ -43,7 +43,7 @@ namespace IT.Tangdao.Framework.Markup
             return OptionsPool.TryGetValue(Key, out var list) ? list : OptionsPool["Default"];
         }
 
-        private class NumericStringConverter : IValueConverter
+        private sealed class NumericStringConverter : IValueConverter
         {
             public object Convert(object v, Type t, object p, CultureInfo c) => v?.ToString();
 

@@ -14,11 +14,20 @@ using System.Windows.Markup;
 
 namespace IT.Tangdao.Framework.Utilys
 {
+    /// <summary>
+    /// 数据自动生成器
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TangdaoFakeDataGenerator<T> where T : new()
     {
         private static readonly ConcurrentDictionary<string, Action<T, object>> _propertySetters =
             new ConcurrentDictionary<string, Action<T, object>>();
 
+        /// <summary>
+        /// 通过动态委托自动生成数据
+        /// </summary>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public List<T> GenerateRandomData(int count)
         {
             var result = new List<T>();

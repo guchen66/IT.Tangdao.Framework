@@ -57,15 +57,26 @@ namespace IT.Tangdao.Framework.Utilys
         }
 
         /*============ 其余接口直接委托 ============*/
+
+        /// <inheritdoc/>
         public int Count => _inner.Count;
+
+        /// <inheritdoc/>
         public bool IsReadOnly => false;
+
+        /// <inheritdoc/>
         public ICollection<string> Keys => _inner.Keys;
+
+        /// <inheritdoc/>
         public ICollection<TValue> Values => _inner.Values;
 
+        /// <inheritdoc/>
         public void Add(string key, TValue value) => this[key] = value;
 
+        /// <inheritdoc/>
         public bool ContainsKey(string key) => _inner.ContainsKey(key);
 
+        /// <inheritdoc/>
         public bool Remove(string key)
         {
             var core = CoreOf(key);
@@ -75,10 +86,13 @@ namespace IT.Tangdao.Framework.Utilys
             return ok;
         }
 
+        /// <inheritdoc/>
         public bool TryGetValue(string key, out TValue value) => _inner.TryGetValue(key, out value);
 
+        /// <inheritdoc/>
         public void Clear() => _inner.Clear();
 
+        /// <inheritdoc/>
         public IEnumerator<KeyValuePair<string, TValue>> GetEnumerator() => _inner.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Parameters.Infrastructure;
 
 namespace IT.Tangdao.Framework.Abstractions
 {
@@ -15,7 +16,7 @@ namespace IT.Tangdao.Framework.Abstractions
     public class DaoLogger : IDaoLogger
     {
         private static readonly ConcurrentDictionary<Type, IDaoLogger> Loggers = new ConcurrentDictionary<Type, IDaoLogger>();
-
+        private static readonly ConcurrentDictionary<string, StreamWriter> s_fileWriters = new ConcurrentDictionary<string, StreamWriter>(StringComparer.Ordinal);
         public static Func<Type, IDaoLogger> LoggerFactory { get; set; }
 
         public static IDaoLogger Get(Type type)
@@ -62,21 +63,27 @@ namespace IT.Tangdao.Framework.Abstractions
         private void Write(string category, string message, Exception e)
         {
             message = $"{message}{Environment.NewLine}";
-
             if (e != null)
-            {
-                message = $"{message}{e.Message}{Environment.NewLine}" +
-                          $"{e.StackTrace}{Environment.NewLine}";
-            }
+                message += $"{e.Message}{Environment.NewLine}{e.StackTrace}{Environment.NewLine}";
 
-            message = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} " +
+            var line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} " +
                       $"[{Environment.CurrentManagedThreadId}] " +
-                      $"{category.ToUpper()} " +
-                      $"{_type.FullName}{Environment.NewLine}" +
+                      $"{category.ToUpper()} {_type.FullName}{Environment.NewLine}" +
                       $"{message}{Environment.NewLine}";
 
-            System.Diagnostics.Debug.Write(message);
-            File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Tangdao.log"), message);
+            var file = System.IO.Path.Combine(LogPathConfig.Root, "Tangdao.log");
+            var writer = GetWriter(file);
+            writer.Write(line);          // 无锁，ConcurrentDictionary 已保证
+            System.Diagnostics.Debug.Write(line);
+        }
+
+        private static StreamWriter GetWriter(string filePath)
+        {
+            return s_fileWriters.GetOrAdd(filePath, fp =>
+                new StreamWriter(fp, append: true, encoding: Encoding.UTF8, bufferSize: 4096)
+                {
+                    AutoFlush = true   // 每条日志立即落盘，进程崩溃也不丢
+                });
         }
     }
 }

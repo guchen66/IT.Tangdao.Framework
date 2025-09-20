@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.DaoInterfaces;
@@ -129,6 +132,48 @@ namespace IT.Tangdao.Framework.Extensions
             }
 
             return source;
+        }
+
+        /// <summary>
+        /// 对序列按索引赋值，指定成员表达式 item => item.Id
+        /// </summary>
+        public static IEnumerable<T> SelectWithIndex<T>(this IEnumerable<T> source, Expression<Func<T, int>> memberSelector)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (memberSelector == null) throw new ArgumentNullException(nameof(memberSelector));
+
+            // 编译一次 setter
+            var setter = GetOrCreateSetter(memberSelector);
+
+            return source.Select((item, idx) =>
+            {
+                setter(item, idx);
+                return item;
+            });
+        }
+
+        // 内部：把 Expression<item.Id> 编译成 Action<item,index>
+        private static readonly ConcurrentDictionary<(Type, string), Delegate> _cache = new ConcurrentDictionary<(Type, string), Delegate>();
+
+        private static Action<T, int> GetOrCreateSetter<T>(Expression<Func<T, int>> selector)
+        {
+            var type = typeof(T);
+            var key = (type, selector.Body.ToString());
+
+            return (Action<T, int>)_cache.GetOrAdd(key, _ =>
+            {
+                // 下面是原逻辑
+                if (!(selector.Body is MemberExpression mem) ||
+                    !(mem.Member is PropertyInfo prop) ||
+                    !prop.CanWrite ||
+                    prop.PropertyType != typeof(int))
+                    throw new ArgumentException("Lambda 必须返回一个可写的 int 属性，如 item => item.Id");
+
+                var paramItem = Expression.Parameter(type, "item");
+                var paramIndex = Expression.Parameter(typeof(int), "index");
+                var assign = Expression.Assign(Expression.Property(paramItem, prop), paramIndex);
+                return Expression.Lambda<Action<T, int>>(assign, paramItem, paramIndex).Compile();
+            });
         }
     }
 }
