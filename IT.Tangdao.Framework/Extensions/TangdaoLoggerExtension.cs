@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
@@ -19,7 +21,9 @@ namespace IT.Tangdao.Framework.Extensions
         /// category 为空时直接落在根目录，否则作为子文件夹。
         /// 程序启动LogPathConfig.SetRoot可自定义Log目录
         /// </summary>
-        public static void WriteLocal(this IDaoLogger logger, string message, string category = null)
+        public static void WriteLocal(this IDaoLogger logger, string message, string category = null, [CallerMemberName] string caller = null,
+                              [CallerFilePath] string file = null,
+                              [CallerLineNumber] int line = 0)
         {
             if (logger == null) return;
 
@@ -29,12 +33,13 @@ namespace IT.Tangdao.Framework.Extensions
                 var dir = string.IsNullOrEmpty(category) ? root : Path.Combine(root, category);
                 Directory.CreateDirectory(dir);
 
-                var fileName = $"{DateTime.Now:yyyyMMdd}_local.log";
+                var fileName = $"{DateTime.Now:yyyyMMdd}.log";
                 var filePath = Path.Combine(dir, fileName);
 
                 // 这里用到了 logger，于是扩展方法“名副其实”
-                var line = $"{DateTime.Now:F}  {logger.GetType().FullName}  {message}{Environment.NewLine}";
-                File.AppendAllText(filePath, line);
+                var logLine = $"{DateTime.Now:F}  [{caller}]  ({Path.GetFileName(file)}:{line})  " +
+                   $"{logger.GetType().FullName}  {message}{Environment.NewLine}";
+                File.AppendAllText(filePath, logLine);
             }
             catch (Exception ex)
             {

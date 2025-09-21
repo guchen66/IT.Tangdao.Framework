@@ -12,12 +12,11 @@ namespace IT.Tangdao.Framework
     {
         public void Connect(int connectionId, object target)
         {
-            throw new NotImplementedException();
         }
 
         public void InitializeComponent()
         {
-            throw new NotImplementedException();
+            InitializeComponent();
         }
     }
 }

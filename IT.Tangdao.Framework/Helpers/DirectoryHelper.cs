@@ -1,8 +1,10 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -140,6 +142,59 @@ namespace IT.Tangdao.Framework.Helpers
         {
             string MainProgramPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
             return MainProgramPath;
+        }
+
+        /// <summary>
+        /// 获取此类的当前路径
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public static string GetThisFilePath([CallerFilePath] string filePath = null)
+        {
+            return filePath;
+        }
+
+        /// <summary>
+        /// 获取当前类所在源文件相对于程序入口的相对路径（兼容 .NET Framework）
+        /// </summary>
+        public static string GetThisFileRelativePath([CallerFilePath] string filePath = null)
+        {
+            string entryDir = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+            string fullPath = Path.GetFullPath(filePath);
+            return GetRelativePath(entryDir, fullPath);
+        }
+
+        /// <summary>
+        /// 手动实现 GetRelativePath（兼容 .NET Framework）
+        /// </summary>
+        private static string GetRelativePath(string fromPath, string toPath)
+        {
+            if (string.IsNullOrEmpty(fromPath)) throw new ArgumentNullException(nameof(fromPath));
+            if (string.IsNullOrEmpty(toPath)) throw new ArgumentNullException(nameof(toPath));
+
+            Uri fromUri = new Uri(AppendDirectorySeparatorChar(fromPath));
+            Uri toUri = new Uri(toPath);
+
+            if (fromUri.Scheme != toUri.Scheme) return toPath; // 不同盘符直接返回全路径
+
+            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
+            string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            if (toUri.Scheme.EqualsIgnoreCase("file"))
+            {
+                relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
+
+            return relativePath;
+        }
+
+        private static string AppendDirectorySeparatorChar(string path)
+        {
+            if (!Path.HasExtension(path) && !path.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                return path + Path.DirectorySeparatorChar;
+            }
+            return path;
         }
     }
 }

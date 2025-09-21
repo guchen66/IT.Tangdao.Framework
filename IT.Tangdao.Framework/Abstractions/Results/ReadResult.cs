@@ -46,7 +46,7 @@ namespace IT.Tangdao.Framework.Abstractions.Results
         /// <param name="exception"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static ReadResult Failure(string message, Exception exception = null, string result = null)
+        public new static ReadResult Failure(string message, Exception exception = null, string result = null)
         {
             return new ReadResult
             {

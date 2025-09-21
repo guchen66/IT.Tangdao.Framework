@@ -35,12 +35,7 @@ namespace IT.Tangdao.Framework.DaoCommon
         /// <summary>
         /// 存储实例
         /// </summary>
-        private static readonly ConcurrentDictionary<Type, object> _instances = new ConcurrentDictionary<Type, object>();
-
-        /// <summary>
-        /// 存储解析容器
-        /// </summary>
-        private static readonly ConcurrentDictionary<Type, ITangdaoProvider> _providers = new ConcurrentDictionary<Type, ITangdaoProvider>();
+        private static readonly ConcurrentDictionary<Type, Lazy<object>> _instances = new ConcurrentDictionary<Type, Lazy<object>>();
 
         public static void SetLocalValue(string name, string value)
         {
@@ -89,12 +84,24 @@ namespace IT.Tangdao.Framework.DaoCommon
             return context;
         }
 
+        public static void SetInstance<TService>(TService instance)
+        {
+            _instances[typeof(TService)] = new Lazy<object>(() => instance);   // 立即返回已知的实例
+        }
+
+        public static TService GetInstance<TService>()
+        {
+            return _instances.TryGetValue(typeof(TService), out var lazy)
+                ? (TService)lazy.Value   // 要么拿到实例，要么 null
+                : default;
+        }
+
         /// <summary>
         /// 注册一个类型的实例工厂方法。
         /// </summary>
         /// <typeparam name="TService">服务类型。</typeparam>
         /// <param name="factory">工厂方法，接受 ITangdaoProvider 并返回 TService 实例。</param>
-        public static void SetInstance<TService>(Func<ITangdaoProvider, object> factory)
+        public static void SetInstanceFactory<TService>(Func<ITangdaoProvider, object> factory)
         {
             _instanceFactories[typeof(TService)] = factory;
         }
@@ -104,16 +111,17 @@ namespace IT.Tangdao.Framework.DaoCommon
         /// </summary>
         /// <typeparam name="TService">服务类型。</typeparam>
         /// <returns>TService 的单例实例。</returns>
-        public static TService GetInstance<TService>(ITangdaoProvider provider) where TService : class
+        public static TService GetInstanceFactory<TService>(ITangdaoProvider provider) where TService : class
         {
-            return (TService)_instances.GetOrAdd(typeof(TService), type =>
-            {
-                if (_instanceFactories.TryGetValue(type, out var factory))
+            var lazy = _instances.GetOrAdd(typeof(TService),
+                t => new Lazy<object>(() =>
                 {
-                    return factory(provider) as object;
-                }
-                throw new InvalidOperationException($"No instance factory registered for type {type.FullName}");
-            });
+                    if (_instanceFactories.TryGetValue(t, out var factory))
+                        return factory(provider);
+                    throw new InvalidOperationException(
+                        $"No instance factory registered for type {t.FullName}");
+                }, true));          // true = 使用线程安全模式
+            return (TService)lazy.Value;
         }
 
         /// <summary>
@@ -122,16 +130,20 @@ namespace IT.Tangdao.Framework.DaoCommon
         /// <param name="type">服务类型。</param>
         /// <param name="provider">ITangdaoProvider 实例。</param>
         /// <returns>指定类型的单例实例。</returns>
-        public static object GetInstance(Type type, ITangdaoProvider provider)
+        public static object GetInstanceFactory(Type type, ITangdaoProvider provider)
         {
-            return _instances.GetOrAdd(type, t =>
-            {
-                if (_instanceFactories.TryGetValue(t, out var factory))
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (provider == null) throw new ArgumentNullException(nameof(provider));
+
+            var lazy = _instances.GetOrAdd(type,
+                t => new Lazy<object>(() =>
                 {
-                    return factory(provider);
-                }
-                throw new InvalidOperationException($"No instance factory registered for type {t.FullName}");
-            });
+                    if (_instanceFactories.TryGetValue(t, out var factory))
+                        return factory(provider);
+                    throw new InvalidOperationException(
+                        $"No instance factory registered for type {t.FullName}");
+                }, true));
+            return lazy.Value;
         }
     }
 }

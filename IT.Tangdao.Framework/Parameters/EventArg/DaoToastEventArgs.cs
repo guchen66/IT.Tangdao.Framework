@@ -18,8 +18,6 @@ namespace IT.Tangdao.Framework.Parameters.EventArg
 
         public static void Usage()
         {
-            DaoToast daoToast = new DaoToast();
-            daoToast.Loaded += new EventHandler<RoutedEventArgs>(daoToast.DaoToast_Loaded);
         }
     }
 }

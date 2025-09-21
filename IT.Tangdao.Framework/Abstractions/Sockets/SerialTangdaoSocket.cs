@@ -21,6 +21,7 @@ namespace IT.Tangdao.Framework.Abstractions.Sockets
 
         public SerialTangdaoSocket(NetMode mode, ITangdaoUri uri) : base(mode, uri)
         {
+            _receiveCts = new CancellationTokenSource();
         }
 
         public override async Task<bool> ConnectAsync()

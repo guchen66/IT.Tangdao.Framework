@@ -11,9 +11,14 @@ using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.DaoException;
 using IT.Tangdao.Framework.DaoMvvm;
 using IT.Tangdao.Framework.Extensions;
+using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Selectors;
 
 namespace IT.Tangdao.Framework
 {
+    /// <summary>
+    /// 容器
+    /// </summary>
     public sealed class TangdaoContainer : ITangdaoContainer
     {
         /// <summary>
@@ -37,6 +42,7 @@ namespace IT.Tangdao.Framework
             };
 
             TangdaoContext.SetContext<TService>(context);
+            //  TangdaoContext.SetInstance<TService>((TService)Activator.CreateInstance(typeof(TService)));
             return this;
         }
 
@@ -96,7 +102,8 @@ namespace IT.Tangdao.Framework
         {
             if (name is string model)
             {
-                IEnumerable<Type> types = ViewToViewModelExtension.GetScanObject(name);
+                Assembly Assembly = model.GetType().Assembly;
+                IEnumerable<Type> types = TangdaoAttributeSelector.FindViewToViewModelAttribute(Assembly);
                 return ViewToViewModelLocator.Build(types);
             }
 

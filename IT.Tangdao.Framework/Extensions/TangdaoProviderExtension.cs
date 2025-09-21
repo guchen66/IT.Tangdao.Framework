@@ -16,7 +16,21 @@ namespace IT.Tangdao.Framework.Extensions
             var context = TangdaoContext.GetContext<TService>();
             if (context == null)
             {
-                throw new InvalidOperationException($"Unable to resolve type: {typeof(TService)}");
+                var result = typeof(TService).IsHasConstructor();
+                if (result)
+                {
+                    RegisterContext regioncontext = new RegisterContext
+                    {
+                        RegisterType = typeof(TService),
+                        Lifecycle = Lifecycle.Transient,
+                    };
+                    TangdaoContext.SetContext<TService>(context);
+
+                    //TODO待优化
+                    // return TangdaoContext.GetInstance<TService>();
+                    return (TService)Activator.CreateInstance(regioncontext.RegisterType);
+                }
+                throw new InvalidOperationException($"内部有参数未进行注册: {typeof(TService)}");
             }
 
             // 检查是否正在解析，避免循环依赖
@@ -49,13 +63,6 @@ namespace IT.Tangdao.Framework.Extensions
                     // 递归解析参数类型
                     parameterValues[i] = ResolveParameter(provider, parameterType);
                 }
-                /*  context.FactoryMapping.TryAdd(typeof(TService), Activator.CreateInstance(implementationType, parameterValues));
-
-                  if (context.Lifecycle == Lifecycle.Transient)
-                  {
-                      context.FactoryMapping.TryGetValue(typeof(TService), out object backType);
-                      return (TService)backType;
-                  }*/
                 // 创建实例
                 return (TService)Activator.CreateInstance(implementationType, parameterValues);
             }
