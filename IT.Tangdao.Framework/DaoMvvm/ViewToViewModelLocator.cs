@@ -19,31 +19,6 @@ namespace IT.Tangdao.Framework.DaoMvvm
     /// </summary>
     public class ViewToViewModelLocator
     {
-        public static ITangdaoContainer Build(IEnumerable<Type> types)
-        {
-            foreach (var type in types)
-            {
-                var name = type.FullName.Replace("ViewModel", "View");
-
-                var viewType = Type.GetType(name);
-                // viewType.get();
-                if (viewType.IsSubclassOf(typeof(UserControl)))
-                {
-                    var view = (UserControl)Activator.CreateInstance(viewType);
-                    view.DataContext = viewType;
-                }
-                else if (viewType.IsSubclassOf(typeof(Window)))
-                {
-                    var view = (Window)Activator.CreateInstance(viewType);
-                    view.DataContext = viewType;
-                }
-                //var view = (Window)Activator.CreateInstance(viewType);
-                var propertyInfo = viewType.GetProperty("DataContext");
-            }
-
-            return new TangdaoContainer();
-        }
-
         /// <summary>
         /// 针对普通 VM，零约束
         /// </summary>
@@ -79,41 +54,52 @@ namespace IT.Tangdao.Framework.DaoMvvm
             return view;
         }
 
-        private static readonly Assembly _assembly = Assembly.GetEntryAssembly();
+        /// <summary>
+        /// 自动为 View 绑定对应的 ViewModel
+        /// </summary>
+        public static void AutoBindViewModel(DependencyObject view, Type viewType, ITangdaoProvider Provider)
+        {
+            // 查找对应的 ViewModel 类型
+            var viewModelType = FindViewModelType(viewType);
+            if (viewModelType != null)
+            {
+                // 从容器解析 ViewModel 并设置 DataContext
+                var viewModel = Provider.GetService(viewModelType);
+                if (viewModel != null)
+                {
+                    if (view is FrameworkElement frameworkElement)
+                    {
+                        frameworkElement.DataContext = viewModel;
+                    }
+                }
+            }
+        }
 
         /// <summary>
-        /// 根据 ViewModel 类型自动关联 View 和 ViewModel。
+        /// 根据 View 类型查找对应的 ViewModel 类型
         /// </summary>
-        /// <typeparam name="TViewModel">ViewModel 类型。</typeparam>
-        /// <returns>关联后的 View 实例。</returns>
-        public static Window ResolveView<TViewModel>() where TViewModel : class
+        private static Type FindViewModelType(Type viewType)
         {
-            // 获取 ViewModel 类型
-            var viewModelType = typeof(TViewModel);
+            if (viewType == null) return null;
 
-            // 查找 ViewToViewModelAttribute
-            var attribute = viewModelType.GetCustomAttribute<ViewToViewModelAttribute>();
-            if (attribute == null)
+            var viewModelName = viewType.Name.Replace("View", "") + "ViewModel";
+
+            // 方法1：同命名空间
+            var viewModelType = viewType.Assembly.GetType($"{viewType.Namespace}.{viewModelName}");
+            if (viewModelType != null) return viewModelType;
+
+            // 方法2：全局搜索（最简单可靠）
+            viewModelType = viewType.Assembly.GetTypes()
+                .FirstOrDefault(t => t.Name == viewModelName);
+
+            if (viewModelType != null)
             {
-                throw new InvalidOperationException($"ViewModel {viewModelType.Name} 未标记 ViewToViewModelAttribute。");
+                Console.WriteLine($"通过全局搜索找到: {viewModelType.FullName}");
+                return viewModelType;
             }
 
-            // 获取 View 类型
-            var viewType = _assembly.GetTypes()
-                .FirstOrDefault(t => t.Name == attribute.ViewName);
-            if (viewType == null)
-            {
-                throw new InvalidOperationException($"未找到名为 {attribute.ViewName} 的 View。");
-            }
-
-            // 创建 View 和 ViewModel 实例
-            var view = Activator.CreateInstance(viewType) as Window;
-            var viewModel = Activator.CreateInstance(viewModelType);
-
-            // 设置 DataContext
-            view.DataContext = viewModel;
-
-            return view;
+            Console.WriteLine($"未找到 ViewModel: {viewModelName}");
+            return null;
         }
 
         /// <summary>
@@ -132,7 +118,7 @@ namespace IT.Tangdao.Framework.DaoMvvm
 
             if (type != null)
             {
-                var control = (Control)provider.Resolve(type);
+                var control = (Control)provider.GetService(type);
                 control.DataContext = data;
                 return control;
             }

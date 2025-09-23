@@ -8,7 +8,7 @@ using System.Windows.Markup;
 
 namespace IT.Tangdao.Framework
 {
-    public class TangdaoWindow : Window, ITangdaoWindow, IComponentConnector
+    public class TangdaoWindow : Window, IComponentConnector
     {
         public void Connect(int connectionId, object target)
         {

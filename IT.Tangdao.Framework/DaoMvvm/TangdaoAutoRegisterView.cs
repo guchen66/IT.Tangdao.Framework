@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace IT.Tangdao.Framework.DaoMvvm
     {
         public static void Register<T>(ITangdaoContainer tangdaoContainer)
         {
-            tangdaoContainer.Register<T>();
+            //tangdaoContainer.AddSingleton<T>();
         }
     }
 }

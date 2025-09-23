@@ -13,106 +13,38 @@ using IT.Tangdao.Framework.DaoMvvm;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Selectors;
+using IT.Tangdao.Framework.Ioc;
 
 namespace IT.Tangdao.Framework
 {
     /// <summary>
-    /// 容器
+    /// 默认只写容器，线程安全委托给 ServiceRegistry。
+    /// 本身不做任何校验，保持单一职责。
     /// </summary>
     public sealed class TangdaoContainer : ITangdaoContainer
     {
-        /// <summary>
-        /// 注册一个类
-        /// </summary>
-        /// <typeparam name="TService"></typeparam>
-        /// <returns></returns>
-        public ITangdaoContainerBuilder Register<TService>()
+        public IServiceRegistry Registry { get; }
+
+        public TangdaoContainer()
         {
-            Type serviceType = typeof(TService);
-
-            var constructors = serviceType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-            var constructor = constructors[0];
-            var parameters = constructor.GetParameters();
-
-            RegisterContext context = new RegisterContext
-            {
-                RegisterType = serviceType,
-                ParameterInfos = parameters,
-                Lifecycle = Lifecycle.Transient,
-            };
-
-            TangdaoContext.SetContext<TService>(context);
-            //  TangdaoContext.SetInstance<TService>((TService)Activator.CreateInstance(typeof(TService)));
-            return this;
+            Registry = new ServiceRegistry();
         }
 
-        public ITangdaoContainerBuilder Register<TService, TImplementation>() where TImplementation : TService
+        public void Register(IServiceEntry entry)
         {
-            Type serviceType = typeof(TService);
-            Type implementationType = typeof(TImplementation);
-
-            var constructors = implementationType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-            var constructor = constructors[0]; // 使用第一个构造函数
-            var parameters = constructor.GetParameters();
-
-            RegisterContext context = new RegisterContext
-            {
-                RegisterType = implementationType,
-                ParameterInfos = parameters
-            };
-
-            // 存储接口和实现类的映射
-            context.InterfaceToImplementationMapping[serviceType] = implementationType;
-
-            TangdaoContext.SetContext<TService>(context);
-            return this;
+            if (entry == null) throw new ArgumentNullException(nameof(entry));
+            Registry.Add(entry);
         }
 
-        public ITangdaoProvider Builder()
+        public ITangdaoProvider BuildProvider()
         {
-            // 创建一个根提供者，不需要传递任何上下文
-            return TangdaoContainerBuilder.Builder();
-        }
-
-        public ITangdaoContainer Register(Type serviceType, Type implementationType)
-        {
-            return this;
-        }
-
-        public ITangdaoContainer Register(Type implementationType)
-        {
-            RegisterContext context = new RegisterContext
-            {
-                RegisterType = implementationType,
-            };
-            return this;
-        }
-
-        public ITangdaoContainer Register(Type serviceType, Func<object> creator)
-        {
-            return this;
-        }
-
-        public ITangdaoContainer Register(Type type, Func<ITangdaoProvider, object> factoryMethod)
-        {
-            return this;
-        }
-
-        public ITangdaoContainer Register(string name)
-        {
-            if (name is string model)
-            {
-                Assembly Assembly = model.GetType().Assembly;
-                IEnumerable<Type> types = TangdaoAttributeSelector.FindViewToViewModelAttribute(Assembly);
-                return ViewToViewModelLocator.Build(types);
-            }
-
-            throw new ContainerErrorException("注册ViewToModel未提供Name");
-        }
-
-        public void Register<TService>(Func<ITangdaoContainer, TService> factory)
-        {
-            //_factories[typeof(TService)] = () => factory(this);
+            // 把内部注册表和反射工厂一起塞进 Provider
+            var factory = new ReflectionServiceFactory(
+                            new TangdaoProvider(Registry, null)); // 先循环引用占位
+                                                                  // 用临时委托解决循环：Provider 需要 Factory，Factory 需要 Provider
+            var provider = new TangdaoProvider(Registry, factory);
+            ((ReflectionServiceFactory)factory).RebindProvider(provider);
+            return provider;
         }
     }
 }

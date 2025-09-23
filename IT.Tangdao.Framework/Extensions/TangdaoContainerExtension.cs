@@ -7,48 +7,143 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework;
 using System.Windows;
+using IT.Tangdao.Framework.Ioc;
 
 namespace IT.Tangdao.Framework.Extensions
 {
+    /// <summary>
+    /// 给 ITangdaoContainer 加链式语法糖，全部转发到 Register 方法。
+    /// </summary>
     public static class TangdaoContainerExtension
     {
-        public static ITangdaoContainer RegisterType<TService, TImplementation>(this ITangdaoContainer container) where TImplementation : TService
+        public static ITangdaoContainer AddTransient<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
-            return container.Register(typeof(TService), typeof(TImplementation));
+            container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new TransientStrategy()));
+            return container;   // 链式
         }
 
-        public static ITangdaoContainer RegisterType<TImplementation>(this ITangdaoContainer container)
+        public static ITangdaoContainer AddSingleton<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
-            return container.Register(typeof(TImplementation));
-        }
-
-        public static ITangdaoContainer RegisterType<TService>(this ITangdaoContainer container, Func<object> creator)
-        {
-            return container.Register(typeof(TService), creator);
-        }
-
-        public static ITangdaoContainer RegisterType<TService>(this ITangdaoContainer container, Func<ITangdaoProvider, object> factoryMethod)
-        {
-            return container.Register(typeof(TService), factoryMethod);
-        }
-
-        public static ITangdaoContainer RegisterViewToViewModel(this ITangdaoContainer container, string name = null)
-        {
-            return container.Register(name);
+            container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new SingletonStrategy()));
+            return container;
         }
 
         /// <summary>
-        /// Window未打开之前，不能给它设置子窗体
+        /// 自己注册自己：T 既是服务类型也是实现类型。
         /// </summary>
-        /// <typeparam name="TWindow"></typeparam>
-        /// <typeparam name="TChildWindow"></typeparam>
-        /// <param name="container"></param>
-        /// <returns></returns>
-       /* public static Window RegisterOwner<TWindow,TChildWindow>(this ITangdaoContainer container) where TWindow:Window, new() where TChildWindow : Window, new()
+        public static ITangdaoContainer AddTransient<T>(this ITangdaoContainer container) where T : class
         {
-            Window window = new TChildWindow();
-            window.Owner=new TWindow();
-            return window;
-        }*/
+            container.Register(new ServiceEntry(typeof(T), typeof(T), new TransientStrategy()));
+            return container;
+        }
+
+        public static ITangdaoContainer AddSingleton<T>(this ITangdaoContainer container)
+            where T : class
+        {
+            container.Register(new ServiceEntry(typeof(T), typeof(T), new SingletonStrategy()));
+            return container;
+        }
+
+        #region 作用域注册
+
+        /// <summary>
+        /// 自己注册自己（作用域）
+        /// </summary>
+        public static ITangdaoContainer AddScoped<T>(this ITangdaoContainer container) where T : class
+        {
+            container.Register(new ServiceEntry(typeof(T), typeof(T), new ScopedStrategy()));
+            return container;
+        }
+
+        /// <summary>
+        /// 接口→实现（作用域）
+        /// </summary>
+        public static ITangdaoContainer AddScoped<TService, TImpl>(this ITangdaoContainer container)
+            where TImpl : TService
+        {
+            container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new ScopedStrategy()));
+            return container;
+        }
+
+        #endregion 作用域注册
+
+        #region 工厂注册
+
+        /// <summary>
+        /// 瞬态工厂：每次调用 factory 委托。
+        /// </summary>
+        public static ITangdaoContainer AddTransientFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
+        {
+            container.Register(new ServiceEntry(typeof(T), typeof(TransientFactory<T>), new TransientStrategy()));
+            // 把委托塞进容器元数据，后续工厂能拿到
+            TransientFactory<T>.SetFactory(factory);
+            return container;
+        }
+
+        /// <summary>
+        /// 单例工厂：只调用一次 factory 委托，结果缓存。
+        /// </summary>
+        public static ITangdaoContainer AddSingletonFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
+        {
+            container.Register(new ServiceEntry(typeof(T), typeof(SingletonFactory<T>), new SingletonStrategy()));
+            SingletonFactory<T>.SetFactory(factory);
+            return container;
+        }
+
+        #endregion 工厂注册
+
+        #region 私有工厂实现
+
+        /// <summary>
+        /// 瞬态工厂包装
+        /// </summary>
+        private sealed class TransientFactory<T> : IServiceFactory where T : class
+        {
+            private static Func<ITangdaoProvider, T> _factory;
+
+            internal static void SetFactory(Func<ITangdaoProvider, T> f) => _factory = f;
+
+            public object Create(IServiceEntry entry)
+            {
+                if (_factory == null) throw new InvalidOperationException("瞬态工厂未配置。");
+                return _factory(ProviderHolder.Provider);
+            }
+        }
+
+        /// <summary>
+        /// 单例工厂包装
+        /// </summary>
+        private sealed class SingletonFactory<T> : IServiceFactory where T : class
+        {
+            private static Func<ITangdaoProvider, T> _factory;
+            private static T _cache;
+            private static readonly object _lock = new object();
+
+            internal static void SetFactory(Func<ITangdaoProvider, T> f) => _factory = f;
+
+            public object Create(IServiceEntry entry)
+            {
+                if (_factory == null) throw new InvalidOperationException("单例工厂未配置。");
+
+                lock (_lock)
+                {
+                    if (_cache == null)
+                    {
+                        _cache = _factory(ProviderHolder.Provider);
+                    }
+                    return _cache;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 工厂内部取 Provider 的桥梁
+        /// </summary>
+        private static class ProviderHolder
+        {
+            internal static ITangdaoProvider Provider => TangdaoApplication.Provider;
+        }
+
+        #endregion 私有工厂实现
     }
 }

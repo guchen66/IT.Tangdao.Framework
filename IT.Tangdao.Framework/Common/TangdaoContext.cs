@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,11 @@ namespace IT.Tangdao.Framework.DaoCommon
         private static readonly ConcurrentDictionary<string, Delegate> _actions = new ConcurrentDictionary<string, Delegate>();
 
         /// <summary>
+        /// 存储参数
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, ITangdaoParameter> _parameter = new ConcurrentDictionary<string, ITangdaoParameter>();
+
+        /// <summary>
         /// 存储数据上下文
         /// </summary>
         private static readonly ConcurrentDictionary<Type, RegisterContext> _contexts = new ConcurrentDictionary<Type, RegisterContext>();
@@ -37,24 +43,37 @@ namespace IT.Tangdao.Framework.DaoCommon
         /// </summary>
         private static readonly ConcurrentDictionary<Type, Lazy<object>> _instances = new ConcurrentDictionary<Type, Lazy<object>>();
 
+        public static void SetTangdaoParameter(string name, ITangdaoParameter parameter)
+        {
+            _parameter[name] = parameter;
+        }
+
+        public static ITangdaoParameter GetTangdaoParameter(string name)
+        {
+            _parameter.TryGetValue(name, out var value);
+            return value;
+        }
+
+        [Obsolete("请迁移到 ITangdaoParameter 接口，本方法将在 v5.0 删除。")]
         public static void SetLocalValue(string name, string value)
         {
             _localValues[name] = value;
         }
 
+        [Obsolete("请迁移到 ITangdaoParameter 接口，本方法将在 v5.0 删除。")]
         public static string GetLocalValue(string name)
         {
             _localValues.TryGetValue(name, out var value);
             return value;
         }
 
-        // 存储Action的方法
+        [Obsolete("请迁移到 ITangdaoParameter 接口，本方法将在 v5.0 删除。")]
         public static void SetLocalAction(string name, Action action)
         {
             _actions[name] = action;
         }
 
-        // 执行存储的Action的方法
+        [Obsolete("请迁移到 ITangdaoParameter 接口，本方法将在 v5.0 删除。")]
         public static void GetLocalAction(string name)
         {
             if (_actions.TryGetValue(name, out var action))

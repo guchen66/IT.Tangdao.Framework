@@ -29,5 +29,15 @@ namespace IT.Tangdao.Framework.Selectors
                 .Where(type => type.IsClass && !type.IsAbstract)
                 .Where(type => type.GetCustomAttributes<ViewToViewModelAttribute>(false).Any());
         }
+
+        public static IEnumerable<Type> HasViewToViewModelByType(Type type)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
+            return type.IsClass && !type.IsAbstract &&
+                   type.GetCustomAttributes<ViewToViewModelAttribute>(false).Any()
+                ? new[] { type }
+                : Enumerable.Empty<Type>();
+        }
     }
 }

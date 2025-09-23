@@ -49,19 +49,30 @@ LoginViewModel:接收
 
 ITangdaoContainer
 
+修改WPF启动项
+
 ```C#
-//容器的初始化
-ITangdaoContainer container = new TangdaoContainer();
+ public partial class App : TangdaoApplication
+ {
+     protected override void RegisterServices(ITangdaoContainer container)
+     {
+         container.AddSingleton<MainView>();
+         container.AddSingleton<MainViewModel>();
+         container.AddSingleton<HomeViewModel>();
+         container.AddSingleton<IReadService, ReadService>();
+     }
 
-//解析器的初始化
-var provider = container.Builder();
+     protected override Window CreateWindow()
+     {
+         return CreateShell<MainView>();
+     }
+ }
+```
 
-//构建一个全局服务定位器
-ServerLocator.InitContainer(container);
+可以通过服务定位进行接口解析
 
-//注册接口和实体类
-container.RegisterType<IReadService,ReadService>();
-container.RegisterType<IWriteService,WriteService>();
+```
+TangdaoApplication.Provider.GetService(viewModel);
 ```
 
 

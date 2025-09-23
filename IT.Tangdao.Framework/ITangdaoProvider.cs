@@ -6,10 +6,20 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework
 {
-    public interface ITangdaoProvider : ITangdaoProviderBuilder
+    /// <summary>
+    /// “只读”解析器：从注册表获取策略与工厂，完成实例化。
+    /// 不暴露任何写入能力。
+    /// </summary>
+    public interface ITangdaoProvider
     {
-        object Resolve(Type type);
+        /// <summary>
+        /// 获取服务；找不到返回 null。
+        /// </summary>
+        object GetService(Type serviceType);
 
-        object Resolve(Type type, params object[] impleType);
+        /// <summary>
+        /// 泛型便利方法，由扩展方法默认实现。
+        /// </summary>
+        T GetService<T>() where T : class;
     }
 }
