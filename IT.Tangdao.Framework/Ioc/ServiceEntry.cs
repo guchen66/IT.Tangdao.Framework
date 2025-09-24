@@ -16,9 +16,7 @@ namespace IT.Tangdao.Framework.Ioc
         public Type ImplementationType { get; }
         public ILifecycleStrategy LifecycleStrategy { get; }
 
-        public ServiceEntry(Type serviceType,
-                            Type implementationType,
-                            ILifecycleStrategy lifecycleStrategy)
+        public ServiceEntry(Type serviceType, Type implementationType, ILifecycleStrategy lifecycleStrategy)
         {
             // 防御式校验，早失败、易排错
             if (serviceType == null)

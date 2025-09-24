@@ -13,6 +13,7 @@ namespace IT.Tangdao.Framework.Ioc
     public sealed class ServiceRegistry : IServiceRegistry
     {
         private readonly Dictionary<Type, IServiceEntry> _dict = new Dictionary<Type, IServiceEntry>();
+        private readonly Dictionary<(Type serviceType, object key), IServiceEntry> _keyedDict = new Dictionary<(Type, object), IServiceEntry>();
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         public void Add(IServiceEntry entry)
@@ -58,6 +59,33 @@ namespace IT.Tangdao.Framework.Ioc
             {
                 _lock.ExitReadLock();
             }
+        }
+
+        public void AddKeyed(IServiceEntry entry, object key)
+        {
+            if (entry == null) throw new ArgumentNullException(nameof(entry));
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
+            _lock.EnterWriteLock();
+            try
+            {
+                _keyedDict[(entry.ServiceType, key)] = entry;
+            }
+            finally { _lock.ExitWriteLock(); }
+        }
+
+        public IServiceEntry GetKeyedEntry(Type serviceType, object key)
+        {
+            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
+            _lock.EnterReadLock();
+            try
+            {
+                _keyedDict.TryGetValue((serviceType, key), out var e);
+                return e;
+            }
+            finally { _lock.ExitReadLock(); }
         }
     }
 }

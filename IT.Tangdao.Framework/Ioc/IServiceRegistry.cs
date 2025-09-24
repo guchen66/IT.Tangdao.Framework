@@ -26,5 +26,15 @@ namespace IT.Tangdao.Framework.Ioc
         /// 供访问者模式遍历快照，避免并发修改问题。
         /// </summary>
         IReadOnlyList<IServiceEntry> GetAllEntries();
+
+        /// <summary>
+        /// 新增：按 (ServiceType,Key) 存条目
+        /// </summary>
+        void AddKeyed(IServiceEntry entry, object key);
+
+        /// <summary>
+        /// 新增：按 (ServiceType,Key) 查条目
+        /// </summary>
+        IServiceEntry GetKeyedEntry(Type serviceType, object key);
     }
 }

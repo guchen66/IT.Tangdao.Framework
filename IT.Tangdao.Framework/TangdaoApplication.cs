@@ -14,6 +14,7 @@ using IT.Tangdao.Framework.DaoCommon;
 using System.Windows.Controls;
 using System.Windows.Media;
 using IT.Tangdao.Framework.Ioc;
+using System.ComponentModel;
 
 namespace IT.Tangdao.Framework
 {
@@ -25,7 +26,7 @@ namespace IT.Tangdao.Framework
     /// </summary>
     public abstract class TangdaoApplication : Application
     {
-        public static ITangdaoProvider Provider { get; private set; } = null;
+        public static ITangdaoProvider Provider { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -34,9 +35,13 @@ namespace IT.Tangdao.Framework
             // ① 仅在此处Build
             var builder = new TangdaoContainerBuilder();
             RegisterServices(builder.Container);   // 暴露 Container 仅此时有效
+
+            //发现Module模块，注册模块
+            // ② 发现 + 注册模块
+            var moduleCatalog = DiscoverModules();
+            RegisterModules(moduleCatalog, builder);
             builder.ValidateDependencies();
-            var container = builder.Build();
-            Provider = container.BuildProvider();
+            Provider = builder.Build().BuildProvider();
 
             // ② 留给子类做额外配置
             Configure();
@@ -104,10 +109,6 @@ namespace IT.Tangdao.Framework
 
             // 自动绑定窗口的 ViewModel
             AutoBindViewModel(shell, shellType);
-
-            // 处理 ContentControl 的内容注入
-            // InjectContentControls(shell);
-
             return shell;
         }
 
@@ -119,65 +120,38 @@ namespace IT.Tangdao.Framework
             ViewToViewModelLocator.AutoBindViewModel(view, viewType, Provider);
         }
 
-        /// <summary>
-        /// 注入标记了 特性 的 ViewModel
-        /// </summary>
-        /// <summary>
-        /// 按需注入：只给当前窗口里「空着」的 ContentControl 装内容。
-        /// 约定：ContentControl 名称去掉后缀后对应 View 类型。
-        /// </summary>
-        private static void InjectContentControls(DependencyObject parent)
+        private List<ITangdaoModule> DiscoverModules()
         {
-            // ① 递归扫视觉树
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            var list = new List<ITangdaoModule>();
+            foreach (var asm in GetModuleAssemblies())
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-
-                // ② 如果是 ContentControl 且现在没内容
-                if (child is ContentControl cc && cc.Content == null)
+                foreach (var attr in asm.GetCustomAttributes<TangdaoModuleAttribute>())
                 {
-                    // ③ 用约定拿到 View 类型
-                    var viewType = GuessViewType(cc.GetType());
-                    if (viewType == null) continue;
-
-                    // ④ 容器解析 View
-                    var view = Provider.GetService(viewType) as Control;
-                    if (view == null) continue;
-
-                    // ⑤ 再给它绑 ViewModel
-                    var vmType = GuessViewModelType(viewType);
-                    if (vmType != null)
-                        view.DataContext = Provider.GetService(vmType);
-
-                    cc.Content = view;
+                    if (Activator.CreateInstance(attr.ModuleType) is ITangdaoModule module)
+                        list.Add(module);
                 }
+            }
+            return list;
+        }
 
-                // 继续往下走
-                InjectContentControls(child);
+        private static void RegisterModules(IReadOnlyList<ITangdaoModule> catalog, TangdaoContainerBuilder builder)
+        {
+            var eager = catalog.Where(m => !m.Lazy).OrderBy(m => m.Order);
+            foreach (var m in eager) m.RegisterServices(builder.Container);
+
+            // 懒加载模块：注册一个工厂，第一次解析时触发真实 RegisterServices
+            // 延迟注册（只攒动作，不解析）
+            foreach (var m in catalog.Where(m => m.Lazy))
+            {
+                var moduleCopy = m;
+                builder.Container.AddLazyRegistration(c => moduleCopy.RegisterServices(c));
             }
         }
 
-        /// <summary>
-        /// 最简单的命名约定：ContentControl 叫 xxxNavigationPanel，
-        /// 对应 View 就叫 NavigationPanelView。
-        /// </summary>
-        private static Type GuessViewType(Type controlType)
-        {
-            var name = controlType.Name
-                                  .Replace("ContentControl", "")
-                                  .Replace("Control", "") + "View";
-            return controlType.Assembly.GetType($"{controlType.Namespace}.{name}");
-        }
-
-        /// <summary>
-        /// View → ViewModel 的约定，和你原来 FindViewModelType 逻辑一致
-        /// </summary>
-        private static Type GuessViewModelType(Type viewType)
-        {
-            var vmName = viewType.Name.Replace("View", "") + "ViewModel";
-            return viewType.Assembly.GetTypes()
-                           .FirstOrDefault(t => t.Name == vmName);
-        }
+        /// 返回要搜索的程序集列表；子类可重写过滤
+        protected virtual IEnumerable<Assembly> GetModuleAssemblies() =>
+            AppDomain.CurrentDomain.GetAssemblies()
+                     .Where(a => !a.IsDynamic && !a.FullName.StartsWith("System"));
 
         protected override void OnExit(ExitEventArgs e)
         {

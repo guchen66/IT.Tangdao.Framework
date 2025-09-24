@@ -14,6 +14,7 @@ using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Selectors;
 using IT.Tangdao.Framework.Ioc;
+using System.ComponentModel;
 
 namespace IT.Tangdao.Framework
 {
@@ -46,5 +47,11 @@ namespace IT.Tangdao.Framework
             ((ReflectionServiceFactory)factory).RebindProvider(provider);
             return provider;
         }
+
+        // 内部延迟队列
+        private readonly List<Action<ITangdaoContainer>> _lazy = new List<Action<ITangdaoContainer>>();
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public IList<Action<ITangdaoContainer>> LazyRegistrations => _lazy;
     }
 }

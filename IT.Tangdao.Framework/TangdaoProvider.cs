@@ -12,9 +12,6 @@ namespace IT.Tangdao.Framework
         private readonly IServiceRegistry _registry;
         private readonly IServiceFactory _factory;
 
-        // Singleton 实例缓存（线程安全字典）
-        private readonly ConcurrentDictionary<Type, object> _singletonCache = new ConcurrentDictionary<Type, object>();
-
         internal TangdaoProvider(IServiceRegistry registry, IServiceFactory factory)
         {
             _registry = registry;
@@ -35,5 +32,22 @@ namespace IT.Tangdao.Framework
 
         public T GetService<T>() where T : class
             => GetService(typeof(T)) as T;
+
+        public object GetKeyedService(Type serviceType, object key)
+        {
+            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
+            // 1. 只走新字典，不影响旧字典
+            var entry = (_registry as ServiceRegistry)?.GetKeyedEntry(serviceType, key);
+            if (entry == null) return null;
+
+            // 2. 生命周期策略与 GetService 共用同一套，无差别
+            return entry.LifecycleStrategy.CreateInstance(
+                new ServiceCreationContext { Entry = entry, Factory = _factory });
+        }
+
+        public T GetKeyedService<T>(object key) where T : class
+            => GetKeyedService(typeof(T), key) as T;
     }
 }

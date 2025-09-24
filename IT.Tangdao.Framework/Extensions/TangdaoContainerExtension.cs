@@ -16,13 +16,13 @@ namespace IT.Tangdao.Framework.Extensions
     /// </summary>
     public static class TangdaoContainerExtension
     {
-        public static ITangdaoContainer AddTransient<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
+        public static ITangdaoContainer AddTangdaoTransient<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
             container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new TransientStrategy()));
             return container;   // 链式
         }
 
-        public static ITangdaoContainer AddSingleton<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
+        public static ITangdaoContainer AddTangdaoSingleton<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
             container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new SingletonStrategy()));
             return container;
@@ -31,14 +31,13 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 自己注册自己：T 既是服务类型也是实现类型。
         /// </summary>
-        public static ITangdaoContainer AddTransient<T>(this ITangdaoContainer container) where T : class
+        public static ITangdaoContainer AddTangdaoTransient<T>(this ITangdaoContainer container) where T : class
         {
             container.Register(new ServiceEntry(typeof(T), typeof(T), new TransientStrategy()));
             return container;
         }
 
-        public static ITangdaoContainer AddSingleton<T>(this ITangdaoContainer container)
-            where T : class
+        public static ITangdaoContainer AddTangdaoSingleton<T>(this ITangdaoContainer container) where T : class
         {
             container.Register(new ServiceEntry(typeof(T), typeof(T), new SingletonStrategy()));
             return container;
@@ -49,7 +48,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 自己注册自己（作用域）
         /// </summary>
-        public static ITangdaoContainer AddScoped<T>(this ITangdaoContainer container) where T : class
+        public static ITangdaoContainer AddTangdaoScoped<T>(this ITangdaoContainer container) where T : class
         {
             container.Register(new ServiceEntry(typeof(T), typeof(T), new ScopedStrategy()));
             return container;
@@ -58,7 +57,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 接口→实现（作用域）
         /// </summary>
-        public static ITangdaoContainer AddScoped<TService, TImpl>(this ITangdaoContainer container)
+        public static ITangdaoContainer AddTangdaoScoped<TService, TImpl>(this ITangdaoContainer container)
             where TImpl : TService
         {
             container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new ScopedStrategy()));
@@ -72,7 +71,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 瞬态工厂：每次调用 factory 委托。
         /// </summary>
-        public static ITangdaoContainer AddTransientFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
+        public static ITangdaoContainer AddTangdaoTransientFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
         {
             container.Register(new ServiceEntry(typeof(T), typeof(TransientFactory<T>), new TransientStrategy()));
             // 把委托塞进容器元数据，后续工厂能拿到
@@ -83,7 +82,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 单例工厂：只调用一次 factory 委托，结果缓存。
         /// </summary>
-        public static ITangdaoContainer AddSingletonFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
+        public static ITangdaoContainer AddTangdaoSingletonFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
         {
             container.Register(new ServiceEntry(typeof(T), typeof(SingletonFactory<T>), new SingletonStrategy()));
             SingletonFactory<T>.SetFactory(factory);
@@ -145,5 +144,18 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
         #endregion 私有工厂实现
+
+        /// <summary>
+        /// 框架私有的懒加载实现
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="registerAction"></param>
+        /// <returns></returns>
+        internal static ITangdaoContainer AddLazyRegistration(this ITangdaoContainer container,
+                                                 Action<ITangdaoContainer> registerAction)
+        {
+            container.LazyRegistrations.Add(registerAction);
+            return container;   // 链式
+        }
     }
 }

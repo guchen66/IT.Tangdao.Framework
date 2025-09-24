@@ -1,6 +1,7 @@
 ﻿using IT.Tangdao.Framework.Ioc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,5 +28,10 @@ namespace IT.Tangdao.Framework
         /// 从当前只写容器生成只读解析器。
         /// </summary>
         ITangdaoProvider BuildProvider();
+
+        /* 新增：仅供框架内部做延迟注册 */
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IList<Action<ITangdaoContainer>> LazyRegistrations { get; }
     }
 }

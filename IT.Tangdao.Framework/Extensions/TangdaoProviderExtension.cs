@@ -21,5 +21,18 @@ namespace IT.Tangdao.Framework.Extensions
 
         public static T GetRequiredService<T>(this ITangdaoProvider provider, Type serviceType)
             => (T)(provider.GetService(serviceType) ?? throw new InvalidOperationException($"服务 '{serviceType.Name}' 未注册。"));
+
+        /// <summary>
+        /// 按 key 获取服务；找不到返回 null。
+        /// </summary>
+        public static T GetKeyedService<T>(this ITangdaoProvider provider, object key) where T : class
+            => (provider as TangdaoProvider)?.GetKeyedService<T>(key);
+
+        /// <summary>
+        /// 按 key 获取服务；找不到抛异常。
+        /// </summary>
+        public static T GetRequiredKeyedService<T>(this ITangdaoProvider provider, object key) where T : class
+            => provider.GetKeyedService<T>(key)
+               ?? throw new InvalidOperationException($"服务 '{typeof(T).Name}' (key='{key}') 未注册。");
     }
 }
