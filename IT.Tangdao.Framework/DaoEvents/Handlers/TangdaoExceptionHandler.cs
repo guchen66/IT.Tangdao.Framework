@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using IT.Tangdao.Framework.Parameters.Infrastructure;
+using IT.Tangdao.Framework.Abstractions.Loggers;
 
 namespace IT.Tangdao.Framework.DaoEvents.Handlers
 {
@@ -16,7 +17,7 @@ namespace IT.Tangdao.Framework.DaoEvents.Handlers
     /// </summary>
     public class TangdaoExceptionHandler
     {
-        private static readonly IDaoLogger Logger = DaoLogger.Get(typeof(TangdaoExceptionHandler));
+        private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(TangdaoExceptionHandler));
 
         private bool _isShowed;
 

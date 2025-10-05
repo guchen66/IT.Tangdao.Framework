@@ -12,7 +12,7 @@ namespace IT.Tangdao.Framework.Utilys
         /// <summary>
         /// 字典→POCO  主入口
         /// </summary>
-        public static T Convert<T>(Dictionary<string, string> dict) where T : new()
+        public static T Convert<T>(TangdaoSortedDictionary<string, string> dict) where T : new()
         {
             if (dict == null) return default;
 

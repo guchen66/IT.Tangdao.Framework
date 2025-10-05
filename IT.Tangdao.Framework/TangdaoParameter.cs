@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.DaoInterfaces;
+﻿using IT.Tangdao.Framework.Interfaces;
 using IT.Tangdao.Framework.Parameters.EventArg;
 using IT.Tangdao.Framework.Parameters.Infrastructure;
 using System;

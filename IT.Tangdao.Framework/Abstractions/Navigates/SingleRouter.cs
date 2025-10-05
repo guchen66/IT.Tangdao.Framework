@@ -109,16 +109,6 @@ namespace IT.Tangdao.Framework.Abstractions.Navigates
             var firstKey = _viewGroups.Keys.First();
             _views = new ObservableCollection<ISingleNavigateView>(_viewGroups[firstKey]);
             CurrentView = _views.FirstOrDefault();
-            // 策略优先，否则取第一组
-            //  CurrentGroupKey = singleNavigateConfig?.GroupKey ?? _viewGroups.Keys.First();
-            //if (!_viewGroups.TryGetValue(CurrentGroupKey, out var list))
-            //    CurrentGroupKey = _viewGroups.Keys.First(); // 兜底
-
-            //_views = new ObservableCollection<ISingleNavigateView>(list);
-            // 设置默认组（第一个分组）
-            // CurrentGroupKey = _viewGroups.Keys.FirstOrDefault();
-
-            CurrentView = _views.FirstOrDefault();
 
             _autoCarouselTimer = new DispatcherTimer
             {

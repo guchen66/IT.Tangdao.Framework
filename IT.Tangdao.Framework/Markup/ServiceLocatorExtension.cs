@@ -21,14 +21,8 @@ namespace IT.Tangdao.Framework.Markup
                 var window = Window.GetWindow(targetObject);
                 if (window != null)
                 {
-                    // 假设你的 Window 实现了 IServiceProvider 或有服务容器
-                    if (window is IServiceProvider serviceProviderWindow)
-                    {
-                        return serviceProviderWindow.GetService(ServiceType);
-                    }
-
                     // 或者使用依赖注入容器
-                    // return YourDIContainer.GetService(ServiceType);
+                    return TangdaoApplication.Provider.GetService(ServiceType);
                 }
             }
             return null;

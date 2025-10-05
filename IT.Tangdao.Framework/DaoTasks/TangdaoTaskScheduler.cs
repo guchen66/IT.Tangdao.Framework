@@ -151,6 +151,10 @@ namespace IT.Tangdao.Framework.DaoTasks
             }, token);
         }
 
+        public static void Destruction()
+        {
+        }
+
         #endregion --------- 公共入口 ---------
 
         #region --------- 私有调度 ---------

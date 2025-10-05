@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
 using IT.Tangdao.Framework.Parameters.Infrastructure;
+using IT.Tangdao.Framework.Abstractions.Loggers;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -21,7 +22,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// category 为空时直接落在根目录，否则作为子文件夹。
         /// 程序启动LogPathConfig.SetRoot可自定义Log目录
         /// </summary>
-        public static void WriteLocal(this IDaoLogger logger, string message, string category = null, [CallerMemberName] string caller = null,
+        public static void WriteLocal(this ITangdaoLogger logger, string message, string category = null, [CallerMemberName] string caller = null,
                               [CallerFilePath] string file = null,
                               [CallerLineNumber] int line = 0)
         {

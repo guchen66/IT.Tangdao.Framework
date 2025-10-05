@@ -6,15 +6,17 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Parameters.Entitys;
+using System.Windows.Media;
 
 namespace IT.Tangdao.Framework.Providers
 {
     public class AutoGeneratorProvider
     {
-        private static AutoGenerator _jsonData;
+        private static AutoGeneratorEntity _jsonData;
         public static string FileName { get; set; }
 
-        private static AutoGenerator GetJsonData()
+        private static AutoGeneratorEntity GetJsonData()
         {
             if (_jsonData == null)
             {
@@ -23,7 +25,7 @@ namespace IT.Tangdao.Framework.Providers
                     throw new FileNotFoundException();
                 }
 
-                _jsonData = JsonConvert.DeserializeObject<AutoGenerator>(FileName);
+                _jsonData = JsonConvert.DeserializeObject<AutoGeneratorEntity>(FileName);
             }
 
             return _jsonData;

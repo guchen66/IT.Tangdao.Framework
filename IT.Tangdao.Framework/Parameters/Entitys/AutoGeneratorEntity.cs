@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoCommon
+namespace IT.Tangdao.Framework.Parameters.Entitys
 {
-    public class AutoGenerator
+    /// <summary>
+    /// 与数据库相关，描述实体类是否自动生成
+    /// </summary>
+    public class AutoGeneratorEntity
     {
         /// <summary>
         /// 标题

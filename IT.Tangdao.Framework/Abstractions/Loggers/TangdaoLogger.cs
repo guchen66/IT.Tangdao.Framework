@@ -9,23 +9,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Parameters.Infrastructure;
 
-namespace IT.Tangdao.Framework.Abstractions
+namespace IT.Tangdao.Framework.Abstractions.Loggers
 {
     /// <summary>
     /// 日志记录器
     /// </summary>
-    public class DaoLogger : IDaoLogger
+    public class TangdaoLogger : ITangdaoLogger
     {
-        private static readonly ConcurrentDictionary<Type, IDaoLogger> Loggers = new ConcurrentDictionary<Type, IDaoLogger>();
+        private static readonly ConcurrentDictionary<Type, TangdaoLogger> Loggers = new ConcurrentDictionary<Type, TangdaoLogger>();
         private static readonly ConcurrentDictionary<string, StreamWriter> s_fileWriters = new ConcurrentDictionary<string, StreamWriter>(StringComparer.Ordinal);
-        public static Func<Type, IDaoLogger> LoggerFactory { get; set; }
+        public static Func<Type, TangdaoLogger> LoggerFactory { get; set; }
 
-        public static IDaoLogger Get(Type type)
+        public static TangdaoLogger Get(Type type)
         {
             //TryGetValue避免两次查找，直接返回logger
-            if (!Loggers.TryGetValue(type, out IDaoLogger logger))
+            if (!Loggers.TryGetValue(type, out TangdaoLogger logger))
             {
-                logger = LoggerFactory?.Invoke(type) ?? new DaoLogger(type);
+                logger = LoggerFactory?.Invoke(type) ?? new TangdaoLogger(type);
                 Loggers[type] = logger; // 或者使用 TryAdd 更安全
             }
 
@@ -34,7 +34,7 @@ namespace IT.Tangdao.Framework.Abstractions
 
         private readonly Type _type;
 
-        protected DaoLogger(Type type) => _type = type;
+        protected TangdaoLogger(Type type) => _type = type;
 
         public void Fatal(string message, Exception e = null)
         {

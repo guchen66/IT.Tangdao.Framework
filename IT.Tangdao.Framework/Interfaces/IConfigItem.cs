@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoInterfaces
+namespace IT.Tangdao.Framework.Interfaces
 {
     public interface IConfigItem
     {
-         string Key {  get; set; }
+        string Key { get; set; }
 
-         string Value { get; set; }
+        string Value { get; set; }
     }
 
     public interface IConfigCollection
@@ -20,6 +20,5 @@ namespace IT.Tangdao.Framework.DaoInterfaces
 
     public class ConfigElement
     {
-
     }
 }

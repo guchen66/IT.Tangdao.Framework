@@ -10,14 +10,12 @@ namespace IT.Tangdao.Framework.Extensions
 {
     public static class ReadResultExtensions
     {
-        public static Dictionary<string, string> ToDictionary(this ReadResult result)
+        public static TangdaoSortedDictionary<string, string> ToDictionary(this ReadResult result)
         {
             if (!result.IsSuccess)
-                return new Dictionary<string, string>(StringComparer.Ordinal);
-            var dicts = result.ToReadResult<Dictionary<string, string>>();
-            return dicts.Data
-                         .OrderBy(kv => kv.Key)
-                         .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+                return new TangdaoSortedDictionary<string, string>(StringComparer.Ordinal);
+            var dicts = result.ToReadResult<TangdaoSortedDictionary<string, string>>();
+            return dicts.Data;
         }
 
         /// <summary>

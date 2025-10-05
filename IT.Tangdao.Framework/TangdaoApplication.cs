@@ -42,7 +42,7 @@ namespace IT.Tangdao.Framework
             RegisterModules(moduleCatalog, builder);
             builder.ValidateDependencies();
             Provider = builder.Build().BuildProvider();
-
+            OnInitialized(moduleCatalog);
             // ② 留给子类做额外配置
             Configure();
 
@@ -84,15 +84,9 @@ namespace IT.Tangdao.Framework
         }
 
         /// <summary>
-        /// 约定装配主窗口：
-        /// 1. 解析 TShell；
-        /// 2. 扫描所有 [InjectContent] 标记的 ContentControl；
-        /// 3. 按约定加载 UserControl + ViewModel 并注入。
-        /// </summary>
-        /// <summary>
         /// 类型安全入口：子类可主动调用，也可被框架自动调用。
         /// </summary>
-        protected Window CreateShell<TShell>() where TShell : Window
+        protected static Window CreateShell<TShell>() where TShell : Window
             => CreateShell(typeof(TShell));
 
         /// <summary>
@@ -101,7 +95,7 @@ namespace IT.Tangdao.Framework
         /// <summary>
         /// 创建主窗口并自动绑定 ViewModel
         /// </summary>
-        protected Window CreateShell(Type shellType)
+        protected static Window CreateShell(Type shellType)
         {
             // 解析窗口实例
             var shell = (Window)Provider.GetService(shellType)
@@ -152,6 +146,12 @@ namespace IT.Tangdao.Framework
         protected virtual IEnumerable<Assembly> GetModuleAssemblies() =>
             AppDomain.CurrentDomain.GetAssemblies()
                      .Where(a => !a.IsDynamic && !a.FullName.StartsWith("System"));
+
+        private static void OnInitialized(List<ITangdaoModule> moduleCatalog)
+        {
+            foreach (var m in moduleCatalog.Where(m => !m.Lazy))
+                m.OnInitialized(Provider);
+        }
 
         protected override void OnExit(ExitEventArgs e)
         {

@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.DaoInterfaces;
+﻿using IT.Tangdao.Framework.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;

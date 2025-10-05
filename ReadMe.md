@@ -718,7 +718,7 @@ public class ComboboxOptions
 然后当使用Combobox的下拉列表时候，可缓存直接使用，当多个视图都需要使用同一个下拉列表的时候非常方便
 
 ```
-  xmlns:markup="clr-namespace:IT.Tangdao.Framework.Markup;assembly=IT.Tangdao.Framework"
+  xmlns:markup="clr-namespace:IT.Tangdao.Core.Markup;assembly=IT.Tangdao.Core"
    <ComboBox x:Name="com" ItemsSource="{markup:OptionList Key=Accuracy}"  />
 ```
 
@@ -741,9 +741,66 @@ public class ComboboxOptions
 常规的bool转string需要在ViewModel设置想要动态改变还需要写触发器,我可以自己指定
 
 ```
- <TextBlock Text="{marup:BoolToStringMode Binding={Binding BoolValue}, FalseValue='{x:Static textStatus:TextStatus.Falied}', TrueValue='{x:Static textStatus:TextStatus.Sucess}'}" />
+ <TextBlock Text="{marup:BoolToStringMode Binding={Binding BoolValue}, FalseValue='失败', TrueValue='成功'}" />
 ```
 
 ###### 3、列表绑定枚举时使用
 
+```c#
+  <daoMarkup:EnumBindSource x:Key="plcType" EnumType="{x:Type shared:PlcType}" />
+```
+
+
+
 ###### 4、获取当前控件所在的Window实例
+
+```C#
+  <Button
+      Width="100"
+      Height="30"
+      Margin="20,20,20,-100"
+      HorizontalAlignment="Center"
+      Background="{StaticResource OceanBlueBrush}"
+      Command="{s:Action ExecuteCancel}"
+      CommandParameter="{markup:GetWindow}"
+      Content="取消"
+      IsCancel="True" />
+```
+
+###### 6、列表中的按钮绑定
+
+在一般情况下绑定比较复杂
+
+对比如下：
+
+```C#
+<DataGridTemplateColumn Width="200" Header="操作">
+    <DataGridTemplateColumn.CellTemplate>
+        <DataTemplate>
+            <StackPanel
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               Orientation="Horizontal">
+                <Button
+                   Width="70"
+                   Margin="0,0,15,0"
+                   Background="LightGreen"
+                   Command="{markup:AncestorBinding Path=DataContext.UpdateUserCommand,AncestorType=UserControl}"
+                   CommandParameter="{Binding Id}"
+                   Content="修改"
+                   FontSize="14"
+                   Foreground="Black" />
+                <Button
+                   Width="70"
+                   Background="Red"
+                   Command="{Binding DataContext.DeleteUserCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=DataGrid}}"
+                   CommandParameter="{Binding Id}"
+                   Content="删除"
+                   FontSize="14"
+                   Foreground="Black" />
+            </StackPanel>
+        </DataTemplate>
+    </DataGridTemplateColumn.CellTemplate>
+</DataGridTemplateColumn>
+```
+

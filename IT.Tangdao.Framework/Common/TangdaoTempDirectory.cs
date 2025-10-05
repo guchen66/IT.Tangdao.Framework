@@ -5,19 +5,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Abstractions.Loggers;
 
 namespace IT.Tangdao.Framework.DaoCommon
 {
     /// <summary>
     /// 临时文件的创建与移除
     /// </summary>
-    public sealed class DaoTempDirectory : IDisposable
+    public sealed class TangdaoTempDirectory : IDisposable
     {
-        private static readonly IDaoLogger Logger = DaoLogger.Get(typeof(DaoTempDirectory));
+        private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(TangdaoTempDirectory));
 
         public string Path { get; }
 
-        public DaoTempDirectory(string tempDirectoryPath)
+        public TangdaoTempDirectory(string tempDirectoryPath)
         {
             Path = tempDirectoryPath;
 

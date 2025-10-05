@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoInterfaces
+namespace IT.Tangdao.Framework.Interfaces
 {
     internal interface IMarkable
     {

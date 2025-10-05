@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions
+namespace IT.Tangdao.Framework.Abstractions.Loggers
 {
-    public interface IDaoLogger
+    public interface ITangdaoLogger
     {
         void Fatal(string message, Exception e = null);
 
