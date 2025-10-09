@@ -10,7 +10,7 @@ namespace IT.Tangdao.Framework.DaoMvvm
     /// <summary>
     /// 自动注册所有视图
     /// </summary>
-    internal class TangdaoAutoRegisterView
+    internal sealed class TangdaoAutoRegisterView
     {
         public static void Register<T>(ITangdaoContainer tangdaoContainer)
         {

@@ -804,3 +804,18 @@ public class ComboboxOptions
 </DataGridTemplateColumn>
 ```
 
+#### 13、路径处理
+
+```C#
+// 使用 Combine 构建路径
+AbsolutePath sourcePath = TangdaoPath.Instance
+    .GetThisFilePath()
+    .Parent()                           // 移除文件名
+    .Combine("..")                      // 上级目录
+    .Combine("Models")                  // Models 文件夹
+    .Combine("User.cs");                // 具体文件
+
+// 使用 ChangeExtension 创建备份
+AbsolutePath backupPath = sourcePath.WithExtension(".backup.cs");
+```
+

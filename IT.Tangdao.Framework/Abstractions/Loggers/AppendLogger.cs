@@ -8,7 +8,7 @@ using IT.Tangdao.Framework.Extensions;
 
 namespace IT.Tangdao.Framework.Abstractions.Loggers
 {
-    internal class AppendLogger : ITangdaoLogger
+    internal sealed class AppendLogger : ITangdaoLogger
     {
         private readonly string _filePath;
 
