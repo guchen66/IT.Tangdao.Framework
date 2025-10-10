@@ -130,7 +130,7 @@ namespace IT.Tangdao.Framework.Helpers
         /// <returns></returns>
         public static string GetSolutionName()
         {
-            string SolutionPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.Name;
+            string SolutionPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Name;
             return SolutionPath;
         }
 

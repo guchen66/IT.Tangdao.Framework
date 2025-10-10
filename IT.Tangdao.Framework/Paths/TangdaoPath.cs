@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Helpers;
 
 namespace IT.Tangdao.Framework.Paths
 {
@@ -40,7 +41,7 @@ namespace IT.Tangdao.Framework.Paths
         /// </summary>
         public AbsolutePath GetSolutionDirectory() => _cache.GetOrAdd("__sln", _ => GetSolutionDirectoryCore());
 
-        private static AbsolutePath GetSolutionDirectoryCore()
+        private AbsolutePath GetSolutionDirectoryCore()
         {
             var dir = FindSolutionDirectory();
             if (dir == null)
@@ -87,16 +88,23 @@ namespace IT.Tangdao.Framework.Paths
         private static string FindSolutionDirectory()
         {
             var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
-            for (int depth = 0; dir != null && depth < 8; depth++)
+            while (dir != null)
             {
-                try
+                var slnFiles = dir.GetFiles("*.sln");
+                if (slnFiles.Length > 0)
                 {
-                    if (dir.GetFiles("*.sln").Length > 0) return dir.FullName;
+                    // 取第一个 .sln 文件名（不含扩展名）
+                    string slnName = Path.GetFileNameWithoutExtension(slnFiles[0].Name);
+                    // 如果同级有同名文件夹，就下去
+                    var projectDir = Path.Combine(dir.FullName, slnName);
+                    if (Directory.Exists(projectDir))
+                        return projectDir;
+                    // 否则停在 .sln 层
+                    return dir.FullName;
                 }
-                catch (UnauthorizedAccessException) { /* 跳过无权限目录 */ }
                 dir = dir.Parent;
             }
-            return null;
+            throw new InvalidOperationException("未找到 .sln 目录。");
         }
 
         #endregion 私有辅助

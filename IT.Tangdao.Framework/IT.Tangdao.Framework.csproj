@@ -22,112 +22,112 @@
 		<DefineConstants>$(DefineConstants);SUPPORTS_VALUETUPLE</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net46|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net461|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net47|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net471|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net46|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net461|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net47|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net471|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net46|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net461|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net47|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net471|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net46|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net461|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net47|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net471|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net46|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net461|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net47|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net471|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|ARM64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net46|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net461|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net47|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net471|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|x64'">
-	  <NoWarn>1701;1702;1591;1570;1572;1573</NoWarn>
+	  <NoWarn>1701;1702;1591;1570;1572;1573;1805;</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
