@@ -63,13 +63,11 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
         /// <summary>
-        /// 对字典的值重新进行排序
+        ///  对字典的值重新进行排序
         /// </summary>
         /// <typeparam name="TKey"></typeparam>
         /// <typeparam name="TValue"></typeparam>
         /// <param name="dict"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
         /// <returns></returns>
         public static Dictionary<TKey, TValue> TryOrderBy<TKey, TValue>(this Dictionary<TKey, TValue> dict)
         {

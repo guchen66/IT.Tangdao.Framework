@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
+using IT.Tangdao.Framework.Common.Reflections;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -69,6 +69,26 @@ namespace IT.Tangdao.Framework.Extensions
         public static bool IsHasSon(this Type type, Type baseType)
         {
             return type.IsSubclassOf(baseType);
+        }
+
+        /// <summary>
+        /// 获取所有父类+接口
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static TypeParents Parents(this Type type)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
+            // 1. 基类
+            var baseType = type.BaseType;                 // 可能 null（object）
+                                                          // 2. 所有祖先接口（含重复，若需要可 Distinct）
+            var allIfs = type.GetInterfaces().Distinct()             // 当前+祖先类接口
+                            .OrderBy(i => i.Name)        // 给个稳定序
+                            .ToList();
+
+            return new TypeParents(baseType, allIfs);
         }
 
         /// <summary>

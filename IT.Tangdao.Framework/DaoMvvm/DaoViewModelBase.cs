@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.DaoMvvm
 {
     public abstract class DaoViewModelBase : INotifyPropertyChanged
-    {      
+    {
         public event PropertyChangedEventHandler PropertyChanged;
-     
+
         protected virtual bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(storage, value)) return false;
@@ -20,7 +20,7 @@ namespace IT.Tangdao.Framework.DaoMvvm
             RaisePropertyChanged(propertyName);
             return true;
         }
-      
+
         protected virtual bool SetProperty<T>(ref T storage, T value, Action onChanged, [CallerMemberName] string propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(storage, value)) return false;
@@ -31,15 +31,20 @@ namespace IT.Tangdao.Framework.DaoMvvm
 
             return true;
         }
-       
+
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
             OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
         }
-     
+
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChanged?.Invoke(this, args);
+        }
+
+        protected internal void RaiseMultiInternal(IReadOnlyList<string> props)
+        {
+            foreach (var p in props) OnPropertyChanged(new PropertyChangedEventArgs(p));
         }
     }
 }

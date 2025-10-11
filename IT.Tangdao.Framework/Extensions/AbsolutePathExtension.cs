@@ -39,5 +39,18 @@ namespace IT.Tangdao.Framework.Extensions
             File.Copy(source.Value, destination.Value, overwrite);
             return destination;
         }
+
+        /// <summary>
+        /// 获取路径上指定后缀文件
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        public static IReadOnlyList<AbsolutePath> EnumerateFiles(this AbsolutePath root, string pattern)
+        {
+            return Directory.EnumerateFiles(root.Value, pattern)
+                .Select(p => new AbsolutePath(p))
+                .ToArray();
+        }
     }
 }

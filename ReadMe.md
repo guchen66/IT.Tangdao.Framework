@@ -906,3 +906,28 @@ AbsolutePath sourcePath = TangdaoPath.Instance
  var backup = sourcePath.Backup(".bak");
 ```
 
+#### 14、自定义排序
+
+带后期增加接口优化
+
+```C#
+List<Student> students = new List<Student>
+{
+    new Student { Id=4, Name = "张三1111", Education = "一本" },
+    new Student { Id=5, Name = "李四2222", Education = "大专" },
+    new Student { Id=2, Name = "王五3333", Education = "研究生" },
+    new Student { Id=1, Name = "张三4444", Education = "一本" },
+    new Student { Id=0, Name = "李四5555", Education = "大专" },
+    new Student { Id=6, Name = "王五6666", Education = "研究生" },
+};
+
+var priority = new Dictionary<string, int>
+{
+    ["大专"] = 1,
+    ["一本"] = 2,
+    ["研究生"] = 3
+};
+
+var comparer = TangdaoSortProvider.Priority<Student>(s => s.Education, priority);
+```
+
