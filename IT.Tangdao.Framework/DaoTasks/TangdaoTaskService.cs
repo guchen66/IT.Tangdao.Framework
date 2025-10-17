@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Parameters.Infrastructure;
 
 namespace IT.Tangdao.Framework.DaoTasks
@@ -21,7 +22,6 @@ namespace IT.Tangdao.Framework.DaoTasks
             {
                 _cts?.Cancel();
                 _cts = new CancellationTokenSource();
-
                 _manual.Set();
 
                 _isPaused = false;

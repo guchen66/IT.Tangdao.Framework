@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Extensions
 {
+    /// <summary>
+    /// 将一个类型转成列表
+    /// 例如Student，List<Student>
+    /// </summary>
     public static class TypeSelectConverterExtension
     {
         // 真正的单例容器

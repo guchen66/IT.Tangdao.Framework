@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -142,7 +143,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 将对象转换为 XElement（简化版）
         /// </summary>
-        public static XElement ToXElement<T>(this T obj, string rootName = "Item") where T : class
+        public static XElement ToXElement<T>(this T obj, string rootName = "Item") where T : class, IXmlSerializable
         {
             var element = new XElement(rootName);
             foreach (var prop in typeof(T).GetProperties())

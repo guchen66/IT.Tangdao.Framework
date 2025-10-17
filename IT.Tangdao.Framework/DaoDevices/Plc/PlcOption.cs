@@ -1,19 +1,19 @@
-﻿using IT.Tangdao.Framework.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Enums;
 
-namespace IT.Tangdao.Framework.Configurations
+namespace IT.Tangdao.Framework.DaoDevices.Plc
 {
     public class PlcOption
     {
-        public PlcType PlcType { get; internal set; }
+        public PlcType PlcType { get; set; }
 
-        public string PlcIpAddress { get; internal set; }
+        public string PlcIpAddress { get; set; }
 
-        public string Port { get; internal set; }
+        public string Port { get; set; }
 
         public bool IsAutoConnection { get; set; }
 

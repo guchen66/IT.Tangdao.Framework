@@ -11,6 +11,28 @@ namespace IT.Tangdao.Framework.Extensions
     public static class AbsolutePathExtension
     {
         /// <summary>
+        /// 根据AbsolutePath创建目录（如果不存在）
+        /// </summary>
+        public static AbsolutePath CreateDirectory(this AbsolutePath sourcePath)
+        {
+            // 检查是否是文件路径（包含扩展名），如果是则取其目录
+            string directoryPath = sourcePath.Value;
+            directoryPath.CreateDirectory();
+            return sourcePath;   // 继续链式调用
+        }
+
+        /// <summary>
+        /// 根据AbsolutePath创建文件（如果不存在）
+        /// </summary>
+        public static AbsolutePath CreateFile(this AbsolutePath sourcePath, string fileName = null)
+        {
+            // 检查是否是文件路径（包含扩展名），如果是则取其目录
+            string filePath = sourcePath.Value;
+            filePath.CreateFile(fileName);
+            return sourcePath;   // 继续链式调用
+        }
+
+        /// <summary>
         /// 把当前文件复制到同目录、同主文件名、指定扩展名的新文件
         /// </summary>
         /// <param name="source">源文件路径</param>

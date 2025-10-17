@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoDevices
+namespace IT.Tangdao.Framework.DaoDevices.Card
 {
-    /// <summary>
-    /// 运动控制卡
-    /// </summary>
-    public class ControlCard
+    public class CardOption
     {
     }
 }

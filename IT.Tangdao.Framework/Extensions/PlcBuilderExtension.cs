@@ -1,6 +1,7 @@
 ﻿using IT.Tangdao.Framework.Abstractions;
 using IT.Tangdao.Framework.Configurations;
 using System;
+using IT.Tangdao.Framework.DaoDevices.Plc;
 
 namespace IT.Tangdao.Framework.Extensions
 {

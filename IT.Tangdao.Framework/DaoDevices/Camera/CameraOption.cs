@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoDevices
+namespace IT.Tangdao.Framework.DaoDevices.Camera
 {
-    /// <summary>
-    /// 相机
-    /// </summary>
-    public class Camera
+    public class CameraOption
     {
     }
 }

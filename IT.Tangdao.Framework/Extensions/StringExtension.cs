@@ -237,7 +237,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// </summary>
         public static string UseBinaryWriteString(this string filePath, string content)
         {
-            filePath.CreateFolder(); // 确保目录存在
+            filePath.CreateParentDirectory(); // 确保目录存在
 
             using (var bw = filePath.ToBinaryWriter())
             {
@@ -261,19 +261,94 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
         /// <summary>
-        /// 通过路径直接创建文件夹
+        /// 为文件路径创建父目录
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public static string CreateFolder(this string path)
+        public static string CreateParentDirectory(this string filePath)
         {
-            var directory = Path.GetDirectoryName(path) ?? throw new InvalidOperationException();
-            if (!Directory.Exists(directory))
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
-            return path;
+            return filePath;
+        }
+
+        /// <summary>
+        /// 通过路径直接创建文件夹
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static string CreateDirectory(this string directoryPath)
+        {
+            // 如果路径看起来像文件（有扩展名），则取目录部分
+            if (!string.IsNullOrEmpty(Path.GetExtension(directoryPath)))
+            {
+                directoryPath = Path.GetDirectoryName(directoryPath);
+            }
+
+            // 确保目录路径不为空，然后创建目录
+            if (!string.IsNullOrEmpty(directoryPath) && !Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            return directoryPath;
+        }
+
+        /// <summary>
+        /// 创建空文件（如果文件已存在则清空内容）
+        /// </summary>
+        public static string CreateFile(this string filePath, string fileName = null)
+        {
+            // 智能组合路径
+            string fullPath = string.IsNullOrEmpty(fileName)
+                ? filePath  // filePath 已经是完整文件路径
+                : Path.Combine(filePath, fileName);  // filePath 是目录，fileName 是文件名
+
+            fullPath.CreateParentDirectory(); // 确保目录存在
+
+            using (File.Create(fullPath))
+            {
+                // 文件会被创建并立即关闭
+            }
+
+            return fullPath; // 返回最终的文件路径
+        }
+
+        /// <summary>
+        /// 创建文件并写入初始内容
+        /// </summary>
+        public static string CreateFile(this string filePath, string initialContent, Encoding encoding = null)
+        {
+            filePath.CreateParentDirectory();
+
+            File.WriteAllText(filePath, initialContent ?? string.Empty, encoding ?? Encoding.UTF8);
+            return filePath;
+        }
+
+        /// <summary>
+        /// 创建文件并写入字节数据
+        /// </summary>
+        public static string CreateFile(this string filePath, byte[] data)
+        {
+            filePath.CreateParentDirectory();
+
+            File.WriteAllBytes(filePath, data ?? Array.Empty<byte>());
+            return filePath;
+        }
+
+        /// <summary>
+        /// 仅当文件不存在时创建
+        /// </summary>
+        public static string CreateFileIfNotExists(this string filePath, string initialContent = null)
+        {
+            if (!File.Exists(filePath))
+            {
+                return string.IsNullOrEmpty(initialContent)
+                    ? filePath.CreateFile()
+                    : filePath.CreateFile(initialContent);
+            }
+            return filePath;
         }
 
         /// <summary>

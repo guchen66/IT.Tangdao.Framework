@@ -40,5 +40,7 @@ namespace IT.Tangdao.Framework.DaoCommon
         /// 生命周期
         /// </summary>
         public Lifecycle Lifecycle { get; set; }
+
+        public object Option { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Services;
 using IT.Tangdao.Framework.Abstractions.IServices;
 using IT.Tangdao.Framework.Abstractions.Alarms;
+using IT.Tangdao.Framework.DaoEvents;
 
 namespace IT.Tangdao.Framework.Ioc
 {
@@ -19,7 +20,7 @@ namespace IT.Tangdao.Framework.Ioc
             container.AddTangdaoSingleton<IReadService, ReadService>();
             container.AddTangdaoSingleton<IWriteService, WriteService>();
             container.AddTangdaoSingleton<IAlarmService, AlarmService>();
-
+            container.AddTangdaoSingleton<IDaoEventAggregator, DaoEventAggregator>();
             // 2. 默认通知器（用户可再注册覆盖）
             container.AddTangdaoTransient<IAlarmNotifier, AlarmPopupNotifier>();
         }

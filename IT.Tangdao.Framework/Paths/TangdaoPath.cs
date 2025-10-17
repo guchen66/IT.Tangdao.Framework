@@ -108,5 +108,47 @@ namespace IT.Tangdao.Framework.Paths
         }
 
         #endregion 私有辅助
+
+        // 在 TangdaoPath 类中添加以下方法
+
+        #region 日期路径功能
+
+        /// <summary>
+        /// 生成基于当前日期的目录路径（格式：基础路径/年/月/日）
+        /// </summary>
+        public AbsolutePath GetDateDirectory(string basePath = null)
+        {
+            var baseDir = string.IsNullOrEmpty(basePath)
+                ? GetCurrentDirectory()
+                : new AbsolutePath(basePath);
+
+            DateTime now = DateTime.Now;
+            string year = now.Year.ToString();
+            string month = now.Month.ToString("00");
+            string day = now.Day.ToString("00");
+
+            return baseDir.Combine(year).Combine(month).Combine(day);
+        }
+
+        /// <summary>
+        /// 生成基于当前日期的文件路径（格式：基础路径/年/月/日/日期后缀.扩展名）
+        /// </summary>
+        public AbsolutePath GetDateFilePath(string basePath = null, string fileSuffix = "", string extension = "xlsx")
+        {
+            var dateDir = GetDateDirectory(basePath);
+            string date = DateTime.Now.ToString("yyMMdd");
+            string fileName = string.IsNullOrEmpty(fileSuffix)
+                ? $"{date}.{extension}"
+                : $"{date}_{fileSuffix}.{extension}";
+
+            return dateDir.Combine(fileName);
+        }
+
+        /// <summary>
+        /// Fluent API 版本 - 基于指定基础路径的日期目录构建器
+        /// </summary>
+        public TangdaoDatePathBuilder DateFrom(string basePath) => new TangdaoDatePathBuilder(new AbsolutePath(basePath));
+
+        #endregion 日期路径功能
     }
 }
