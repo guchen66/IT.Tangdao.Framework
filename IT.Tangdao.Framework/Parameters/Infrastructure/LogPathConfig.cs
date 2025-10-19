@@ -12,7 +12,7 @@ namespace IT.Tangdao.Framework.Parameters.Infrastructure
     /// </summary>
     public static class LogPathConfig
     {
-        private static string _folder = null;          // 缓存
+        private static string _folder;          // 缓存
         private static readonly object _lock = new object();
 
         /// <summary>

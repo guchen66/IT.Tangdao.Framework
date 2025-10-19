@@ -27,5 +27,21 @@ namespace IT.Tangdao.Framework.Utilys
         /// 等价于 .NET 6 的 Random.Shared
         /// </summary>
         public static Random Shared => _local.Value;
+
+        /// <summary>
+        /// 50 % 概率返回 true
+        /// </summary>
+        public static bool NextBool() => Shared.Next(2) == 0;
+
+        /// <summary>
+        /// 指定概率返回 true
+        /// </summary>
+        /// <param name="trueProbability">0.0 ~ 1.0</param>
+        public static bool NextBool(double trueProbability)
+        {
+            if (trueProbability < 0.0 || trueProbability > 1.0)
+                throw new ArgumentOutOfRangeException(nameof(trueProbability));
+            return Shared.NextDouble() < trueProbability;
+        }
     }
 }

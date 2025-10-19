@@ -5,7 +5,8 @@
 		<UseWPF>true</UseWPF>
 		<Title>一个简易开发的工具类库包</Title>
 		<Authors>liuxin</Authors>
-		<Version>4.0.10</Version>
+		<Owners>liuxin</Owners>
+		<Version>4.0.11</Version>
 		<Description>一个工具类库包</Description>
 		<RepositoryUrl>https://github.com/guchen66/IT.Tangdao.Framework</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -17,6 +18,7 @@
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Copyright>Copyright (c) liuxin 2023-$([System.DateTime]::Now.ToString(`yyyy`))</Copyright>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'net47' Or '$(TargetFramework)' == 'net48' ">
 		<DefineConstants>$(DefineConstants);SUPPORTS_VALUETUPLE</DefineConstants>
