@@ -1,6 +1,6 @@
-﻿using IT.Tangdao.Framework.DaoEvents;
+﻿using IT.Tangdao.Framework.Events;
 using IT.Tangdao.Framework.Ioc;
-using IT.Tangdao.Framework.Parameters.EventArg;
+using IT.Tangdao.Framework.EventArg;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using IT.Tangdao.Framework.DaoMvvm;
+using IT.Tangdao.Framework.Mvvm;
 using IT.Tangdao.Framework.Extensions;
 
 namespace IT.Tangdao.Framework.Abstractions.Navigates

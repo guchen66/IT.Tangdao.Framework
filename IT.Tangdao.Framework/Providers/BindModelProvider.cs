@@ -1,5 +1,5 @@
-﻿using IT.Tangdao.Framework.Abstractions.IServices;
-using IT.Tangdao.Framework.DaoMvvm;
+﻿using IT.Tangdao.Framework.Abstractions;
+using IT.Tangdao.Framework.Mvvm;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Helpers;
 using System;
@@ -26,7 +26,7 @@ namespace IT.Tangdao.Framework.Providers
         {
             _readService = TangdaoApplication.Provider.GetService<IReadService>();
             var xmlData = _readService.Read(ObjectPath);
-            Default = XmlFolderHelper.Deserialize<T>(xmlData);
+            //  Default = XmlFolderHelper.Deserialize<T>(new ContentQueryable(xmlData));
         }
     }
 }

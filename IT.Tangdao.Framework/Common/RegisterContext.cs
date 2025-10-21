@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoCommon
+namespace IT.Tangdao.Framework.Common
 {
     public class RegisterContext
     {

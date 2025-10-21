@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using IT.Tangdao.Framework.Parameters.Infrastructure;
+using IT.Tangdao.Framework.Infrastructure;
 
 namespace IT.Tangdao.Framework.Abstractions.Loggers
 {

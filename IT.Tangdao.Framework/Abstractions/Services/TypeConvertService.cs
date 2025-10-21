@@ -1,9 +1,8 @@
-﻿using IT.Tangdao.Framework.Abstractions.IServices;
-using IT.Tangdao.Framework.Extensions;
+﻿using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.DaoException;
 using System.Reflection;
 
-namespace IT.Tangdao.Framework.Abstractions.Services
+namespace IT.Tangdao.Framework.Abstractions
 {
     public class TypeConvertService : ITypeConvertService
     {

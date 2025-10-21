@@ -1,5 +1,4 @@
-﻿using IT.Tangdao.Framework.Abstractions.IServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace IT.Tangdao.Framework.Abstractions.Services
+namespace IT.Tangdao.Framework.Abstractions
 {
     public class QueryControlService : IQueryControlService
     {
@@ -19,27 +18,26 @@ namespace IT.Tangdao.Framework.Abstractions.Services
                 var child = VisualTreeHelper.GetChild(parent, i);
                 if (child is TextBox textBox)
                 {
-                  //  textBox.IsReadOnly = isReadOnly;
+                    //  textBox.IsReadOnly = isReadOnly;
                 }
                 else
                 {
-                   // QueryableLayoutControl(child, isReadOnly);
+                    // QueryableLayoutControl(child, isReadOnly);
                 }
             }
         }
 
-       /* private IEnumerable<Panel> Children
-        {
-            get
-            {
-                if (AssociatedObject is Panel panel)
-                    return panel.Children.OfType<Button>();
+        /* private IEnumerable<Panel> Children
+         {
+             get
+             {
+                 if (AssociatedObject is Panel panel)
+                     return panel.Children.OfType<Button>();
+                 else if (AssociatedObject is ItemsControl control)
+                     return control.Items.OfType<Button>();
 
-                else if (AssociatedObject is ItemsControl control)
-                    return control.Items.OfType<Button>();
-
-                return Enumerable.Empty<Button>();
-            }
-        }*/
+                 return Enumerable.Empty<Button>();
+             }
+         }*/
     }
 }

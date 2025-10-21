@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using IT.Tangdao.Framework.Common.Reflections;
+using IT.Tangdao.Framework.Reflections;
 
 namespace IT.Tangdao.Framework.Extensions
 {

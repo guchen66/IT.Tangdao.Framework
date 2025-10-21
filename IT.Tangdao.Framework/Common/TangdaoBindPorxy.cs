@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace IT.Tangdao.Framework.DaoCommon
+namespace IT.Tangdao.Framework.Common
 {
     public class TangdaoBindPorxy : Freezable
     {

@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.DaoCommon;
+﻿using IT.Tangdao.Framework.Common;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -6,8 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IT.Tangdao.Framework.Parameters.Entitys;
-using System.Windows.Media;
+using IT.Tangdao.Framework.Infrastructure;
 
 namespace IT.Tangdao.Framework.Providers
 {

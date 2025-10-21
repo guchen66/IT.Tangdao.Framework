@@ -19,12 +19,20 @@ namespace IT.Tangdao.Framework.Selectors
         /// 文件查询
         /// </summary>
         /// <returns></returns>
-        private static Lazy<IRead> _read = new Lazy<IRead>(() => new Read());
+        private static readonly Lazy<IRead> _read = new Lazy<IRead>(() => new Read());
+
+        private FileSelector()
+        {
+        }
 
         public static IRead Queryable()
         {
             return _read.Value;
         }
+
+        private static readonly Lazy<IContentQueryable> _contentQueryable = new Lazy<IContentQueryable>(() => new ContentQueryable());
+
+        public static IContentQueryable ContentQueryable() => _contentQueryable.Value;
 
         /// <summary>
         /// 获取当前路径文件类型
@@ -157,29 +165,13 @@ namespace IT.Tangdao.Framework.Selectors
 
         public static string GetExtensionFromFileType(DaoFileType fileType)
         {
-            switch (fileType)
-            {
-                case DaoFileType.Txt:
-                    return ".txt";
+            if (fileType == DaoFileType.None)
+                return null;
 
-                case DaoFileType.Xml:
-                    return ".xml";
+            if (!Enum.IsDefined(typeof(DaoFileType), fileType))
+                throw new ArgumentException($"无效的 DaoFileType 值: {fileType}", nameof(fileType));
 
-                case DaoFileType.Xlsx:
-                    return ".xlsx";
-
-                case DaoFileType.Xaml:
-                    return ".xaml";
-
-                case DaoFileType.Json:
-                    return ".json";
-
-                case DaoFileType.Config:
-                    return ".config";
-
-                default:
-                    return null;
-            }
+            return "." + fileType.ToString().ToLowerInvariant();
         }
 
         private static readonly ConcurrentDictionary<string, string> _cache = new ConcurrentDictionary<string, string>();

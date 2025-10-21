@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.DaoEvents.Handlers;
+﻿using IT.Tangdao.Framework.Events;
 using System;
 
 namespace IT.Tangdao.Framework.Enums

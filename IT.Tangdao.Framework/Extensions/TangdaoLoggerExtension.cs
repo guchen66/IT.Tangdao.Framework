@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
-using IT.Tangdao.Framework.Parameters.Infrastructure;
+using IT.Tangdao.Framework.Infrastructure;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 
 namespace IT.Tangdao.Framework.Extensions

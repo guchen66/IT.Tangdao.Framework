@@ -1,5 +1,5 @@
-﻿using IT.Tangdao.Framework.Parameters.EventArg;
-using IT.Tangdao.Framework.Parameters.Infrastructure;
+﻿using IT.Tangdao.Framework.EventArg;
+using IT.Tangdao.Framework.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

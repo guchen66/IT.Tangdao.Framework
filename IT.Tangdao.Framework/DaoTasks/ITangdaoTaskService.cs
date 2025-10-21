@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.Parameters.Infrastructure;
+﻿using IT.Tangdao.Framework.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -9,7 +9,6 @@ using System.Windows.Data;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Xaml;
-using IT.Tangdao.Framework.Interfaces;
 
 namespace IT.Tangdao.Framework.Markup
 {

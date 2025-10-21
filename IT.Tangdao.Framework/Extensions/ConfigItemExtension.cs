@@ -1,12 +1,10 @@
-﻿using IT.Tangdao.Framework.Interfaces;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using IT.Tangdao.Framework.Abstractions;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -39,18 +37,17 @@ namespace IT.Tangdao.Framework.Extensions
 
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
 
-           /* var customSection = (IConfigItem)config.GetSection(section);
-            if (customSection == null)
-            {
-                dicts.Add("null", null);
-                return dicts;
-            }
-            foreach (MenuElement menu in customSection.Menus)
-            {
-                dicts.TryAdd(menu.Title, menu.Value);
-            }*/
+            /* var customSection = (IConfigItem)config.GetSection(section);
+             if (customSection == null)
+             {
+                 dicts.Add("null", null);
+                 return dicts;
+             }
+             foreach (MenuElement menu in customSection.Menus)
+             {
+                 dicts.TryAdd(menu.Title, menu.Value);
+             }*/
             return dicts;
-
         }
     }
 }

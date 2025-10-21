@@ -1,6 +1,5 @@
-﻿using IT.Tangdao.Framework.DaoCommon;
+﻿using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Enums;
-using IT.Tangdao.Framework.DaoEvents;
 using System;
 using System.Collections.Generic;
 using System.Linq;

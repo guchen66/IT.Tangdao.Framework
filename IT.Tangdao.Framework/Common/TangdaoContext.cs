@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.DaoCommon
+namespace IT.Tangdao.Framework.Common
 {
     /// <summary>
     /// 同步数据传输，进行两个类之间简单的数据交互

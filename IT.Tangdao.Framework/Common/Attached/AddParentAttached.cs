@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.Interfaces;
+﻿using IT.Tangdao.Framework.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace IT.Tangdao.Framework.Common.Attached
+namespace IT.Tangdao.Framework.Attached
 {
     public static class AddParentAttached
     {

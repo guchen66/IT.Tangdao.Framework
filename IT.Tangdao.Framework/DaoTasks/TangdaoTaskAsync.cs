@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.Interfaces;
+﻿using IT.Tangdao.Framework.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

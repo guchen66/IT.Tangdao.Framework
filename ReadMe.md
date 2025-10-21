@@ -8,17 +8,22 @@
 
 静态命令：MinidaoCommand
 
-1-1、用法
+###### 1-1、用法
 
 ```C#
-TangdaoCommand  taodao=new TangdaoCommand();
-TangdaoAsyncCommand taodaoAsync=new TangdaoAsyncCommand();
-MinidaoCommand.Create();
+TangdaoCommand  taodao=new TangdaoCommand(()=>{});
+TangdaoAsyncCommand taodaoAsync=new TangdaoAsyncCommand(async () => { });
+MinidaoCommand.Create(()=>{});
+MinidaoCommand.CreateFromTask(async () => { });
 ```
 
 
 
-#### 2、事件聚合器
+#### 2、事件聚合器 
+
+IDaoEventAggregator
+
+###### 2-1、用法
 
 ```C#
  public IDaoEventAggregator _daoEventAggregator;
@@ -30,38 +35,23 @@ _daoEventAggregator.Subscribe<T>(Execute);
 T:DaoEventBase
 ```
 
-#### 3、增加另外一种全新的方式去发送数据
+#### 3、IOC容器
+
+容器ITangdaoContainer
+
+解析器ITangdaoProvider
+
+修改启动项
 
 ```C#
-MainViewModel: 发送
-private void Execute()
-{
-      ITangdaoParameter tangdaoParameter = new TangdaoParameter();
-      tangdaoParameter.Add("001",Name);
-      this.RunSameLevelWindowAsync<LoginView>(tangdaoParameter);
-}
-LoginViewModel:接收
- public void Response(ITangdaoParameter tangdaoParameter)
- {
-     Name = tangdaoParameter.Get<string>("001");
- }
-```
-
-#### 2、容器
-
-ITangdaoContainer
-
-修改WPF启动项
-
-```C#
- public partial class App : TangdaoApplication
+public partial class App : TangdaoApplication
  {
      protected override void RegisterServices(ITangdaoContainer container)
      {
-         container.AddSingleton<MainView>();
-         container.AddSingleton<MainViewModel>();
-         container.AddSingleton<HomeViewModel>();
-         container.AddSingleton<IReadService, ReadService>();
+         container.AddTangdaoSingleton<MainView>();
+         container.AddTangdaoSingleton<MainViewModel>();
+         container.AddTangdaoSingleton<HomeViewModel>();
+         container.AddTangdaoSingleton<IReadService, ReadService>();
      }
 
      protected override Window CreateWindow()
@@ -71,63 +61,125 @@ ITangdaoContainer
  }
 ```
 
+除了单例注册外，还可以瞬态注册，工厂注册，Key值注册
+
 可以通过服务定位进行接口解析
 
-```
+```C#
 TangdaoApplication.Provider.GetService(viewModel);
 ```
 
 
 
-对PLC的读取进行了扩展未完成
+#### 3、常用文件的读写
 
-```c#
-  container.RegisterPlcServer(plc => 
-  {
-      plc.PlcType= PlcType.Siemens;
-      plc.PlcIpAddress = "127.0.0.1";
-      plc.Port = "502";
-
-  });
-
-  container.RegisterType<IPlcReadService,PlcReadService>();
-  var plcservice=provider.Resolve<IPlcReadService>();
-  plcservice.ReadAsync("DM200");
-```
-
-
-
-#### 3、扩展方法
-
-###### 3-1、读写
-
-StringExtension 可以方便一些代码
-
-读取本地txt文件的方法
-
-```c#
-string path = "E://Temp.txt";
-string xmlContent=TxtFolderHelper.ReadByFileStream(path);
-```
-
-如果是测试读取文件的话，可以简单的读取
-
-```c#
- string path = "E://Temp.txt";
- string content=path.CreateFolder().UseStreamReadToEnd();
-```
-
-读取本地xml文件的方法
+###### 3-1、对XML文件的读写
 
 ```C#
- string path = "E://Temp//Student.xml";
- string xmlContent=TxtFolderHelper.ReadByFileStream(path);
- Student student=XmlFolderHelper.Deserialize<Student>(xmlContent);
+ string foldPath = Path.Combine(IgniteInfoLocation.Cache, "LoginInfo.xml");
+ string xmlData = _readService.Read(foldPath);
+ var isRememberValue = _readService.Current.SelectNode("IsRemember").Result;// 获取元素的值
+ 
 ```
 
-也可以使用接口读取
+支持XML的序列化和反序列化
 
-###### 3-2、xml文件是
+```C#
+ Student student=XmlFolderHelper.Deserialize<Student>(xmlContent);
+ string xml=XmlFolderHelper.SerializeXML<Student>(student);
+```
+
+
+
+###### 3-2、对Config文件的读写
+
+1、读取默认的App.config
+
+配置
+
+```C#
+<configuration>
+	<configSections>
+		<section name="Menu" type="System.Configuration.DictionarySectionHandler" />
+		<section name="Student" type="System.Configuration.DictionarySectionHandler" />
+	</configSections>
+	<Menu>
+		<add key="0" value="我的样本" />
+		<add key="1" value="动态记录" />
+		<add key="2" value="存储" />
+		<add key="3" value="实验" />
+	</Menu>
+	<Student>
+		<add key="Id" value="1" />
+		<add key="Name" value="张三" />
+		<add key="Age" value="18" />
+		<add key="Source" value="18" />
+	</Student>
+</configuration>
+```
+
+
+
+```C#
+ Dictionary<string, string> MenuList = _readService.Current.SelectConfig("Menu").ToDictionary();
+ var student = _readService.Current.SelectConfig("Student").ToObject<Student>();
+```
+
+
+
+2、读取自定义配置config文件
+
+```C#
+<section name="Tangdao" type="IT.Tangdao.Framework.Common.TangdaoMenuSection,IT.Tangdao.Framework" />
+<Tangdao>
+	<menus>
+		<add title="首页" value="DefaultViewModel" />
+		<add title="用户信息" value="UserInfoViewModel" />
+		<add title="设置" value="SetViewModel" />
+		<add title="监控" value="MonitorViewModel" />
+		<add title="维护" value="MaintionViewModel" />
+		<add title="配方" value="RecipeViewModel" />
+		<add title="参数" value="ParameBaseViewModel" />
+	</menus>
+</Tangdao>
+```
+
+
+
+```C#
+ var dicts = readService.Current.SelectCustomConfig(readTitle, section).ToReadResult<Dictionary<string, string>>().Data;
+```
+
+
+
+###### 3-3、对Json文件的读写
+
+```C#
+ var json = readService.Current.SelectValue(key);
+```
+
+
+
+###### 3-4、对ini文件的读写
+
+###### 3-5、便捷式读写文件
+
+注册接口，然后读取
+
+```c#
+  string path = "E://Temp//Student.xml";
+  Student stu= await _readService.ReadXmlToEntityAsync<Student>(path,DaoFileType.Xml);
+```
+
+###### 3-6、支持异步读写
+
+```C#
+  await _writeService.WriteAsync("E://Temp//100.txt","HelloWorld");
+
+  await _readService.ReadAsync("E://Temp//100.txt");
+```
+
+对各种文件子节点的读取
 
 ```C#
 <?xml version="1.0" encoding="utf-8"?>
@@ -157,35 +209,6 @@ string xmlContent=TxtFolderHelper.ReadByFileStream(path);
      public string Name { get; set; }
     
  }
-```
-
-注册接口，然后读取
-
-```c#
-  string path = "E://Temp//Student.xml";
-  Student stu= await _readService.ReadXmlToEntityAsync<Student>(path,DaoFileType.Xml);
-```
-
-简单的读取写入
-
-```C#
-  await _writeService.WriteAsync("E://Temp//100.txt","HelloWorld");
-
-  await _readService.ReadAsync("E://Temp//100.txt");
-```
-
-以及增加了XML的序列化和反序列化
-
-将对象转成XML，以字符串保存
-
-```c#
-string xml=XmlFolderHelper.SerializeXML<Student>(student);
-```
-
-XML字符串反序列化为对象
-
-```c#
-Student student=XmlFolderHelper.Deserialize<Student>(xml);
 ```
 
 使用SelectNode读取xml节点
@@ -249,41 +272,11 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
  var readResult = _readService.Current.SelectNodes<ProcessItem>();
 ```
 
-###### 3-3、config的读取
+#### 4、扩展
 
-配置
+###### 4-1、基于ViewModel命名约定的隐式键展开容器字典
 
-```
-<configuration>
-	<configSections>
-		<section name="Menu" type="System.Configuration.DictionarySectionHandler" />
-		<section name="Student" type="System.Configuration.DictionarySectionHandler" />
-	</configSections>
-	<Menu>
-		<add key="0" value="我的样本" />
-		<add key="1" value="动态记录" />
-		<add key="2" value="存储" />
-		<add key="3" value="实验" />
-	</Menu>
-	<Student>
-		<add key="Id" value="1" />
-		<add key="Name" value="张三" />
-		<add key="Age" value="18" />
-		<add key="Source" value="18" />
-	</Student>
-</configuration>
-```
-
-读取
-
-```
- Dictionary<string, string> MenuList = _readService.Current.SelectConfig("Menu").ToDictionary();
- var student = _readService.Current.SelectConfig("Student").ToObject<Student>();
-```
-
-###### 3-4、基于ViewModel命名约定的隐式键展开容器字典
-
-```
+```C#
  public class Test
  {
      public static MultiKeyDictionary<string> keyValuePairs = new MultiKeyDictionary<string>();
@@ -303,13 +296,48 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
 
 增加自定义排序字典TangdaoSortedDictionary，以及对它的扩展
 
-#### 4、增加一些常用的帮助类
-
-DirectoryHelper
 
 
+###### 4-2、增加另外一种全新的方式去发送数据
 
+```C#
+MainViewModel: 发送
+private void Execute()
+{
+      ITangdaoParameter tangdaoParameter = new TangdaoParameter();
+      tangdaoParameter.Add("001",Name);
+      this.RunSameLevelWindowAsync<LoginView>(tangdaoParameter);
+}
+LoginViewModel:接收
+ public void Response(ITangdaoParameter tangdaoParameter)
+ {
+     Name = tangdaoParameter.Get<string>("001");
+ }
 ```
+
+
+
+对PLC的读取进行了扩展未完成
+
+```c#
+  container.RegisterPlcServer(plc => 
+  {
+      plc.PlcType= PlcType.Siemens;
+      plc.PlcIpAddress = "127.0.0.1";
+      plc.Port = "502";
+
+  });
+
+  container.RegisterType<IPlcReadService,PlcReadService>();
+  var plcservice=provider.Resolve<IPlcReadService>();
+  plcservice.ReadAsync("DM200");
+```
+
+
+
+
+
+```C#
 var maybe = TangdaoOptional<string>.Some("Hello")
                                    .Where(s => s.Length > 3)
                                    .Select(s => s.ToUpper())
@@ -320,7 +348,7 @@ Console.WriteLine(maybe);   // HELLO
 
 
 
-#### 5、强制组件通信
+#### 5、组件通信
 
 ```C#
 //同级别窗体通信 
@@ -331,11 +359,52 @@ this.RunSameLevelWindowAsync<LoginView>(tangdaoParameter);
 this.RunChildWindowAsync<LoginView>();
 ```
 
+###### 5-1、线程之间的数据传输 AmbientContext
 
+```C#
+//值类型使用
+AmbientContext.Set(123);
+AmbientContext.Get<int>();
+
+//引用类型使用
+Student student=new Student(1,"张三");
+AmbientContext.SetCurrent(student);
+AmbientContext.Get<Student>();
+
+//按指定Key值传输数据
+AmbientContext.SetCurrent("学生",student);
+AmbientContext.Get<Student>("学生");
+
+```
+
+###### 5-2、进程之间的数据传输 TangdaoContext
+
+功能更加强大，可以进行数据传输，委托传输，字典传输，命令传输
+
+```C#
+TangdaoContext.SetTangdaoParameter<T>();
+
+TangdaoContext.GetTangdaoParameter<T>();
+```
+
+###### 5-3、Socket通信
 
 #### 6、日志DaoLogger
 
 日志默认是写在桌面上的
+
+```C#
+ private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(Bootstrapper));
+ Logger.WriteLocal($"注册成功");
+```
+
+也可以自定义配置日志的路径：
+
+下面代码放在启动项即可
+
+```C#
+ LogPathConfig.SetRoot($@"{IgniteInfoLocation.Logger}");
+```
 
 #### 7、自动生成器
 
@@ -385,7 +454,7 @@ public class MainWindowViewModel : BindableBase
 
 
 
-#### 8、增加IRouter路由导航
+#### 8、增加路由导航
 
 ###### 1、简单的导航，具有翻页功能ISingleRouter
 
@@ -639,7 +708,7 @@ class Program
 
 
 
-#### 10、增加文本监控
+#### 10、文本监控
 
 在程序启动时注册事件
 
@@ -684,7 +753,7 @@ class Program
  Bind<IMonitorService>().To<FileMonitorService>().InSingletonScope();
 ```
 
-#### 11、任务调度器TangdaoTaskScheduler
+#### 11、任务调度器
 
 ```C#
   TangdaoTaskScheduler.Execute(dao: daoTask =>
