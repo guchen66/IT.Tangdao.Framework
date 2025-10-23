@@ -16,25 +16,6 @@ namespace IT.Tangdao.Framework.Selectors
     internal sealed class FileSelector
     {
         /// <summary>
-        /// 文件查询
-        /// </summary>
-        /// <returns></returns>
-        private static readonly Lazy<IRead> _read = new Lazy<IRead>(() => new Read());
-
-        private FileSelector()
-        {
-        }
-
-        public static IRead Queryable()
-        {
-            return _read.Value;
-        }
-
-        private static readonly Lazy<IContentQueryable> _contentQueryable = new Lazy<IContentQueryable>(() => new ContentQueryable());
-
-        public static IContentQueryable ContentQueryable() => _contentQueryable.Value;
-
-        /// <summary>
         /// 获取当前路径文件类型
         /// </summary>
         /// <param name="path"></param>

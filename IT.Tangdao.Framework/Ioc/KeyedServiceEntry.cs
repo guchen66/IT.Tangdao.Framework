@@ -17,6 +17,9 @@ namespace IT.Tangdao.Framework.Ioc
 
         public object Key { get; }
 
+        //TODO
+        //public IServiceFactory Factory { get; }   // 新增
+
         public KeyedServiceEntry(Type serviceType,
                                  Type implementationType,
                                  ILifecycleStrategy lifecycleStrategy,

@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using IT.Tangdao.Framework.Abstractions.Results;
 using IT.Tangdao.Framework.Enums;
-using IT.Tangdao.Framework.Selectors;
-using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Helpers;
+using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions
+namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     /// <summary>
     /// 链式查询起点。支持自动或显式指定格式后对内容做节点/实体查询。
@@ -13,27 +11,22 @@ namespace IT.Tangdao.Framework.Abstractions
     /// </summary>
     public interface IContentQueryable
     {
-        /// <summary>自动探测格式并返回自身。</summary>
-        IContentQueryable Auto();
+        string Content { get; }
 
-        /// <summary>强制按 Xml 解析后续操作。</summary>
-        IContentQueryable AsXml();
+        IContentXmlQueryable AsXml();
 
-        /// <summary>强制按 Json 解析后续操作。</summary>
-        IContentQueryable AsJson();
+        IContentJsonQueryable AsJson();
 
-        /// <summary>强制按 Config 解析后续操作。</summary>
-        IContentQueryable AsConfig();
+        IContentConfigQueryable AsConfig();
 
-        IContentQueryable this[int readIndex] { get; }
+        IContentQueryable Read(string path, DaoFileType t = DaoFileType.None);
 
-        IContentQueryable Read(string path, DaoFileType daoFileType = DaoFileType.None);
+        //Task<IContentQueryable> ReadAsync(string path, DaoFileType daoFileType = DaoFileType.None);
 
-        // --------- 业务查询 ----------
-        ReadResult SelectNode(string node);
+        IContentQueryable Auto();          // 自动探测
 
-        ReadResult<T> Select<T>(string key = null);
+        IContentQueryable this[int index] { get; }
 
-        ReadResult<List<T>> SelectNodes<T>() where T : new();
+        IContentQueryable this[string readObject] { get; }
     }
 }

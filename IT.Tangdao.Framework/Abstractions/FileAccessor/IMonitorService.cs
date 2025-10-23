@@ -4,7 +4,7 @@ using IT.Tangdao.Framework.Events;
 using IT.Tangdao.Framework.EventArg;
 using System;
 
-namespace IT.Tangdao.Framework.Abstractions
+namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     /// <summary>
     /// 本地文件（增删改）监控接口

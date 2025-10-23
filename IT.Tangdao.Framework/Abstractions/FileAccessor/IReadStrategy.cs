@@ -2,19 +2,6 @@
 using IT.Tangdao.Framework.Abstractions.Results;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Enums;
-using IT.Tangdao.Framework.Selectors;
-using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Helpers;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data.SqlTypes;
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {

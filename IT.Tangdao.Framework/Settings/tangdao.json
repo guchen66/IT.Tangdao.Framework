@@ -1,0 +1,7 @@
+{
+  "UserName": "Admin",
+  "Password": "123456",
+  "IsRemember": true,
+  "IsAdmin": true,
+  "Role": "管理员"
+}

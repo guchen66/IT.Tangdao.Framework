@@ -15,6 +15,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using IT.Tangdao.Framework.Ioc;
 using System.ComponentModel;
+using IT.Tangdao.Framework.Abstractions.Configurations;
 
 namespace IT.Tangdao.Framework
 {
@@ -42,7 +43,8 @@ namespace IT.Tangdao.Framework
             RegisterModules(moduleCatalog, builder);
             builder.ValidateDependencies();
             Provider = builder.Build().BuildProvider();
-            OnInitialized(moduleCatalog);
+            builder.RaiseBuilt(Provider);     //回调插件的Initialized
+
             // ② 留给子类做额外配置
             Configure();
 
@@ -128,17 +130,30 @@ namespace IT.Tangdao.Framework
             return list;
         }
 
+        /// <summary>
+        /// 注册模块以及将初始化回调存在builder的委托
+        /// </summary>
+        /// <param name="catalog"></param>
+        /// <param name="builder"></param>
         private static void RegisterModules(IReadOnlyList<ITangdaoModule> catalog, TangdaoContainerBuilder builder)
         {
             var eager = catalog.Where(m => !m.Lazy).OrderBy(m => m.Order);
-            foreach (var m in eager) m.RegisterServices(builder.Container);
+            foreach (var m in eager)
+            {
+                m.RegisterServices(builder.Container);
+                builder.AddBuiltCallback(provider => m.OnInitialized(provider));
+            }
 
             // 懒加载模块：注册一个工厂，第一次解析时触发真实 RegisterServices
             // 延迟注册（只攒动作，不解析）
             foreach (var m in catalog.Where(m => m.Lazy))
             {
                 var moduleCopy = m;
-                builder.Container.AddLazyRegistration(c => moduleCopy.RegisterServices(c));
+                builder.Container.AddLazyRegistration(c =>
+                {
+                    moduleCopy.RegisterServices(c);
+                    builder.AddBuiltCallback(provider => m.OnInitialized(provider));
+                });
             }
         }
 
@@ -147,11 +162,11 @@ namespace IT.Tangdao.Framework
             AppDomain.CurrentDomain.GetAssemblies()
                      .Where(a => !a.IsDynamic && !a.FullName.StartsWith("System"));
 
-        private static void OnInitialized(List<ITangdaoModule> moduleCatalog)
-        {
-            foreach (var m in moduleCatalog.Where(m => !m.Lazy))
-                m.OnInitialized(Provider);
-        }
+        //private static void OnInitialized(List<ITangdaoModule> moduleCatalog)
+        //{
+        //    foreach (var m in moduleCatalog.Where(m => !m.Lazy))
+        //        m.OnInitialized(Provider);
+        //}
 
         protected override void OnExit(ExitEventArgs e)
         {

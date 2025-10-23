@@ -7,25 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
 using IT.Tangdao.Framework.Abstractions.Alarms;
-using IT.Tangdao.Framework.Events;
+using IT.Tangdao.Framework.Ioc;
+using IT.Tangdao.Framework.Abstractions.Configurations;
 
-namespace IT.Tangdao.Framework.Ioc
+namespace IT.Tangdao.Framework.Bootstrap
 {
-    internal sealed class FrameworkDefaultComponent : ITangdaoContainerComponent
-    {
-        public void Load(ITangdaoContainer container, DaoComponentContext context)
-        {
-            // 框架级默认服务
-            container.AddTangdaoSingleton<IReadService, ReadService>();
-            container.AddTangdaoSingleton<IWriteService, WriteService>();
-            container.AddTangdaoSingleton<IAlarmService, AlarmService>();
-            container.AddTangdaoSingleton<IDaoEventAggregator, DaoEventAggregator>();
-            // 2. 默认通知器（用户可再注册覆盖）
-            container.AddTangdaoTransient<IAlarmNotifier, AlarmPopupNotifier>();
-        }
-    }
-
-    // FrameworkDefaultComponentModule.cs
     internal sealed class FrameworkDefaultComponentModule : TangdaoModuleBase
     {
         public override void RegisterServices(ITangdaoContainer container)

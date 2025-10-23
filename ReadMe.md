@@ -17,6 +17,15 @@ MinidaoCommand.Create(()=>{});
 MinidaoCommand.CreateFromTask(async () => { });
 ```
 
+###### 1-2、集成快捷命令
+
+```
+//当ViewModel继承DaoViewModelBase的时候，可以快速创建命令，省去new TangdaoCommand();
+HomeViewModel : DaoViewModelBase
+
+public ICommand SaveCommand => this.Cmd(Execute);
+```
+
 
 
 #### 2、事件聚合器 
@@ -37,9 +46,7 @@ T:DaoEventBase
 
 #### 3、IOC容器
 
-容器ITangdaoContainer
-
-解析器ITangdaoProvider
+###### 3-1、容器ITangdaoContainer
 
 修改启动项
 
@@ -63,17 +70,73 @@ public partial class App : TangdaoApplication
 
 除了单例注册外，还可以瞬态注册，工厂注册，Key值注册
 
-可以通过服务定位进行接口解析
+```C#
+
+ container.AddTangdaoScoped<T>();
+ container.AddTangdaoTransient<T>();
+ container.AddTangdaoSingleton<T>();
+ container.AddKeyedTransient<T>();
+container.AddTangdaoSingletonFactory<IWeatherService>(provider =>
+new WeatherService(provider.GetService<ITangdaoLogger>(), provider.GetService<IConfig>()));
+```
+
+###### 3-2、解析器ITangdaoProvider
+
+```
+Provider.GetService<T>();
+```
+
+###### 3-3、服务定位器
 
 ```C#
 TangdaoApplication.Provider.GetService(viewModel);
 ```
 
+#### 4、插件式注册
+
+###### 4-1、对于.Netframwork版本继承TangdaoModuleBase
+
+```C#
+ public class DemoModule : TangdaoModuleBase
+ {
+     public override void RegisterServices(ITangdaoContainer container)
+     {
+         container.AddKeyedSingleton<IReadContentService, ReadConfigService>("config");
+         container.AddKeyedSingleton<IReadContentService, ReadJsonService>("json");
+         container.AddKeyedSingleton<IReadContentService, ReadXmlService>("xml");
+     }
+
+     public override void OnInitialized(ITangdaoProvider provider)
+     {
+         base.OnInitialized(provider);
+     }
+ }
+```
+
+###### 4-2、对于.NetCore版本继承ITangdaoModule
+
+```C#
+ public class DemoModule : ITangdaoModule
+ {
+     public override void RegisterServices(ITangdaoContainer container)
+     {
+         container.AddKeyedSingleton<IReadContentService, ReadConfigService>("config");
+         container.AddKeyedSingleton<IReadContentService, ReadJsonService>("json");
+         container.AddKeyedSingleton<IReadContentService, ReadXmlService>("xml");
+     }
+
+     public override void OnInitialized(ITangdaoProvider provider)
+     {
+         base.OnInitialized(provider);
+     }
+ }
+```
 
 
-#### 3、常用文件的读写
 
-###### 3-1、对XML文件的读写
+#### 5、常用文件的读写
+
+###### 5-1、对XML文件的读写
 
 ```C#
  string foldPath = Path.Combine(IgniteInfoLocation.Cache, "LoginInfo.xml");
@@ -91,7 +154,7 @@ TangdaoApplication.Provider.GetService(viewModel);
 
 
 
-###### 3-2、对Config文件的读写
+###### 5-2、对Config文件的读写
 
 1、读取默认的App.config
 
@@ -130,7 +193,7 @@ TangdaoApplication.Provider.GetService(viewModel);
 2、读取自定义配置config文件
 
 ```C#
-<section name="Tangdao" type="IT.Tangdao.Framework.Common.TangdaoMenuSection,IT.Tangdao.Framework" />
+<section name="Tangdao" type="IT.Tangdao.Core.DaoCommon.TangdaoMenuSection,IT.Tangdao.Core" />
 <Tangdao>
 	<menus>
 		<add title="首页" value="DefaultViewModel" />
@@ -152,7 +215,7 @@ TangdaoApplication.Provider.GetService(viewModel);
 
 
 
-###### 3-3、对Json文件的读写
+###### 5-3、对Json文件的读写
 
 ```C#
  var json = readService.Current.SelectValue(key);
@@ -160,9 +223,9 @@ TangdaoApplication.Provider.GetService(viewModel);
 
 
 
-###### 3-4、对ini文件的读写
+###### 5-4、对ini文件的读写
 
-###### 3-5、便捷式读写文件
+###### 5-5、便捷式读写文件
 
 注册接口，然后读取
 
@@ -171,7 +234,7 @@ TangdaoApplication.Provider.GetService(viewModel);
   Student stu= await _readService.ReadXmlToEntityAsync<Student>(path,DaoFileType.Xml);
 ```
 
-###### 3-6、支持异步读写
+###### 5-6、支持异步读写
 
 ```C#
   await _writeService.WriteAsync("E://Temp//100.txt","HelloWorld");
@@ -272,9 +335,9 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
  var readResult = _readService.Current.SelectNodes<ProcessItem>();
 ```
 
-#### 4、扩展
+#### 6、扩展
 
-###### 4-1、基于ViewModel命名约定的隐式键展开容器字典
+###### 6-1、基于ViewModel命名约定的隐式键展开容器字典
 
 ```C#
  public class Test
@@ -298,7 +361,7 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
 
 
 
-###### 4-2、增加另外一种全新的方式去发送数据
+###### 6-2、增加另外一种全新的方式去发送数据
 
 ```C#
 MainViewModel: 发送
@@ -348,7 +411,7 @@ Console.WriteLine(maybe);   // HELLO
 
 
 
-#### 5、组件通信
+#### 7、组件通信
 
 ```C#
 //同级别窗体通信 
@@ -359,7 +422,7 @@ this.RunSameLevelWindowAsync<LoginView>(tangdaoParameter);
 this.RunChildWindowAsync<LoginView>();
 ```
 
-###### 5-1、线程之间的数据传输 AmbientContext
+###### 7-1、线程之间的数据传输 AmbientContext
 
 ```C#
 //值类型使用
@@ -377,7 +440,7 @@ AmbientContext.Get<Student>("学生");
 
 ```
 
-###### 5-2、进程之间的数据传输 TangdaoContext
+###### 7-2、进程之间的数据传输 TangdaoContext
 
 功能更加强大，可以进行数据传输，委托传输，字典传输，命令传输
 
@@ -387,9 +450,9 @@ TangdaoContext.SetTangdaoParameter<T>();
 TangdaoContext.GetTangdaoParameter<T>();
 ```
 
-###### 5-3、Socket通信
+###### 7-3、Socket通信
 
-#### 6、日志DaoLogger
+#### 8、日志DaoLogger
 
 日志默认是写在桌面上的
 
@@ -406,7 +469,7 @@ TangdaoContext.GetTangdaoParameter<T>();
  LogPathConfig.SetRoot($@"{IgniteInfoLocation.Logger}");
 ```
 
-#### 7、自动生成器
+#### 9、自动生成器
 
 可以自动生成虚假数据，用于平时调试
 
@@ -454,7 +517,7 @@ public class MainWindowViewModel : BindableBase
 
 
 
-#### 8、增加路由导航
+#### 10、增加路由导航
 
 ###### 1、简单的导航，具有翻页功能ISingleRouter
 
@@ -660,7 +723,7 @@ CS Code:
 
 
 
-#### 9、时间轮
+#### 11、时间轮
 
 ```C#
 class Program
@@ -708,7 +771,7 @@ class Program
 
 
 
-#### 10、文本监控
+#### 12、文本监控
 
 在程序启动时注册事件
 
@@ -753,7 +816,7 @@ class Program
  Bind<IMonitorService>().To<FileMonitorService>().InSingletonScope();
 ```
 
-#### 11、任务调度器
+#### 13、任务调度器
 
 ```C#
   TangdaoTaskScheduler.Execute(dao: daoTask =>
@@ -770,7 +833,7 @@ class Program
   TangdaoTaskScheduler.Execute(daoAsync => { }, dao => { });
 ```
 
-#### 12、Markup的扩展
+#### 14、Markup的扩展
 
 ###### 1、对Combobox进行定制列表
 
@@ -875,7 +938,7 @@ public class ComboboxOptions
 </DataGridTemplateColumn>
 ```
 
-#### 13、路径处理
+#### 15、路径处理
 
 | 场景                                       | 用途                                 | 如何使用                                                     |
 | ------------------------------------------ | ------------------------------------ | ------------------------------------------------------------ |
@@ -975,7 +1038,7 @@ AbsolutePath sourcePath = TangdaoPath.Instance
  var backup = sourcePath.Backup(".bak");
 ```
 
-#### 14、自定义排序
+#### 16、自定义排序
 
 带后期增加接口优化
 

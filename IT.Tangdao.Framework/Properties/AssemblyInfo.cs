@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using IT.Tangdao.Framework.Ioc;
 using IT.Tangdao.Framework.Attributes;
+using IT.Tangdao.Framework.Bootstrap;
 
 // 常规信息
 [assembly: AssemblyTitle("Tangdao.Framework")]

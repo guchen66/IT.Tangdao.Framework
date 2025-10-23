@@ -6,7 +6,7 @@
 		<Title>一个简易开发的工具类库包</Title>
 		<Authors>liuxin</Authors>
 		<Owners>liuxin</Owners>
-		<Version>4.0.12</Version>
+		<Version>4.0.14</Version>
 		<Description>一个工具类库包</Description>
 		<RepositoryUrl>https://github.com/guchen66/IT.Tangdao.Framework</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -160,4 +160,8 @@
 	<ItemGroup>
 		<EditorConfigFiles Remove="E:\CSharp Project\自定义Nuget\IT.Tangdao.Framework\IT.Tangdao.Framework\.editorconfig" />
 	</ItemGroup>
+	<ItemGroup>
+  <!-- 确保嵌入 -->
+  <EmbeddedResource Include="Settings\tangdao.json" />
+</ItemGroup>
 </Project>

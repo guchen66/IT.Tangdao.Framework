@@ -11,7 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace IT.Tangdao.Framework.Abstractions
+namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     public class FileMonitorService : IMonitorService, IDisposable
     {

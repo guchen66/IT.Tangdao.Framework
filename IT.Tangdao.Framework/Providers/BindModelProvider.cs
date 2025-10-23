@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.Abstractions;
+﻿using IT.Tangdao.Framework.Abstractions.FileAccessor;
 using IT.Tangdao.Framework.Mvvm;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Helpers;
@@ -25,7 +25,7 @@ namespace IT.Tangdao.Framework.Providers
         public BindModelProvider()
         {
             _readService = TangdaoApplication.Provider.GetService<IReadService>();
-            var xmlData = _readService.Read(ObjectPath);
+            // var xmlData = _readService.Read(ObjectPath);
             //  Default = XmlFolderHelper.Deserialize<T>(new ContentQueryable(xmlData));
         }
     }

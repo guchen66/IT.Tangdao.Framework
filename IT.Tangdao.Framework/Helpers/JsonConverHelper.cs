@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Converters;
 
 namespace IT.Tangdao.Framework.Helpers
 {
@@ -23,7 +24,7 @@ namespace IT.Tangdao.Framework.Helpers
             string rootDirectory = DirectoryHelper.SelectRootDirectory();
 
             string[] jsonFilePaths = await Task.Run(() => Directory.GetFiles(rootDirectory, "*.json"));
-            
+
             return jsonFilePaths.Select(Path.GetFileName).ToArray();           //只列出路径的文件名
         }
 
@@ -53,7 +54,6 @@ namespace IT.Tangdao.Framework.Helpers
             var matchingJson = allJsonFilePaths.FirstOrDefault(s => Path.GetFileNameWithoutExtension(s) == name);
             return matchingJson;
         }
-
 
         /// <summary>
         /// 获取根目录下的指定json文件并打开查看内容
@@ -100,6 +100,19 @@ namespace IT.Tangdao.Framework.Helpers
                 string json = jsonObject[key]?.ToString();
                 return json;
             }
+        }
+
+        internal static void SaveJsonData<T>(T obj, string filePath)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore,  // 这个会排除IP: null
+                Converters = new List<JsonConverter> { new StringEnumConverter() }  // 添加枚举转换器
+            };
+
+            string json = JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
+            File.WriteAllText(filePath, json);
         }
     }
 }
