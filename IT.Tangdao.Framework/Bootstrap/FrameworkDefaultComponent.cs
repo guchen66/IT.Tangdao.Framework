@@ -22,8 +22,6 @@ namespace IT.Tangdao.Framework.Bootstrap
             container.AddTangdaoSingleton<IWriteService, WriteService>();
             container.AddTangdaoSingleton<IAlarmService, AlarmService>();
 
-            // 你写的——完全等价
-            // container.AddTangdaoSingletonFactory<TangdaoConfig>(sp => sp.GetService<ITangdaoConfigLoader>().Load());
             var loader = new TangdaoConfigLoader();
             // 2. 立即 Load 并塞进容器
             container.AddTangdaoSingleton(loader.Load());

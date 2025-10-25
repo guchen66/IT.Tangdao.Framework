@@ -28,14 +28,14 @@ namespace IT.Tangdao.Framework.Abstractions
         /// 硬件打开
         /// </summary>
         /// <returns></returns>
-        Task<ReadResult> Open();
+        //  Task<ResponseResult> Open();
 
         /// <summary>
         /// 硬件关闭
         /// </summary>
         /// <returns></returns>
-        Task<ReadResult> Close();
+        // Task<ResponseResult> Close();
 
-        Task<ReadResult> Read();
+        // Task<ResponseResult> Read();
     }
 }

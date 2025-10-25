@@ -2,6 +2,7 @@
 using IT.Tangdao.Framework.Abstractions.Results;
 using IT.Tangdao.Framework.Enums;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Paths;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
@@ -21,7 +22,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         IContentQueryable Read(string path, DaoFileType t = DaoFileType.None);
 
-        //Task<IContentQueryable> ReadAsync(string path, DaoFileType daoFileType = DaoFileType.None);
+        IContentQueryable Read(AbsolutePath path, DaoFileType t = DaoFileType.None);
 
         IContentQueryable Auto();          // 自动探测
 

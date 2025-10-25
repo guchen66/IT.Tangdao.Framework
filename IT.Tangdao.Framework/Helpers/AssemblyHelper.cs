@@ -140,5 +140,41 @@ namespace IT.Tangdao.Framework.Helpers
                               && !a.Name.StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase)
                               && !a.Name.StartsWith("netstandard", StringComparison.OrdinalIgnoreCase))
                   .ToArray();
+
+        /// <summary>
+        /// 返回要搜索的程序集列表；子类可重写过滤
+        /// </summary>
+        /// <returns></returns>
+        internal static IEnumerable<Assembly> GetModuleAssemblies()
+        {
+            // 1. 立即求值，避免多次枚举
+            var loaded = AppDomain.CurrentDomain.GetAssemblies()
+                                  .Where(a => !a.IsDynamic);
+
+            var set = new HashSet<Assembly>(/* 默认引用相等 */);
+
+            // 2. 入口程序集（可能 null）
+            var entry = Assembly.GetEntryAssembly();
+            if (entry != null)
+                set.Add(entry);
+
+            foreach (var a in loaded)
+                if (IsFrameworkCandidate(a))
+                    set.Add(a);
+
+            return set;
+
+            // 本地函数：过滤规则
+            bool IsFrameworkCandidate(Assembly a)
+            {
+                var name = a.FullName;
+                return
+                    !name.StartsWith("System", StringComparison.OrdinalIgnoreCase) &&
+                    !name.StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase) &&
+                    !name.StartsWith("Presentation", StringComparison.OrdinalIgnoreCase) &&
+                    !name.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase) &&
+                    name.StartsWith("IT.Tangdao", StringComparison.OrdinalIgnoreCase);
+            }
+        }
     }
 }

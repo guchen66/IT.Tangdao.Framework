@@ -7,63 +7,72 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.Abstractions.Results
 {
     /// <summary>
-    /// 非泛型查询结果
+    /// 非泛型响应结果
     /// </summary>
-    public class QueryableResult : IQueryableResult
+    public class ResponseResult : IResponseResult
     {
         public bool IsSuccess { get; protected set; }
         public string Message { get; protected set; }
         public DateTime Timestamp { get; } = DateTime.UtcNow;
         public Exception Exception { get; protected set; }
-        public string OperationType { get; protected set; }
+        public string Value { get; protected set; }
+
+        public object Payload { get; set; }
 
         //扩展属性字典，用于存储任意附加数据
         public Dictionary<string, object> ExtendedProperties { get; } = new Dictionary<string, object>();
 
-        protected QueryableResult()
-        { }
-
-        public static QueryableResult Success(string message = "操作成功", string operationType = null)
+        public static ResponseResult Success(string message = "操作成功", string value = null)
         {
-            return new QueryableResult
+            return new ResponseResult
             {
                 IsSuccess = true,
                 Message = message,
-                OperationType = operationType
+                Value = value
             };
         }
 
-        public static QueryableResult Failure(string message, Exception exception = null, string operationType = null)
+        public static ResponseResult Success(string message = "操作成功", object payload = null)
         {
-            return new QueryableResult
+            return new ResponseResult
+            {
+                IsSuccess = true,
+                Message = message,
+                Payload = payload
+            };
+        }
+
+        public static ResponseResult Failure(string message, Exception exception = null, string value = null)
+        {
+            return new ResponseResult
             {
                 IsSuccess = false,
                 Message = message,
                 Exception = exception,
-                OperationType = operationType
+                Value = value
             };
         }
 
-        public static QueryableResult FromException(Exception ex, string operationType = null)
+        public static ResponseResult FromException(Exception ex, string content = null)
         {
-            return Failure($"操作异常: {ex.Message}", ex, operationType);
+            return Failure($"操作异常: {ex.Message}", ex, content);
         }
 
-        public QueryableResult WithProperty(string key, object value)
+        public ResponseResult WithProperty(string key, object value)
         {
             ExtendedProperties[key] = value;
             return this;
         }
 
         // 转换为泛型版本
-        public QueryableResult<T> ToGenericResult<T>(T data = default)
+        public ResponseResult<T> ToGenericResult<T>(T data = default)
         {
-            var result = new QueryableResult<T>
+            var result = new ResponseResult<T>
             {
                 IsSuccess = this.IsSuccess,
                 Message = this.Message,
                 Exception = this.Exception,
-                OperationType = this.OperationType,
+                Value = this.Value,
                 Data = data
             };
 

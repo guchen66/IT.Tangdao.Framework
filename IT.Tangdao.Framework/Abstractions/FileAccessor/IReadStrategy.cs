@@ -11,7 +11,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         bool CanHandle(string contentOrPath);
 
-        ReadResult<T> Read<T>(string content, string key = null) where T : class, new();
+        ResponseResult<T> Read<T>(string content, string key = null) where T : class, new();
     }
 
     //internal sealed class XmlReadStrategy : IReadStrategy
@@ -19,7 +19,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     //    public DaoFileType SupportType => DaoFileType.Xml;
     //    public bool CanHandle(string content) => content.TrimStart().StartsWith("<");
 
-    //    public ReadResult<T> Read<T>(string content, string key = null) where T : class, new()
+    //    public ResponseResult<T> Read<T>(string content, string key = null) where T : class, new()
     //    {
     //        // 把原来 Read.SelectNodes<T>() 的逻辑搬过来
     //    }
@@ -30,7 +30,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     //    public DaoFileType SupportType => DaoFileType.Json;
     //    public bool CanHandle(string content) => content.TrimStart().StartsWith("{") || content.TrimStart().StartsWith("[");
 
-    //    public ReadResult<T> Read<T>(string content, string key = null) where T : class, new()
+    //    public ResponseResult<T> Read<T>(string content, string key = null) where T : class, new()
     //    {
     //        // 原 Read.SelectValue / SelectNodes 逻辑
     //    }

@@ -16,6 +16,8 @@ using System.Windows.Media;
 using IT.Tangdao.Framework.Ioc;
 using System.ComponentModel;
 using IT.Tangdao.Framework.Abstractions.Configurations;
+using IT.Tangdao.Framework.Abstractions.Loggers;
+using IT.Tangdao.Framework.Helpers;
 
 namespace IT.Tangdao.Framework
 {
@@ -28,6 +30,7 @@ namespace IT.Tangdao.Framework
     public abstract class TangdaoApplication : Application
     {
         public static ITangdaoProvider Provider { get; private set; }
+        private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(TangdaoApplication));
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -38,7 +41,6 @@ namespace IT.Tangdao.Framework
             RegisterServices(builder.Container);   // 暴露 Container 仅此时有效
 
             //发现Module模块，注册模块
-            // ② 发现 + 注册模块
             var moduleCatalog = DiscoverModules();
             RegisterModules(moduleCatalog, builder);
             builder.ValidateDependencies();
@@ -116,13 +118,18 @@ namespace IT.Tangdao.Framework
             ViewToViewModelLocator.AutoBindViewModel(view, viewType, Provider);
         }
 
-        private List<ITangdaoModule> DiscoverModules()
+        /// <summary>
+        /// 要想生效，用户代码需要写[assembly: TangdaoModule(typeof(DemoModule))]
+        /// </summary>
+        /// <returns></returns>
+        private static List<ITangdaoModule> DiscoverModules()
         {
             var list = new List<ITangdaoModule>();
-            foreach (var asm in GetModuleAssemblies())
+            foreach (var asm in AssemblyHelper.GetModuleAssemblies())
             {
                 foreach (var attr in asm.GetCustomAttributes<TangdaoModuleAttribute>())
                 {
+                    Logger.Info("查看是否调用了" + attr.ToString());
                     if (Activator.CreateInstance(attr.ModuleType) is ITangdaoModule module)
                         list.Add(module);
                 }
@@ -156,17 +163,6 @@ namespace IT.Tangdao.Framework
                 });
             }
         }
-
-        /// 返回要搜索的程序集列表；子类可重写过滤
-        protected virtual IEnumerable<Assembly> GetModuleAssemblies() =>
-            AppDomain.CurrentDomain.GetAssemblies()
-                     .Where(a => !a.IsDynamic && !a.FullName.StartsWith("System"));
-
-        //private static void OnInitialized(List<ITangdaoModule> moduleCatalog)
-        //{
-        //    foreach (var m in moduleCatalog.Where(m => !m.Lazy))
-        //        m.OnInitialized(Provider);
-        //}
 
         protected override void OnExit(ExitEventArgs e)
         {

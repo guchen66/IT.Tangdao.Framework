@@ -27,7 +27,7 @@ namespace IT.Tangdao.Framework.Providers
             JsonFileName = "appsettings.json";
         }
 
-        public ReadResult GetSection(string key)
+        public ResponseResult GetSection(string key)
         {
             var path = DirectoryHelper.SelectDirectoryByName(JsonFileName);
             if (!File.Exists(path))
@@ -43,16 +43,16 @@ namespace IT.Tangdao.Framework.Providers
             JObject jsonObject = JObject.Parse(jsonContent);
             if (jsonObject == null)
             {
-                return ReadResult.Failure("转换失败，json数据为空");
+                return ResponseResult.Failure("转换失败，json数据为空");
             }
             JToken valueToken = jsonObject.SelectToken(tokenPath);
 
             if (valueToken == null || valueToken.Type == JTokenType.Null)
             {
                 // 键不存在或值为 null
-                return ReadResult.Failure("转换失败，JToken为null");
+                return ResponseResult.Failure("转换失败，JToken为null");
             }
-            return ReadResult.Success(valueToken.ToString());
+            return ResponseResult.Success(value: valueToken.ToString());
         }
     }
 }

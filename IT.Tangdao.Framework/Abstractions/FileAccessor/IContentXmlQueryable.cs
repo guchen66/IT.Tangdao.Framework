@@ -7,12 +7,12 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     public interface IContentXmlQueryable : IContentQueryable
     {
-        ReadResult SelectNode(string node);
+        ResponseResult SelectNode(string node);
 
-        ReadResult SelectNodes(string uriPath);
+        ResponseResult SelectNodes(string uriPath);
 
-        ReadResult<List<T>> SelectNodes<T>(string rootElement, Func<XElement, T> selector);
+        ResponseResult<List<T>> SelectNodes<T>(string rootElement, Func<XElement, T> selector);
 
-        ReadResult<List<T>> SelectNodes<T>() where T : new();
+        ResponseResult<List<T>> SelectNodes<T>() where T : new();
     }
 }

@@ -13,52 +13,58 @@ using IT.Tangdao.Framework.Abstractions.Loggers;
 using System.Runtime.Remoting.Contexts;
 using IT.Tangdao.Framework.Infrastructure.Ambient;
 using Newtonsoft.Json;
+using IT.Tangdao.Framework.Paths;
+using System.Windows.Markup;
 
 namespace IT.Tangdao.Framework.Extensions
 {
     public static class CacheContentExtensions
     {
-        private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(CacheContentExtensions));
+        /// <summary>
+        /// 从缓存反序列化（同步） - string 路径
+        /// </summary>
+        public static T DeserializeCache<T>(this ICacheContentQueryable cache, string path, DaoFileType type = DaoFileType.None) where T : class, new()
+            => ResolveInternal<T>(cache, path, type);
 
         /// <summary>
-        /// 从缓存反序列化（同步）
+        /// 从缓存反序列化（同步） - AbsolutePath 路径
         /// </summary>
-        public static T Deserialize<T>(this ICacheContentQueryable cache, string path, DaoFileType type = DaoFileType.None) where T : class, new()
+        public static T DeserializeCache<T>(this ICacheContentQueryable cache, AbsolutePath path, DaoFileType type = DaoFileType.None) where T : class, new()
+            => ResolveInternal<T>(cache, path.Value, type);
+
+        #region 私有实现
+
+        private static T ResolveInternal<T>(ICacheContentQueryable cache, string fullPath, DaoFileType type) where T : class, new()
         {
             try
             {
-                var rootKey = CacheKey.GetCacheKey(path, type);
-
+                var rootKey = FileContentCacheKey.Create(fullPath, type);
                 var parameter = TangdaoContext.GetTangdaoParameter(rootKey);
+                string content = parameter.Get<string>(rootKey);
 
-                string Data = parameter.Get<string>(rootKey);
-                var detected = FileSelector.DetectFromContent(Data);
-                T result = new T();
+                var detected = FileSelector.DetectFromContent(content);
 
                 switch (detected)
                 {
                     case DaoFileType.Xml:
-                        result = XmlFolderHelper.Deserialize<T>(Data);
-                        break;
+                        return XmlFolderHelper.Deserialize<T>(content);
 
                     case DaoFileType.Json:
-                        result = JsonConvert.DeserializeObject<T>(Data); ;
-                        break;
+                        return JsonConvert.DeserializeObject<T>(content);
 
                     case DaoFileType.Config:
-                        result = ReadResult.Success(Data).ToObject<T>();
-                        break;
+                        return ResponseResult.Success(value: content).ToObject<T>();
 
                     default:
                         throw new NotSupportedException($"不支持的文件类型: {detected}");
                 }
-
-                return result;
             }
-            catch (Exception ex)
+            catch
             {
-                return null;// ReadResult<T>.FromException(ex);
+                return default(T);
             }
         }
+
+        #endregion 私有实现
     }
 }

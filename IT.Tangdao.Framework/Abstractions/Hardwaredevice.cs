@@ -15,22 +15,22 @@ namespace IT.Tangdao.Framework.Abstractions
 
         public bool IsConn { get; set; }
 
-        public async Task<ReadResult> Open()
-        {
-            await Task.Delay(1000);
-            return ReadResult.Success();
-        }
+        //public async Task<ResponseResult> Open()
+        //{
+        //    await Task.Delay(1000);
+        //    return ResponseResult.ToGenericResult();
+        //}
 
-        public async Task<ReadResult> Close()
-        {
-            await Task.Delay(1000);
-            return ReadResult.Success();
-        }
+        //public async Task<ResponseResult> Close()
+        //{
+        //    await Task.Delay(1000);
+        //    return ResponseResult.Success();
+        //}
 
-        public async Task<ReadResult> Read()
-        {
-            await Task.Delay(1000);
-            return ReadResult.Success();
-        }
+        //public async Task<ResponseResult> Read()
+        //{
+        //    await Task.Delay(1000);
+        //    return ResponseResult.Success();
+        //}
     }
 }

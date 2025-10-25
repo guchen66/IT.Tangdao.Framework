@@ -76,7 +76,7 @@ public partial class App : TangdaoApplication
  container.AddTangdaoTransient<T>();
  container.AddTangdaoSingleton<T>();
  container.AddKeyedTransient<T>();
-container.AddTangdaoSingletonFactory<IWeatherService>(provider =>
+ container.AddTangdaoSingletonFactory<IWeatherService>(provider =>
 new WeatherService(provider.GetService<ITangdaoLogger>(), provider.GetService<IConfig>()));
 ```
 
@@ -138,11 +138,24 @@ TangdaoApplication.Provider.GetService(viewModel);
 
 ###### 5-1、对XML文件的读写
 
+xml文件：
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LoginDto xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <UserName>Admin</UserName>
+  <Password>123</Password>
+  <IsRemember>true</IsRemember>
+  <IsAdmin>true</IsAdmin>
+  <Role>管理员</Role>
+</LoginDto>
+```
+
+cs代码：
+
 ```C#
  string foldPath = Path.Combine(IgniteInfoLocation.Cache, "LoginInfo.xml");
- string xmlData = _readService.Read(foldPath);
- var isRememberValue = _readService.Current.SelectNode("IsRemember").Result;// 获取元素的值
- 
+ var isRememberValue = _readService.Default.Read(foldPath).AsXml().SelectNode("IsRemember").Value;
 ```
 
 支持XML的序列化和反序列化
@@ -152,13 +165,17 @@ TangdaoApplication.Provider.GetService(viewModel);
  string xml=XmlFolderHelper.SerializeXML<Student>(student);
 ```
 
+也可以使用缓存模式序列化，只要读过本地的文件，就可以使用缓存
+
+```C#
+_readService.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
+```
+
 
 
 ###### 5-2、对Config文件的读写
 
-1、读取默认的App.config
-
-配置
+1、读取默认的App.config配置
 
 ```C#
 <configuration>
@@ -181,19 +198,38 @@ TangdaoApplication.Provider.GetService(viewModel);
 </configuration>
 ```
 
-
+cs代码：使用SelectAppConfig
 
 ```C#
- Dictionary<string, string> MenuList = _readService.Current.SelectConfig("Menu").ToDictionary();
- var student = _readService.Current.SelectConfig("Student").ToObject<Student>();
+ readService.Default.AsConfig().SelectAppConfig(HandlerName);
+```
+
+也可以直接将读取到的数据转成List或ObservableCollection
+
+```C#
+readService.Default.AsConfig().SelectAppConfig(HandlerName).ToList(v => new TangdaoMenuItem { MenuName = v }).ToObservableCollection();
 ```
 
 
 
 2、读取自定义配置config文件
 
+对于.Framework版本
+
 ```C#
-<section name="Tangdao" type="IT.Tangdao.Core.DaoCommon.TangdaoMenuSection,IT.Tangdao.Core" />
+<section name="Tangdao" type="IT.Tangdao.Framework.Common.TangdaoMenuSection,IT.Tangdao.Framework" />
+```
+
+对于.NetCore版本
+
+```C#
+<section name="Tangdao" type="IT.Tangdao.Core.Common.TangdaoMenuSection,IT.Tangdao.Core" />
+```
+
+
+
+```C#
+
 <Tangdao>
 	<menus>
 		<add title="首页" value="DefaultViewModel" />
@@ -207,10 +243,22 @@ TangdaoApplication.Provider.GetService(viewModel);
 </Tangdao>
 ```
 
-
+cs代码：使用SelectCustomConfig
 
 ```C#
- var dicts = readService.Current.SelectCustomConfig(readTitle, section).ToReadResult<Dictionary<string, string>>().Data;
+var responseResult = readService.Default.AsConfig().SelectCustomConfig(readTitle, section);
+```
+
+```C#
+ if (responseResult.Payload is Dictionary<string, string> data)
+ {
+     List<HomeMenuItem> menuItems = data.Select(kvp => new HomeMenuItem
+     {
+         Title = kvp.Key,
+         ViewModelName = kvp.Value
+     }).ToList();
+     return new ReadOnlyCollection<HomeMenuItem>(menuItems);
+ }
 ```
 
 

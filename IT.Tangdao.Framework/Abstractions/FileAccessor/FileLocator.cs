@@ -49,18 +49,18 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             return Entity;
         }
 
-        public ReadResult<string> BatchReadFileAsync(string path, DaoFileType daoFileType = DaoFileType.Txt)
+        public ResponseResult<string> BatchReadFileAsync(string path, DaoFileType daoFileType = DaoFileType.Txt)
         {
             if (string.IsNullOrWhiteSpace(path))
-                return ReadResult<string>.Failure("路径不能为空。");
+                return ResponseResult<string>.Failure("路径不能为空。");
 
             if (FileSelector.GetPathKind(path) != PathKind.Directory)
-                return ReadResult<string>.Failure("指定路径必须是有效目录。");
+                return ResponseResult<string>.Failure("指定路径必须是有效目录。");
 
             // 1. 先拿过滤后的文件列表（私有方法，见下）
             var files = QueryFilter(path, daoFileType);
             if (!files.Any())
-                return ReadResult<string>.Failure($"目录下未找到 {daoFileType} 类型文件。");
+                return ResponseResult<string>.Failure($"目录下未找到 {daoFileType} 类型文件。");
 
             // 2. 逐个读并合并
             var sb = new StringBuilder();
@@ -72,10 +72,10 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                 }
                 catch (Exception ex)
                 {
-                    return ReadResult<string>.Failure($"读取文件失败：{ex.Message}");
+                    return ResponseResult<string>.Failure($"读取文件失败：{ex.Message}");
                 }
             }
-            return ReadResult<string>.Success(sb.ToString());
+            return ResponseResult<string>.Success(sb.ToString());
         }
 
         /// <summary>

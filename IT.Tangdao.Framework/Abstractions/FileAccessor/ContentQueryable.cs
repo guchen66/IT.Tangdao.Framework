@@ -16,6 +16,7 @@ using IT.Tangdao.Framework.Helpers;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Loggers;
+using IT.Tangdao.Framework.Paths;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
@@ -118,11 +119,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         #region--XML读取--
 
-        public ReadResult SelectNode(string node)
+        public ResponseResult SelectNode(string node)
         {
             if (_content == null)
             {
-                return ReadResult.Failure("文件未解析成功");
+                return ResponseResult.Failure("文件未解析成功");
             }
 
             try
@@ -134,19 +135,19 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                 switch (xmlType)
                 {
                     case DaoXmlType.Empty:
-                        return ReadResult.Failure("XML内容为空");
+                        return ResponseResult.Failure("XML内容为空");
 
                     case DaoXmlType.None:
-                        return ReadResult.Failure("XML只有声明没有内容");
+                        return ResponseResult.Failure("XML只有声明没有内容");
 
                     case DaoXmlType.Single:
                         // 单节点结构 - 直接查找目标节点
                         var singleElement = root.Element(node) ?? root.Elements().First().Element(node);
                         if (singleElement == null)
                         {
-                            return ReadResult.Failure($"节点 '{node}' 不存在");
+                            return ResponseResult.Failure($"节点 '{node}' 不存在");
                         }
-                        return ReadResult.Success(singleElement.Value);
+                        return ResponseResult.Success(value: singleElement.Value);
 
                     case DaoXmlType.Multiple:
                         if (ReadIndex < 0)
@@ -155,9 +156,9 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                             var directElement = root.Element(node);
                             if (directElement != null)
                             {
-                                return ReadResult.Success(directElement.Value);
+                                return ResponseResult.Success(value: directElement.Value);
                             }
-                            return ReadResult.Failure("存在多个节点，请指定索引");
+                            return ResponseResult.Failure("存在多个节点，请指定索引");
                         }
                         else
                         {
@@ -165,25 +166,25 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                             var parentNode = root.Elements().ElementAtOrDefault(ReadIndex);
                             if (parentNode == null)
                             {
-                                return ReadResult.Failure($"索引 {ReadIndex} 超出范围");
+                                return ResponseResult.Failure($"索引 {ReadIndex} 超出范围");
                             }
 
                             var targetElement = parentNode.Element(node);
                             if (targetElement == null)
                             {
-                                return ReadResult.Failure($"子节点 '{node}' 不存在");
+                                return ResponseResult.Failure($"子节点 '{node}' 不存在");
                             }
 
-                            return ReadResult.Success(targetElement.Value);
+                            return ResponseResult.Success(value: targetElement.Value);
                         }
 
                     default:
-                        return ReadResult.Failure("未知的XML结构类型");
+                        return ResponseResult.Failure("未知的XML结构类型");
                 }
             }
             catch (Exception ex)
             {
-                return ReadResult.Failure($"XML解析错误: {ex.Message}");
+                return ResponseResult.Failure($"XML解析错误: {ex.Message}");
             }
             finally
             {
@@ -196,48 +197,48 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// </summary>
         /// <param name="uriPath"></param>
         /// <returns></returns>
-        public ReadResult SelectNodes(string uriPath)
+        public ResponseResult SelectNodes(string uriPath)
         {
             XElement xElement = uriPath.LoadFromFile().Root;
             IEnumerable<XElement> xElements = xElement.Descendants();
             if (xElements == null)
             {
-                return ReadResult.Failure($"Element '{uriPath}' not found.");
+                return ResponseResult.Failure($"Element '{uriPath}' not found.");
             }
-            return ReadResult<IEnumerable<XElement>>.Success(xElements);
+            return ResponseResult<IEnumerable<XElement>>.Success(xElements);
         }
 
-        public ReadResult<List<T>> SelectNodes<T>(string rootElement, Func<XElement, T> selector)
+        public ResponseResult<List<T>> SelectNodes<T>(string rootElement, Func<XElement, T> selector)
         {
             try
             {
                 if (_content == null)
                 {
-                    return ReadResult<List<T>>.Failure($"读取失败");
+                    return ResponseResult<List<T>>.Failure($"读取失败");
                 }
                 var doc = XDocument.Parse(_content);
                 var elements = doc.Root.Elements().Select(node => node).ToList();
 
                 if (elements == null || elements.Count == 0)
                 {
-                    return ReadResult<List<T>>.Failure("未找到指定的元素。");
+                    return ResponseResult<List<T>>.Failure("未找到指定的元素。");
                 }
 
                 List<T> result = elements.Select(selector).ToList();
-                return ReadResult<List<T>>.Success(result);
+                return ResponseResult<List<T>>.Success(result);
             }
             catch (Exception ex)
             {
-                return ReadResult<List<T>>.FromException(ex, $"解析 XML 失败: {ex.Message}");
+                return ResponseResult<List<T>>.FromException(ex, $"解析 XML 失败: {ex.Message}");
             }
         }
 
-        public ReadResult<List<T>> SelectNodes<T>() where T : new()
+        public ResponseResult<List<T>> SelectNodes<T>() where T : new()
         {
             try
             {
                 if (_content == null)
-                    return ReadResult<List<T>>.Failure("读取失败");
+                    return ResponseResult<List<T>>.Failure("读取失败");
 
                 var doc = XDocument.Parse(_content);
                 var result = new List<T>();
@@ -249,11 +250,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                     result.Add(instance);
                 }
 
-                return ReadResult<List<T>>.Success(result);
+                return ResponseResult<List<T>>.Success(result);
             }
             catch (Exception ex)
             {
-                return ReadResult<List<T>>.FromException(ex, $"解析失败: {ex.Message}");
+                return ResponseResult<List<T>>.FromException(ex, $"解析失败: {ex.Message}");
             }
         }
 
@@ -261,11 +262,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         #region-- 读取Json数据 --
 
-        public ReadResult SelectKeys()
+        public ResponseResult SelectKeys()
         {
             if (_content == null)
             {
-                return ReadResult.Failure($"读取失败");
+                return ResponseResult.Failure($"读取失败");
             }
             List<string> keys = new List<string>();
             JObject jsonObject = JObject.Parse(_content);
@@ -291,7 +292,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             }
 
             GetKeys(jsonObject);
-            return ReadResult<List<string>>.Success(keys);
+            return ResponseResult<List<string>>.Success(keys);
         }
 
         /// <summary>
@@ -299,27 +300,27 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public ReadResult SelectValue(string key)
+        public ResponseResult SelectValue(string key)
         {
             if (_content == null)
             {
-                return ReadResult.Failure($"读取失败");
+                return ResponseResult.Failure($"读取失败");
             }
             var path = DirectoryHelper.SelectDirectoryByName(_content);
             string jsonContent = File.ReadAllText(path);
             JObject jsonObject = JObject.Parse(jsonContent);
             if (ReadObject == null)
             {
-                return ReadResult.Failure("转换失败，未设置索引器");
+                return ResponseResult.Failure("转换失败，未设置索引器");
             }
             JToken valueToken = jsonObject.SelectToken($"{ReadObject}.{key}");
 
             if (valueToken == null || valueToken.Type == JTokenType.Null)
             {
                 // 键不存在或值为 null
-                return ReadResult.Failure("转换失败，JToken为null");
+                return ResponseResult.Failure("转换失败，JToken为null");
             }
-            return ReadResult.Success(valueToken.ToString());
+            return ResponseResult.Success(value: valueToken.ToString());
         }
 
         #endregion
@@ -332,28 +333,26 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// 使用了struct后，如果传递数据的扩展方法，需要加上ref
         /// </summary>
         /// <param name="section"></param>
-        public ReadResult SelectConfig(string section)
+        public ResponseResult SelectAppConfig(string section)
         {
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
             TangdaoSortedDictionary<string, string> dict = idict.Cast<DictionaryEntry>().ToTangdaoSortedDictionary();
-
-            return ReadResult<TangdaoSortedDictionary<string, string>>.Success(dict);
+            return ResponseResult.Success(payload: dict);
         }
 
-        public ReadResult SelectConfig<T>(string section) where T : class, new()
+        public ResponseResult SelectAppConfig<T>(string section) where T : class, new()
         {
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
 
             var dict = idict.Cast<DictionaryEntry>()
                            .ToDictionary(
                                de => de.Key.ToString(),
-                               de => Convert.ChangeType(de.Value, typeof(T)) as T
-                           );
+                               de => Convert.ChangeType(de.Value, typeof(T)) as T);
 
-            return ReadResult<Dictionary<string, T>>.Success(dict);
+            return ResponseResult<Dictionary<string, T>>.Success(dict);
         }
 
-        public ReadResult SelectConfigByJsonConvert<T>(string section) where T : class, new()
+        public ResponseResult SelectConfigByJsonConvert<T>(string section) where T : class, new()
         {
             T Target = new T();
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
@@ -363,14 +362,14 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                        de => JsonConvert.DeserializeObject<T>(de.Value.ToString())
                    );
 
-            return ReadResult<Dictionary<string, T>>.Success(dict);
+            return ResponseResult<Dictionary<string, T>>.Success(dict);
         }
 
         /// <summary>
         /// 读取自定义的config文件
         /// </summary>
         /// <param name="menuList"></param>
-        public ReadResult SelectCustomConfig(string configName, string section)
+        public ResponseResult SelectCustomConfig(string configName, string section)
         {
             Dictionary<string, string> dicts = new Dictionary<string, string>();
             ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap
@@ -384,13 +383,30 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             if (customSection == null)
             {
                 dicts.Add("null", null);
-                return ReadResult<string>.Failure(null);
+                return ResponseResult<string>.Failure(null);
             }
             foreach (MenuElement menu in customSection.Menus)
             {
                 dicts.TryAdd(menu.Title, menu.Value);
             }
-            return ReadResult<Dictionary<string, string>>.Success(dicts);
+            return ResponseResult.Success(payload: dicts);
+        }
+
+        #endregion
+
+        #region --AbsolutePath--
+
+        public IContentQueryable Read(AbsolutePath path, DaoFileType t = DaoFileType.None)
+        {
+            _content = File.ReadAllText(path.Value);
+            _detected = t == DaoFileType.None ? FileSelector.DetectFromContent(_content) : t;
+
+            // ① 根 key：路径 + 格式
+            var rootKey = $"Content:{path.Value}:{_detected}";
+            TangdaoParameter tangdaoParameter = new TangdaoParameter();
+            tangdaoParameter.Add(rootKey, _content);    //缓存内容
+            TangdaoContext.SetTangdaoParameter(rootKey, tangdaoParameter);
+            return this;
         }
 
         #endregion

@@ -9,12 +9,12 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     public interface IContentConfigQueryable : IContentQueryable
     {
-        ReadResult SelectConfig(string section);
+        ResponseResult SelectAppConfig(string section);
 
-        ReadResult SelectConfig<T>(string section) where T : class, new();
+        ResponseResult SelectAppConfig<T>(string section) where T : class, new();
 
-        ReadResult SelectConfigByJsonConvert<T>(string section) where T : class, new();
+        ResponseResult SelectConfigByJsonConvert<T>(string section) where T : class, new();
 
-        ReadResult SelectCustomConfig(string configName, string section);
+        ResponseResult SelectCustomConfig(string configName, string section);
     }
 }
