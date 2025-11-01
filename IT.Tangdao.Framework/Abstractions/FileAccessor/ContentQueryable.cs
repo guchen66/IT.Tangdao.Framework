@@ -17,10 +17,12 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Paths;
+using IT.Tangdao.Framework.Infrastructure.Configurations;
+using System.Xml;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
-    internal sealed class ContentQueryable : IContentQueryable, IContentXmlQueryable, IContentJsonQueryable, IContentConfigQueryable
+    internal sealed class ContentQueryable : IContentQueryable, IContentXmlQueryable, IContentJsonQueryable, IContentConfigQueryable, IContentIniQueryable
     {
         #region--索引器--
 
@@ -70,6 +72,8 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             set => _content = value;
         }
 
+        internal string _path = string.Empty;
+
         private DaoFileType _detected = DaoFileType.None;
 
         /* ========== IContentQueryable 通用方法 **只写一次** ========== */
@@ -77,8 +81,8 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         public IContentQueryable Read(string path, DaoFileType t)
         {
             _content = File.ReadAllText(path);
+            _path = path;
             _detected = t == DaoFileType.None ? FileSelector.DetectFromContent(_content) : t;
-
             // ① 根 key：路径 + 格式
             var rootKey = string.Format("Content:{0}:{1}", path, _detected);
             TangdaoParameter tangdaoParameter = new TangdaoParameter();
@@ -111,19 +115,55 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         /* ========== 格式切换 ========== */
 
-        public IContentXmlQueryable AsXml() => this;
+        public IContentXmlQueryable AsXml()
+        {
+            if (_detected == DaoFileType.Xml)
+            {
+                return this;
+            }
+            throw new FormatException("转换失败，读取的内容不是有效的XML格式");
+        }
 
-        public IContentJsonQueryable AsJson() => this;
+        public IContentJsonQueryable AsJson()
+        {
+            if (_detected == DaoFileType.Json)
+            {
+                return this;
+            }
+            throw new FormatException("转换失败，读取的内容不是有效的Json格式");
+        }
 
-        public IContentConfigQueryable AsConfig() => this;
+        public IContentConfigQueryable AsConfig()
+        {
+            // 如果是 Config 类型，或者是未读取状态（用于读取默认 App.config），都允许转换
+            if (_detected == DaoFileType.Config || _detected == DaoFileType.None)
+            {
+                return this;
+            }
+            throw new FormatException("转换失败，读取的内容不是有效的Config格式");
+        }
+
+        public IContentIniQueryable AsIni()
+        {
+            if (_detected == DaoFileType.Ini)
+            {
+                return this;
+            }
+            throw new FormatException("转换失败，读取的内容不是有效的Ini格式");
+        }
 
         #region--XML读取--
 
+        /// <summary>
+        /// XML结构是单个节点使用
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public ResponseResult SelectNode(string node)
         {
             if (_content == null)
             {
-                return ResponseResult.Failure("文件未解析成功");
+                return ResponseResult.Failure("文件未解析成功", new XmlException($"文件未解析成功 {_content}"));
             }
 
             try
@@ -135,17 +175,17 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                 switch (xmlType)
                 {
                     case DaoXmlType.Empty:
-                        return ResponseResult.Failure("XML内容为空");
+                        return ResponseResult.Failure("XML内容为空", new XmlException($"XML内容为空 {node}"));
 
                     case DaoXmlType.None:
-                        return ResponseResult.Failure("XML只有声明没有内容");
+                        return ResponseResult.Failure("XML只有声明没有内容", new XmlException($"XML只有声明没有内容: {node}"));
 
                     case DaoXmlType.Single:
                         // 单节点结构 - 直接查找目标节点
                         var singleElement = root.Element(node) ?? root.Elements().First().Element(node);
                         if (singleElement == null)
                         {
-                            return ResponseResult.Failure($"节点 '{node}' 不存在");
+                            return ResponseResult.Failure("存在多个节点，请指定索引", new XmlException($"存在多个节点，请指定索引，目标节点: {node}"));
                         }
                         return ResponseResult.Success(value: singleElement.Value);
 
@@ -158,7 +198,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                             {
                                 return ResponseResult.Success(value: directElement.Value);
                             }
-                            return ResponseResult.Failure("存在多个节点，请指定索引");
+                            return ResponseResult.Failure("存在多个节点，请指定索引", new XmlException($"存在多个节点，请指定索引，目标节点: {node}"));
                         }
                         else
                         {
@@ -166,13 +206,13 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                             var parentNode = root.Elements().ElementAtOrDefault(ReadIndex);
                             if (parentNode == null)
                             {
-                                return ResponseResult.Failure($"索引 {ReadIndex} 超出范围");
+                                return ResponseResult.Failure($"索引 {ReadIndex} 超出范围", new XmlException($"索引 {ReadIndex} 超出范围"));
                             }
 
                             var targetElement = parentNode.Element(node);
                             if (targetElement == null)
                             {
-                                return ResponseResult.Failure($"子节点 '{node}' 不存在");
+                                return ResponseResult.Failure($"子节点 '{node}' 不存在", new XmlException($"子节点 '{node}' 不存在"));
                             }
 
                             return ResponseResult.Success(value: targetElement.Value);
@@ -184,7 +224,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             }
             catch (Exception ex)
             {
-                return ResponseResult.Failure($"XML解析错误: {ex.Message}");
+                return ResponseResult.Failure($"XML解析错误", ex);
             }
             finally
             {
@@ -193,12 +233,13 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         }
 
         /// <summary>
-        /// 这里的path是uri地址，不是XML具体数据
+        /// XML结构是多个节点使用
         /// </summary>
         /// <param name="uriPath"></param>
         /// <returns></returns>
-        public ResponseResult SelectNodes(string uriPath)
+        public ResponseResult SelectNodes()
         {
+            string uriPath = _path;
             XElement xElement = uriPath.LoadFromFile().Root;
             IEnumerable<XElement> xElements = xElement.Descendants();
             if (xElements == null)
@@ -333,11 +374,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// 使用了struct后，如果传递数据的扩展方法，需要加上ref
         /// </summary>
         /// <param name="section"></param>
-        public ResponseResult SelectAppConfig(string section)
+        public ResponseResult<TangdaoSortedDictionary<string, string>> SelectAppConfig(string section)
         {
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
             TangdaoSortedDictionary<string, string> dict = idict.Cast<DictionaryEntry>().ToTangdaoSortedDictionary();
-            return ResponseResult.Success(payload: dict);
+            return ResponseResult<TangdaoSortedDictionary<string, string>>.Success(dict);
         }
 
         public ResponseResult SelectAppConfig<T>(string section) where T : class, new()
@@ -369,12 +410,17 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// 读取自定义的config文件
         /// </summary>
         /// <param name="menuList"></param>
-        public ResponseResult SelectCustomConfig(string configName, string section)
+        public ResponseResult<Dictionary<string, string>> SelectCustomConfig(string configName, string section)
         {
+            if (_detected != DaoFileType.Config)
+            {
+                throw new FormatException("自定义读取Config文件时,请先调用Read方法读取指定路径文件");
+            }
+
             Dictionary<string, string> dicts = new Dictionary<string, string>();
             ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap
             {
-                ExeConfigFilename = Path.Combine(AppDomain.CurrentDomain.BaseDirectory + configName)
+                ExeConfigFilename = _path
             };
 
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
@@ -383,13 +429,34 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             if (customSection == null)
             {
                 dicts.Add("null", null);
-                return ResponseResult<string>.Failure(null);
+                return ResponseResult<Dictionary<string, string>>.Failure(null);
             }
             foreach (MenuElement menu in customSection.Menus)
             {
                 dicts.TryAdd(menu.Title, menu.Value);
             }
-            return ResponseResult.Success(payload: dicts);
+            return ResponseResult<Dictionary<string, string>>.Success(dicts);
+        }
+
+        #endregion
+
+        #region--读取Ini文件--
+
+        public ResponseResult<IniConfig> SelectIni(string section)
+        {
+            var configs = IniParser.Parse(_content);
+            if (configs != null)
+            {
+                if (section == null)
+                {
+                    return null;
+                }
+                return ResponseResult<IniConfig>.Success(data: configs[section]);
+            }
+            else
+            {
+                return ResponseResult<IniConfig>.Failure($" {configs} 不存在");
+            }
         }
 
         #endregion

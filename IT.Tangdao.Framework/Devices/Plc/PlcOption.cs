@@ -11,7 +11,7 @@ namespace IT.Tangdao.Framework.Devices.Plc
     {
         public PlcType PlcType { get; set; }
 
-        public string PlcIpAddress { get; set; }
+        public string Ip { get; set; }
 
         public string Port { get; set; }
 

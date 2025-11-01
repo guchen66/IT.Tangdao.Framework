@@ -22,6 +22,7 @@ namespace IT.Tangdao.Framework
         /// <summary>
         /// 拿到内部注册表（只读），供 Builder 或 Visitor 使用。
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         IServiceRegistry Registry { get; }
 
         /// <summary>

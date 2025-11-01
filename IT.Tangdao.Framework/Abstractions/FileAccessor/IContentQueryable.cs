@@ -20,6 +20,8 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         IContentConfigQueryable AsConfig();
 
+        IContentIniQueryable AsIni();
+
         IContentQueryable Read(string path, DaoFileType t = DaoFileType.None);
 
         IContentQueryable Read(AbsolutePath path, DaoFileType t = DaoFileType.None);

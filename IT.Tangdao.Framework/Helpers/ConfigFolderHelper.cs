@@ -110,5 +110,10 @@ namespace IT.Tangdao.Framework.Helpers
                 dict[k] = ConfigurationManager.AppSettings[k];
             return dict;
         }
+
+        internal static T DeserializeObject<T>(string content) where T : class, new()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

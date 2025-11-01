@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions
+namespace IT.Tangdao.Framework.Abstractions.Contracts
 {
     /// <summary>
-    /// 对ViewModel增强可用功能
+    /// 自动注册ViewModelToView
     /// </summary>
-    public interface IAddParent
+    public interface IViewModel
     {
     }
 }

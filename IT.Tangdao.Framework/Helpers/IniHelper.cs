@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Infrastructure.Configurations;
 
 namespace IT.Tangdao.Framework.Helpers
 {
@@ -160,5 +161,36 @@ namespace IT.Tangdao.Framework.Helpers
         }
 
         #endregion 批量枚举
+
+        /// <summary>
+        /// 检测内容是否为 INI 文件格式
+        /// </summary>
+        public static bool IsIniFormat(string content) => IniParser.IsIniFormat(content);
+
+        /// <summary>
+        /// 解析 INI 文件内容
+        /// </summary>
+        public static IniConfigCollection Parse(string iniContent) => IniParser.Parse(iniContent);
+
+        /// <summary>
+        /// 从文件路径解析 INI 文件
+        /// </summary>
+        public static IniConfigCollection ParseFile(string filePath) => IniParser.ParseFile(filePath);
+
+        // 可以添加其他 INI 相关的工具方法
+        public static string GetValue(IniConfigCollection configs, string section, string key, string defaultValue = "")
+        {
+            var sectionConfig = configs[section];
+            return sectionConfig?[key] ?? defaultValue;
+        }
+
+        public static T GetValue<T>(IniConfigCollection configs, string section, string key, T defaultValue = default)
+        {
+            var value = GetValue(configs, section, key);
+            if (string.IsNullOrEmpty(value))
+                return defaultValue;
+
+            return TypeParser.TryParse<T>(value, out var result) ? result : defaultValue;
+        }
     }
 }

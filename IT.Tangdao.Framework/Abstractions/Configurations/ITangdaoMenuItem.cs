@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Infrastructure
+namespace IT.Tangdao.Framework.Abstractions.Configurations
 {
     /// <summary>
     /// 用于配置菜单

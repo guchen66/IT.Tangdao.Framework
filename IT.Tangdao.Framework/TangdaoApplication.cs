@@ -49,7 +49,6 @@ namespace IT.Tangdao.Framework
 
             // ② 留给子类做额外配置
             Configure();
-
             // ③ 创建主窗口
             var window = CreateWindow();
             // ② 摆烂时走约定
@@ -129,7 +128,6 @@ namespace IT.Tangdao.Framework
             {
                 foreach (var attr in asm.GetCustomAttributes<TangdaoModuleAttribute>())
                 {
-                    Logger.Info("查看是否调用了" + attr.ToString());
                     if (Activator.CreateInstance(attr.ModuleType) is ITangdaoModule module)
                         list.Add(module);
                 }

@@ -12,7 +12,7 @@ namespace IT.Tangdao.Framework.Abstractions.Results
     /// <typeparam name="T">数据类型</typeparam>
     public class ResponseResult<T> : ResponseResult, IResponseResult<T>
     {
-        public new T Data { get; set; }
+        public T Data { get; set; }
 
         protected void Initialize(bool isSuccess, string message, T data = default, Exception exception = null, string value = null)
         {
@@ -49,18 +49,6 @@ namespace IT.Tangdao.Framework.Abstractions.Results
         public new static ResponseResult<T> FromException(Exception ex, string operationType = null)
         {
             return Failure($"操作异常: {ex.Message}", ex, operationType);
-        }
-
-        // 添加扩展属性
-        public new ResponseResult<T> WithProperty(string key, object value)
-        {
-            ExtendedProperties[key] = value;
-            return this;
-        }
-
-        public T GetCuttentData()
-        {
-            return Data;
         }
 
         // 隐式转换

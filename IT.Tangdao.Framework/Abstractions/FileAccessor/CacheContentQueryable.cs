@@ -67,6 +67,8 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         public IContentConfigQueryable AsConfig() => _inner.AsConfig();
 
+        public IContentIniQueryable AsIni() => _inner.AsIni();
+
         public IContentQueryable Auto() => this;
 
         public IContentQueryable this[int idx] => new ContentQueryable()[idx];

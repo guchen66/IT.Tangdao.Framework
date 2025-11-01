@@ -132,6 +132,15 @@ TangdaoApplication.Provider.GetService(viewModel);
  }
 ```
 
+###### 4-3、AutoViewAttribute
+
+当对于ViewModel使用特性的时候，自动关联View和ViewModel
+
+```C#
+ [AutoView]
+ public class DefaultViewModel : DaoViewModelBase{}
+```
+
 
 
 #### 5、常用文件的读写
@@ -165,7 +174,7 @@ cs代码：
  string xml=XmlFolderHelper.SerializeXML<Student>(student);
 ```
 
-也可以使用缓存模式序列化，只要读过本地的文件，就可以使用缓存
+也可以使用缓存模式序列化，只要读过本地的文件，就可以使用缓存转成对象实例
 
 ```C#
 _readService.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
@@ -198,7 +207,7 @@ _readService.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
 </configuration>
 ```
 
-cs代码：使用SelectAppConfig
+cs代码：使用SelectAppConfig ，由于读取的是WPF自带的Appconfig，不需要带路径
 
 ```C#
  readService.Default.AsConfig().SelectAppConfig(HandlerName);
@@ -243,10 +252,10 @@ readService.Default.AsConfig().SelectAppConfig(HandlerName).ToList(v => new Tang
 </Tangdao>
 ```
 
-cs代码：使用SelectCustomConfig
+cs代码：使用SelectCustomConfig，注意，这里需要先指定路径Read(configPath)
 
 ```C#
-var responseResult = readService.Default.AsConfig().SelectCustomConfig(readTitle, section);
+var responseResult = readService.Default.Read(configPath).AsConfig().SelectCustomConfig(readTitle, section);
 ```
 
 ```C#
@@ -266,31 +275,31 @@ var responseResult = readService.Default.AsConfig().SelectCustomConfig(readTitle
 ###### 5-3、对Json文件的读写
 
 ```C#
- var json = readService.Current.SelectValue(key);
+var json = _readService.Default.Read(foldPath).AsJson(); 
+
 ```
 
 
 
 ###### 5-4、对ini文件的读写
 
-###### 5-5、便捷式读写文件
-
-注册接口，然后读取
-
-```c#
-  string path = "E://Temp//Student.xml";
-  Student stu= await _readService.ReadXmlToEntityAsync<Student>(path,DaoFileType.Xml);
-```
-
-###### 5-6、支持异步读写
+ini文件内容
 
 ```C#
-  await _writeService.WriteAsync("E://Temp//100.txt","HelloWorld");
-
-  await _readService.ReadAsync("E://Temp//100.txt");
+[parameters] 
+api_url=http://58.211.68.202:8082
+sockt_port=7181
+boot_up=1
+socket_port=7181
 ```
 
-对各种文件子节点的读取
+```C#
+ var result = _readService.Default.Read(foldPath).AsIni().SelectIni("socket_port");
+```
+
+
+
+对XML各种文件子节点的读取
 
 ```C#
 <?xml version="1.0" encoding="utf-8"?>
@@ -350,20 +359,16 @@ var responseResult = readService.Default.AsConfig().SelectCustomConfig(readTitle
 
 ```C#
 // 正确调用（多节点必须指定索引）
-var ip1 = _readService.Current[1].SelectNode("IP").Value;
+var ip1 = _readService.Default.AsXml().SelectNode("IP").Value;
 
-// 错误调用（多节点未指定索引）
-var ip2 = _readService.Current.SelectNode("IP").Value; 
-// 返回错误："存在多个节点，请指定索引"
+var ip2 = _readService.Default.AsXml().SelectNodes(); 
 
-// 正确调用（单节点可不指定索引）
-var ip3 = _readService.Current.SelectNode("IP").Value; 
 ```
 
 优化繁琐的读取,不需要知道类的所有属性
 
 ```C#
-  var readResult = _readService.Current.SelectNodes("ProcessItem", x => new ProcessItem
+  var readResult = _readService.Default.SelectNodes("ProcessItem", x => new ProcessItem
   {
       Name = x.Element("Name")?.Value,
       IsFeeding = (bool)x.Element("IsFeeding"),
@@ -380,7 +385,7 @@ var ip3 = _readService.Current.SelectNode("IP").Value;
 直接通过反射+泛型
 
 ```C#
- var readResult = _readService.Current.SelectNodes<ProcessItem>();
+ var readResult = _readService.Default.AsXml().SelectNodes<ProcessItem>();
 ```
 
 #### 6、扩展
@@ -1012,7 +1017,9 @@ if (imagePath.FileExists)
 }
 ```
 
-###### 2、使用 `PathTemplate` 动态生成路径
+###### 2、
+
+1、使用 `PathTemplate` 动态生成路径
 
 ```C#
 var template = PathTemplate.Create("{Solution}/Exports/{UserId}/{Date}/report.xlsx");
@@ -1026,6 +1033,31 @@ var path = template.Resolve(new
 
 // 输出：C:\Projects\MySolution\Exports\12345\2025-10-10\report.xlsx
 ```
+
+2、 邮件 / 短信模板
+
+```C#
+var mailTmpl = PathTemplate.Create(
+    "亲爱的 {UserName}，您的验证码是 {Code}，{Expire} 分钟内有效。");
+var body = mailTmpl.Resolve(new { UserName = "张三", Code = "628491", Expire = "5" });
+Console.WriteLine(body);
+// 输出：亲爱的 张三，您的验证码是 628491，5 分钟内有效。
+```
+
+3、代码片段生成器（T4 替代）
+
+```C#
+var propTmpl = PathTemplate.Create("public {Type} {Name} { get; set; }");
+var props = new[] { new { Type = "string", Name = "FirstName" },
+                    new { Type = "int",    Name = "Age" } };
+foreach (var p in props)
+    Console.WriteLine(propTmpl.Resolve(p));
+// 输出：
+// public string FirstName { get; set; }
+// public int Age { get; set; }
+```
+
+
 
 ###### 3、缓存解决方案目录，避免重复查找
 

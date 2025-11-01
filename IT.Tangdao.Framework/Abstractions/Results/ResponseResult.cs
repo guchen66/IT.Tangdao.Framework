@@ -17,10 +17,7 @@ namespace IT.Tangdao.Framework.Abstractions.Results
         public Exception Exception { get; protected set; }
         public string Value { get; protected set; }
 
-        public object Payload { get; set; }
-
-        //扩展属性字典，用于存储任意附加数据
-        public Dictionary<string, object> ExtendedProperties { get; } = new Dictionary<string, object>();
+        //  public object Payload { get; set; }
 
         public static ResponseResult Success(string message = "操作成功", string value = null)
         {
@@ -32,15 +29,15 @@ namespace IT.Tangdao.Framework.Abstractions.Results
             };
         }
 
-        public static ResponseResult Success(string message = "操作成功", object payload = null)
-        {
-            return new ResponseResult
-            {
-                IsSuccess = true,
-                Message = message,
-                Payload = payload
-            };
-        }
+        //public static ResponseResult Success(string message = "操作成功", object payload = null)
+        //{
+        //    return new ResponseResult
+        //    {
+        //        IsSuccess = true,
+        //        Message = message,
+        //        Payload = payload
+        //    };
+        //}
 
         public static ResponseResult Failure(string message, Exception exception = null, string value = null)
         {
@@ -58,12 +55,6 @@ namespace IT.Tangdao.Framework.Abstractions.Results
             return Failure($"操作异常: {ex.Message}", ex, content);
         }
 
-        public ResponseResult WithProperty(string key, object value)
-        {
-            ExtendedProperties[key] = value;
-            return this;
-        }
-
         // 转换为泛型版本
         public ResponseResult<T> ToGenericResult<T>(T data = default)
         {
@@ -75,12 +66,6 @@ namespace IT.Tangdao.Framework.Abstractions.Results
                 Value = this.Value,
                 Data = data
             };
-
-            foreach (var prop in this.ExtendedProperties)
-            {
-                result.ExtendedProperties[prop.Key] = prop.Value;
-            }
-
             return result;
         }
     }

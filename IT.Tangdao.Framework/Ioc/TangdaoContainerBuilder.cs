@@ -30,6 +30,7 @@ namespace IT.Tangdao.Framework.Ioc
         public ITangdaoContainer Build()
         {
             // 目前只是快照返回，后续可加锁防再写
+
             return Container;
         }
 

@@ -1,4 +1,5 @@
-﻿using IT.Tangdao.Framework.EventArg;
+﻿using IT.Tangdao.Framework.Abstractions.Contracts;
+using IT.Tangdao.Framework.EventArg;
 using IT.Tangdao.Framework.Infrastructure;
 using System;
 using System.Collections.Concurrent;

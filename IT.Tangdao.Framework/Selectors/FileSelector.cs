@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using IT.Tangdao.Framework.Helpers;
 
 namespace IT.Tangdao.Framework.Selectors
 {
@@ -58,7 +59,11 @@ namespace IT.Tangdao.Framework.Selectors
                 }
                 return DaoFileType.Xml;
             }
-            // 可以添加更多文件类型的检测逻辑
+            // INI 文件检测
+            else if (IniHelper.IsIniFormat(trimmedContent))
+            {
+                return DaoFileType.Ini;
+            }
             else
             {
                 // 如果都不匹配，可以尝试更复杂的检测或返回None

@@ -61,8 +61,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 把一组节点直接映射成对象，LINQ 一行完事。
         /// </summary>
-        public static IEnumerable<T> Map<T>(this IEnumerable<XElement> source,
-                                            Func<XElement, T> projector)
+        public static IEnumerable<T> Map<T>(this IEnumerable<XElement> source, Func<XElement, T> projector)
             => source.Select(projector);
 
         #region XElement 扩展 - 安全访问

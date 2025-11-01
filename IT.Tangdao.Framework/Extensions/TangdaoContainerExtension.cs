@@ -19,7 +19,7 @@ namespace IT.Tangdao.Framework.Extensions
         public static ITangdaoContainer AddTangdaoTransient<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
             container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new TransientStrategy()));
-            return container;   // 链式
+            return container;
         }
 
         public static ITangdaoContainer AddTangdaoSingleton<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService

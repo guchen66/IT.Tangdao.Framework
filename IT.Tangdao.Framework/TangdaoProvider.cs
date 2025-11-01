@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using IT.Tangdao.Framework.Ioc;
 
 namespace IT.Tangdao.Framework
@@ -16,6 +17,7 @@ namespace IT.Tangdao.Framework
         {
             _registry = registry;
             _factory = factory;
+            // _snapshot = registry.GetAllEntries(); // 建造阶段一次性拍快照，后续线程安全遍
         }
 
         public object GetService(Type serviceType)

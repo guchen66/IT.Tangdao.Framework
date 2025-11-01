@@ -53,7 +53,7 @@ namespace IT.Tangdao.Framework.Extensions
                         return JsonConvert.DeserializeObject<T>(content);
 
                     case DaoFileType.Config:
-                        return ResponseResult.Success(value: content).ToObject<T>();
+                        return ConfigFolderHelper.DeserializeObject<T>(content);
 
                     default:
                         throw new NotSupportedException($"不支持的文件类型: {detected}");

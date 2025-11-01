@@ -9,7 +9,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     {
         ResponseResult SelectNode(string node);
 
-        ResponseResult SelectNodes(string uriPath);
+        ResponseResult SelectNodes();
 
         ResponseResult<List<T>> SelectNodes<T>(string rootElement, Func<XElement, T> selector);
 

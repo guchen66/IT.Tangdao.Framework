@@ -109,7 +109,10 @@ namespace IT.Tangdao.Framework.Paths
         /*---------- 内部 Token ----------*/
 
         private enum TokenType
-        { Literal, Placeholder }
+        {
+            Literal,
+            Placeholder
+        }
 
         private readonly struct Token
         {
@@ -117,7 +120,10 @@ namespace IT.Tangdao.Framework.Paths
             public readonly string Text;
 
             public Token(TokenType type, string text)
-            { Type = type; Text = text; }
+            {
+                Type = type;
+                Text = text;
+            }
         }
     }
 }
