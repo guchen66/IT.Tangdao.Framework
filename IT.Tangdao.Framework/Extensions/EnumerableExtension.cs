@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -108,6 +109,28 @@ namespace IT.Tangdao.Framework.Extensions
             }
 
             return source; // 已存在则返回原集合
+        }
+
+        /// <summary>
+        /// 确保实现IAddParent接口的对象集合不包含重复ID
+        /// 按 Id 去重，不会抛出异常，重复就原样返回
+        /// </summary>
+        public static IEnumerable<T> OnlyAdd<T>(this IEnumerable<T> source, T newItem) where T : IAddParent
+        {
+            if (source == null)
+                TangdaoGuards.ThrowIfNull(source);
+            if (newItem == null)
+                TangdaoGuards.ThrowIfNull(nameof(newItem));
+
+            // 检查是否已存在相同ID的项
+            bool exists = source.Any(item => item.Id == newItem.Id);
+
+            if (!exists)
+            {
+                return source.Concat(new[] { newItem });
+            }
+
+            return source;
         }
 
         /// <summary>

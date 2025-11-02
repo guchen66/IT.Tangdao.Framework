@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using IT.Tangdao.Framework.Ioc;
 
 namespace IT.Tangdao.Framework.Abstractions.Contracts
 {
-    public interface IAddParent
+    /// <summary>
+    /// 扩展Loaded方法
+    /// </summary>
+    public interface IViewReady
     {
-        int Id { get; }
+        void OnViewLoaded();
     }
 }

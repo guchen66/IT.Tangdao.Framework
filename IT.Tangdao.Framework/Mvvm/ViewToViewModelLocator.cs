@@ -14,6 +14,9 @@ using IT.Tangdao.Framework.Threading;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using System.Threading;
+using IT.Tangdao.Framework.Abstractions.Contracts;
+using System.Windows.Shapes;
+using System.Windows.Markup;
 
 namespace IT.Tangdao.Framework.Mvvm
 {
@@ -27,6 +30,8 @@ namespace IT.Tangdao.Framework.Mvvm
         /// 针对普通 VM，零约束
         /// </summary>
         public static object Build(object vm) => BuildInstance(vm);
+
+        private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(ViewToViewModelLocator));
 
         /// <summary>
         /// 针对实现了 ITangdaoPage 的 VM，编译期就能确定类型，零装箱
@@ -75,6 +80,19 @@ namespace IT.Tangdao.Framework.Mvvm
                     if (view is FrameworkElement frameworkElement)
                     {
                         frameworkElement.DataContext = viewModel;
+                        if (viewModel is IViewReady life)
+                        {
+                            // 显式委托变量，用于解绑
+                            RoutedEventHandler handler = null;
+                            handler = (s, e) =>
+                            {
+                                frameworkElement.Loaded -= handler;   // 立刻解绑
+                                life.OnViewLoaded();
+                            };
+                            frameworkElement.Loaded += handler;
+                            if (frameworkElement.IsLoaded)
+                                handler(frameworkElement, new RoutedEventArgs());
+                        }
                     }
                 }
             }
@@ -130,11 +148,24 @@ namespace IT.Tangdao.Framework.Mvvm
                 if (Application.Current.Resources.Contains(key)) continue;
                 var viewTypeName = vmType.FullName.Replace("ViewModel", "View").Replace("ViewModels", "Views");
                 var viewType = vmType.Assembly.GetType(viewTypeName);
-                var view = TangdaoApplication.Provider.GetService(viewType) ?? Activator.CreateInstance(viewType);
+
                 var factory = new FrameworkElementFactory(viewType);
-                Application.Current.Resources[key] =
-                       new DataTemplate { DataType = vmType, VisualTree = factory };
+                factory.AddHandler(FrameworkElement.LoadedEvent, new RoutedEventHandler(OnViewLoaded));
+                var dataTemplate = new DataTemplate { DataType = vmType, VisualTree = factory };
+                Application.Current.Resources[key] = dataTemplate;
             }
+        }
+
+        private static void OnViewLoaded(object sender, RoutedEventArgs e)
+        {
+            // sender 就是「模板实例」本身
+            var view = (FrameworkElement)sender;
+            // 解除订阅，只执行一次
+            view.Loaded -= OnViewLoaded;
+
+            var vm = view.DataContext;          // 已由 ContentPresenter 自动灌入
+            if (vm is IViewReady life)
+                life.OnViewLoaded();
         }
     }
 }
