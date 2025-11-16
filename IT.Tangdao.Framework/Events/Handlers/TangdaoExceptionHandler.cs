@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using IT.Tangdao.Framework.Infrastructure;
 using IT.Tangdao.Framework.Abstractions.Loggers;
+using IT.Tangdao.Framework.Configurations;
 
 namespace IT.Tangdao.Framework.Events
 {

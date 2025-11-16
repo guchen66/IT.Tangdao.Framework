@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Mvvm;
-using IT.Tangdao.Framework.Selectors;
+using IT.Tangdao.Framework.Helpers;
 using System.Runtime.CompilerServices;
 using IT.Tangdao.Framework.Attributes;
 using IT.Tangdao.Framework.Common;
@@ -15,9 +15,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using IT.Tangdao.Framework.Ioc;
 using System.ComponentModel;
-using IT.Tangdao.Framework.Abstractions.Configurations;
 using IT.Tangdao.Framework.Abstractions.Loggers;
-using IT.Tangdao.Framework.Helpers;
 
 namespace IT.Tangdao.Framework
 {

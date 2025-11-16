@@ -1,9 +1,10 @@
-﻿using IT.Tangdao.Framework.Infrastructure.Configurations;
+﻿using IT.Tangdao.Framework.Configurations;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -105,6 +106,29 @@ namespace IT.Tangdao.Framework.Helpers
             }
 
             throw new InvalidOperationException($"No parser registered for type {targetType.Name}");
+        }
+
+        public static bool TryParse(string input, Type targetType, out object result)
+        {
+            result = null;
+
+            // 1. 拿到开放泛型方法 TryParse<T>
+            MethodInfo openMethod = typeof(TypeParser)
+                .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .First(mi => mi.Name == "TryParse" && mi.IsGenericMethodDefinition);
+
+            // 2. 构造封闭泛型方法 TryParse<targetType>
+            MethodInfo closedMethod = openMethod.MakeGenericMethod(targetType);
+
+            // 3. 准备实参：输入串 + out 占位
+            object[] args = { input, null };
+
+            // 4. 调用
+            bool ok = (bool)closedMethod.Invoke(null, args);
+
+            // 5. 取 out 值
+            result = args[1];
+            return ok;
         }
 
         /// <summary>

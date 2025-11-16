@@ -33,13 +33,23 @@ namespace IT.Tangdao.Framework.Extensions
         /// </summary>
         public static ITangdaoContainer AddTangdaoTransient<T>(this ITangdaoContainer container) where T : class
         {
-            container.Register(new ServiceEntry(typeof(T), typeof(T), new TransientStrategy()));
+            return container.AddTangdaoTransient(typeof(T));
+        }
+
+        public static ITangdaoContainer AddTangdaoTransient(this ITangdaoContainer container, Type type)
+        {
+            container.Register(new ServiceEntry(type, type, new TransientStrategy()));
             return container;
         }
 
         public static ITangdaoContainer AddTangdaoSingleton<T>(this ITangdaoContainer container) where T : class
         {
-            container.Register(new ServiceEntry(typeof(T), typeof(T), new SingletonStrategy()));
+            return container.AddTangdaoSingleton(typeof(T));
+        }
+
+        public static ITangdaoContainer AddTangdaoSingleton(this ITangdaoContainer container, Type type)
+        {
+            container.Register(new ServiceEntry(type, type, new SingletonStrategy()));
             return container;
         }
 
@@ -50,17 +60,31 @@ namespace IT.Tangdao.Framework.Extensions
         /// </summary>
         public static ITangdaoContainer AddTangdaoScoped<T>(this ITangdaoContainer container) where T : class
         {
-            container.Register(new ServiceEntry(typeof(T), typeof(T), new ScopedStrategy()));
+            return container.AddTangdaoScoped(typeof(T));
+        }
+
+        public static ITangdaoContainer AddTangdaoScoped(this ITangdaoContainer container, Type type)
+        {
+            container.Register(new ServiceEntry(type, type, new ScopedStrategy()));
             return container;
         }
 
         /// <summary>
         /// 接口→实现（作用域）
         /// </summary>
-        public static ITangdaoContainer AddTangdaoScoped<TService, TImpl>(this ITangdaoContainer container)
-            where TImpl : TService
+        public static ITangdaoContainer AddTangdaoScoped<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
-            container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new ScopedStrategy()));
+            return container.AddTangdaoScoped(typeof(TService), typeof(TImpl));
+        }
+
+        public static ITangdaoContainer AddTangdaoScoped(this ITangdaoContainer container, Type serviceType, Type implementationType)
+        {
+            if (!serviceType.IsAssignableFrom(implementationType))
+            {
+                throw new ArgumentException(
+                    $"类型 {implementationType.Name} 必须继承或实现 {serviceType.Name}");
+            }
+            container.Register(new ServiceEntry(serviceType, implementationType, new ScopedStrategy()));
             return container;
         }
 

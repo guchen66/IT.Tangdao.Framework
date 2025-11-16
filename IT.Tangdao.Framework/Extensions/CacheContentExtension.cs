@@ -8,13 +8,12 @@ using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Abstractions.FileAccessor;
 using System;
 using System.Globalization;
-using IT.Tangdao.Framework.Selectors;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using System.Runtime.Remoting.Contexts;
-using IT.Tangdao.Framework.Infrastructure.Ambient;
 using Newtonsoft.Json;
 using IT.Tangdao.Framework.Paths;
 using System.Windows.Markup;
+using IT.Tangdao.Framework.Ambient;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -42,7 +41,7 @@ namespace IT.Tangdao.Framework.Extensions
                 var parameter = TangdaoContext.GetTangdaoParameter(rootKey);
                 string content = parameter.Get<string>(rootKey);
 
-                var detected = FileSelector.DetectFromContent(content);
+                var detected = FileHelper.DetectFromContent(content);
 
                 switch (detected)
                 {

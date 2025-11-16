@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions.Configurations
+namespace IT.Tangdao.Framework.Abstractions
 {
     [AutoConfigure(1)]
     internal sealed class TangdaoJsonConfig : ITangdaoConfig

@@ -9,6 +9,6 @@ namespace IT.Tangdao.Framework.Ioc
 {
     internal interface ITangdaoContainerComponent : ITangdaoComponent
     {
-        void Load(ITangdaoContainer container, DaoComponentContext context);
+        void Load(ITangdaoContainer container, TangdaoComponentContext context);
     }
 }

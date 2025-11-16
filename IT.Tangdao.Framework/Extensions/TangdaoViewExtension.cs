@@ -10,66 +10,67 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
+using IT.Tangdao.Framework.Abstractions;
 
 namespace IT.Tangdao.Framework.Extensions
 {
     public static class TangdaoViewExtension
     {
-        public static Task RunParentWindowAsync<TWindow>(this DaoViewModelBase viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
-        {
-            var uiSyncContext = System.Windows.Threading.Dispatcher.CurrentDispatcher;
-            var tc = new TaskCompletionSource<object>();
+        //public static Task RunParentWindowAsync<TWindow>(this DaoViewModelBase viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
+        //{
+        //    var uiSyncContext = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        //    var tc = new TaskCompletionSource<object>();
 
-            uiSyncContext.Invoke(() =>
-            {
-                TWindow view = new TWindow();
-                view.Closed += View_Closed;
-                ITangdaoMessage tangdaoWin = view.DataContext as ITangdaoMessage;
-                view.Loaded += (obj, e) =>
-                {
-                    tangdaoWin.Response(tangdaoParameter);
-                };
+        //    uiSyncContext.Invoke(() =>
+        //    {
+        //        TWindow view = new TWindow();
+        //        view.Closed += View_Closed;
+        //        ITangdaoMessage tangdaoWin = view.DataContext as ITangdaoMessage;
+        //        view.Loaded += (obj, e) =>
+        //        {
+        //            tangdaoWin.Response(tangdaoParameter);
+        //        };
 
-                view.Show();
-            });
+        //        view.Show();
+        //    });
 
-            return tc.Task;
-        }
+        //    return tc.Task;
+        //}
 
-        /// <summary>
-        /// 从ViewModel直接打开窗体
-        /// 并且传递参数或者委托到一个平级的窗体
-        /// </summary>
-        /// <typeparam name="TWindow"></typeparam>
-        /// <param name="viewModel"></param>
-        /// <param name="tangdaoParameter"></param>
-        /// <returns></returns>
-        public static Task RunSameLevelWindowAsync<TWindow>(this DaoViewModelBase viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
-        {
-            TaskCompletionSource<object> tc = new TaskCompletionSource<object>();
+        ///// <summary>
+        ///// 从ViewModel直接打开窗体
+        ///// 并且传递参数或者委托到一个平级的窗体
+        ///// </summary>
+        ///// <typeparam name="TWindow"></typeparam>
+        ///// <param name="viewModel"></param>
+        ///// <param name="tangdaoParameter"></param>
+        ///// <returns></returns>
+        //public static Task RunSameLevelWindowAsync<TWindow>(this DaoViewModelBase viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()
+        //{
+        //    TaskCompletionSource<object> tc = new TaskCompletionSource<object>();
 
-            Thread thread = new Thread(() =>
-            {
-                TWindow view = new TWindow();
-                view.Closed += View_Closed;
-                ITangdaoMessage tangdaoWin = view.DataContext as ITangdaoMessage;
-                view.Loaded += (obj, e) =>
-                {
-                    tangdaoWin.Response(tangdaoParameter);
-                };
-                view.Show();
+        //    Thread thread = new Thread(() =>
+        //    {
+        //        TWindow view = new TWindow();
+        //        view.Closed += View_Closed;
+        //        ITangdaoMessage tangdaoWin = view.DataContext as ITangdaoMessage;
+        //        view.Loaded += (obj, e) =>
+        //        {
+        //            tangdaoWin.Response(tangdaoParameter);
+        //        };
+        //        view.Show();
 
-                //如果不加这段代码，窗体因为没有启动消息循环，一闪而过
-                System.Windows.Threading.Dispatcher.Run();
+        //        //如果不加这段代码，窗体因为没有启动消息循环，一闪而过
+        //        System.Windows.Threading.Dispatcher.Run();
 
-                tc.SetResult(null);
-            });
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
+        //        tc.SetResult(null);
+        //    });
+        //    thread.SetApartmentState(ApartmentState.STA);
+        //    thread.Start();
 
-            //新线程启动，将Task实例返回，接收await操作符
-            return tc.Task;
-        }
+        //    //新线程启动，将Task实例返回，接收await操作符
+        //    return tc.Task;
+        //}
 
         /// <summary>
         /// 从ViewModel打开一个子窗体

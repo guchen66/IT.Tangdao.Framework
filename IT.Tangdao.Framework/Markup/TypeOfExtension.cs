@@ -11,8 +11,6 @@ namespace IT.Tangdao.Framework.Markup
     {
         public string TypeName { get; set; }
 
-        //public TypeOfExtension(string typeName) => TypeName = typeName;
-
         public override object ProvideValue(IServiceProvider sp)
         {
             var resolver = sp.GetService(typeof(IXamlTypeResolver)) as IXamlTypeResolver;

@@ -106,7 +106,7 @@ namespace IT.Tangdao.Framework.Mvvm
         {
             if (viewType == null) return null;
 
-            var viewModelName = viewType.Name.Replace("View", "") + "ViewModel";
+            var viewModelName = viewType.Name.Replace("View", "ViewModel");
 
             // 方法1：同命名空间
             var viewModelType = viewType.Assembly.GetType($"{viewType.Namespace}.{viewModelName}");
@@ -118,11 +118,9 @@ namespace IT.Tangdao.Framework.Mvvm
 
             if (viewModelType != null)
             {
-                Console.WriteLine($"通过全局搜索找到: {viewModelType.FullName}");
                 return viewModelType;
             }
 
-            Console.WriteLine($"未找到 ViewModel: {viewModelName}");
             return null;
         }
 
@@ -140,7 +138,7 @@ namespace IT.Tangdao.Framework.Mvvm
 
             var vms = _entryAssembly.GetTypes()
                 .Where(t => !t.IsAbstract &&
-                            Attribute.IsDefined(t, typeof(AutoViewAttribute)));
+                            Attribute.IsDefined(t, typeof(AutoWireViewAttribute)));
 
             foreach (var vmType in vms)
             {

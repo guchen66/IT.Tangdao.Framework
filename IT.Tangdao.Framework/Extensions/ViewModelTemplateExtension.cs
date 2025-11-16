@@ -11,11 +11,8 @@ namespace IT.Tangdao.Framework.Extensions
     {
         /// <summary>
         /// 只要 VM 实现了 IViewModel，就自动创建 DataTemplate 并注入全局资源。
-        /// 调用时机：模块 RegisterServices 阶段即可。
         /// </summary>
-        public static ITangdaoContainer AddViewModelTemplate<TVM, TView>(this ITangdaoContainer container)
-            where TVM : IViewModel
-            where TView : FrameworkElement, new()
+        public static FrameworkElement AddTemplate<TVM, TView>(this FrameworkElement vm) where TVM : FrameworkElement where TView : FrameworkElement, new()
         {
             // ① 创建代码级 DataTemplate
             var template = new DataTemplate
@@ -27,7 +24,7 @@ namespace IT.Tangdao.Framework.Extensions
             // ② 丢进全局资源字典（没有 Key，就是隐式模板）
             Application.Current.Resources.Add(template.DataType, template);
 
-            return container;
+            return vm;
         }
     }
 }

@@ -49,6 +49,35 @@ namespace IT.Tangdao.Framework.Helpers
             }
         }
 
+        private static readonly Random _rand = new Random();
+
+        /// <summary>
+        /// 使用正则随机生成一个邮箱（.NET Framework 版）
+        /// 正则：^[a-z]{6,12}@[a-z]{3,6}\.(com|cn|net|org)$
+        /// </summary>
+        public static string GenerateRandomEmail()
+        {
+            // 1. 小写字母池
+            const string letters = "abcdefghijklmnopqrstuvwxyz";
+
+            // 2. 随机字符串辅助
+            Func<int, int, string> randLower = (min, max) =>
+            {
+                int len = _rand.Next(min, max + 1);
+                var sb = new StringBuilder(len);
+                for (int i = 0; i < len; i++)
+                    sb.Append(letters[_rand.Next(letters.Length)]);
+                return sb.ToString();
+            };
+
+            // 3. 按正则片段拼接
+            string local = randLower(6, 12);          // [a-z]{6,12}
+            string domain = randLower(3, 6);          // [a-z]{3,6}
+            string tld = _rand.Next(2) == 0 ? "com" : "cn"; // 简化二选一
+
+            return $"{local}@{domain}.{tld}";
+        }
+
         /// <summary>
         /// 这个字段可以作为日志标识符使用
         /// </summary>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 using IT.Tangdao.Framework.Enums;
-using IT.Tangdao.Framework.Selectors;
+using IT.Tangdao.Framework.Helpers;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
@@ -25,7 +25,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         {
             var doc = XDocument.Parse(content);
             T instance = new T();
-            FileSelector.MapXElementToObject(doc.Root, instance);
+            FileHelper.MapXElementToObject(doc.Root, instance);
             return instance;
         }
 

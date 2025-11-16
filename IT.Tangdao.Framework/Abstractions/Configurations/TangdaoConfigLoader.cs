@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 
-namespace IT.Tangdao.Framework.Abstractions.Configurations
+namespace IT.Tangdao.Framework.Abstractions
 {
     internal class TangdaoConfigLoader : ITangdaoConfigLoader
     {

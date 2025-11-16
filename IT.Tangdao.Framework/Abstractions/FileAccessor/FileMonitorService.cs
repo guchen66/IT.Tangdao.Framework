@@ -1,7 +1,7 @@
 ﻿using IT.Tangdao.Framework.Configurations;
 using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.EventArg;
-using IT.Tangdao.Framework.Selectors;
+using IT.Tangdao.Framework.Helpers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -86,7 +86,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         private void MonitorFileType(DaoFileType fileType)
         {
-            var files = FileSelector.SelectFilesByDaoFileType(
+            var files = FileHelper.SelectFilesByDaoFileType(
                 _config.MonitorRootPath,
                 fileType,
                 _config.IncludeSubdirectories);
@@ -124,7 +124,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         {
             try
             {
-                string extension = FileSelector.GetExtensionFromFileType(fileType);
+                string extension = FileHelper.GetExtensionFromFileType(fileType);
                 var files = Directory.GetFiles(directoryPath, $"*{extension}", SearchOption.AllDirectories);
 
                 foreach (var filePath in files)
@@ -155,7 +155,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
             try
             {
-                string extension = FileSelector.GetExtensionFromFileType(fileType);
+                string extension = FileHelper.GetExtensionFromFileType(fileType);
                 var watcher = new FileSystemWatcher
                 {
                     Path = directoryPath,

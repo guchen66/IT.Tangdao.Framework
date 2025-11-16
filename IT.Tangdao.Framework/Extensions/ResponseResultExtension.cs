@@ -5,7 +5,7 @@ using System.Text;
 using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Abstractions.Results;
 using System.Collections.ObjectModel;
-using IT.Tangdao.Framework.Infrastructure.Configurations;
+using IT.Tangdao.Framework.Configurations;
 
 namespace IT.Tangdao.Framework.Extensions
 {

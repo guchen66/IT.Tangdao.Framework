@@ -448,7 +448,9 @@ LoginViewModel:接收
 
 
 
-对PLC的读取进行了扩展未完成
+对PLC的读取进行了扩展
+
+注意：已迁移到IT.Tangdao.Core.Device.dll或IT.Tangdao.Framework.Device.dll
 
 ```c#
   container.RegisterPlcServer(plc => 
@@ -574,8 +576,8 @@ public class MainWindowViewModel : BindableBase
 
      private void Loaded()
      {
-         var generator = new DaoFakeDataGeneratorProvider<Student>();
-         List<Student> randomStudents = generator.GenerateRandomData(10);
+         var generator = new TangdaoDataFaker<Student>();
+         List<Student> randomStudents = generator.Build(10);
          Students = new ObservableCollection<Student>(randomStudents);
      }
  }
@@ -1168,3 +1170,16 @@ var priority = new Dictionary<string, int>
 var comparer = TangdaoSortProvider.Priority<Student>(s => s.Education, priority);
 ```
 
+#### 17、特性
+
+AutoRegisterAttribute:自动注册特性
+
+AutoWireViewAttribute：对ViewModel标注特性，自动关联View和ViewModel
+
+```C#
+ [AutoRegister(Mode = RegisterMode.Singleton, Order = 6)]
+ [AutoWireView]
+ public class TaskViewModel : DaoViewModelBase{}
+```
+
+注册的时候，可以指定注册的模式和顺序，数字越小，最先注册

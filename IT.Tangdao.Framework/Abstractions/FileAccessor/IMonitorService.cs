@@ -1,8 +1,8 @@
-﻿using IT.Tangdao.Framework.Configurations;
-using IT.Tangdao.Framework.Enums;
+﻿using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Events;
 using IT.Tangdao.Framework.EventArg;
 using System;
+using IT.Tangdao.Framework.Configurations;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {

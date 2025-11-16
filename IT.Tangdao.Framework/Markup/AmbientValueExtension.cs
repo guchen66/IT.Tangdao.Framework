@@ -8,6 +8,9 @@ using System.Xaml;
 
 namespace IT.Tangdao.Framework.Markup
 {
+    /// <summary>
+    /// 环境传播
+    /// </summary>
     [ContentProperty(nameof(Value))]
     public class AmbientValueExtension : MarkupExtension
     {

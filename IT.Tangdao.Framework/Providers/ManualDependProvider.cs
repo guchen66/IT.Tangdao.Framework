@@ -9,12 +9,12 @@ namespace IT.Tangdao.Framework.Providers
 {
     internal sealed class ManualDependProvider
     {
-        private static List<DaoComponentContext> _daoComponents = new List<DaoComponentContext>();
+        private static List<TangdaoComponentContext> _daoComponents = new List<TangdaoComponentContext>();
 
-        internal static List<DaoComponentContext> CreateDependLinkList(Type componentType, object options = default)
+        internal static List<TangdaoComponentContext> CreateDependLinkList(Type componentType, object options = default)
         {
             // 根组件上下文
-            var rootComponentContext = new DaoComponentContext
+            var rootComponentContext = new TangdaoComponentContext
             {
                 ComponentType = componentType,
                 IsRoot = true
@@ -34,16 +34,16 @@ namespace IT.Tangdao.Framework.Providers
         internal static object ResolveDependLinkList(Type componentType, object options = default)
         {
             // 根组件上下文
-            var rootComponentContext = new DaoComponentContext
+            var rootComponentContext = new TangdaoComponentContext
             {
                 ComponentType = componentType,
                 IsRoot = true
             };
-            rootComponentContext.GetProperty<DaoComponentContext>(componentType);
+            rootComponentContext.GetProperty<TangdaoComponentContext>(componentType);
 
             // 初始化组件依赖链
             var dependLinkList = new List<Type> { componentType };
-            var componentContextLinkList = new List<DaoComponentContext> { rootComponentContext };
+            var componentContextLinkList = new List<TangdaoComponentContext> { rootComponentContext };
 
             // 创建组件依赖链
             //  CreateDependLinkList(componentType, ref dependLinkList, ref componentContextLinkList);

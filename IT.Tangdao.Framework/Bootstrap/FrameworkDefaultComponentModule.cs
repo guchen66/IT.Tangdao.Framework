@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
 using IT.Tangdao.Framework.Abstractions.Alarms;
 using IT.Tangdao.Framework.Ioc;
-using IT.Tangdao.Framework.Abstractions.Configurations;
 
 namespace IT.Tangdao.Framework.Bootstrap
 {

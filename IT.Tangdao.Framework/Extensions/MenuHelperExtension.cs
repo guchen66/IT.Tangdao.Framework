@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IT.Tangdao.Framework.Abstractions.Configurations;
+using IT.Tangdao.Framework.Abstractions;
 
 namespace IT.Tangdao.Framework.Extensions
 {

@@ -9,13 +9,13 @@ using IT.Tangdao.Framework.Abstractions.FileAccessor;
 using IT.Tangdao.Framework.Abstractions.Alarms;
 using IT.Tangdao.Framework.Events;
 using IT.Tangdao.Framework.Ioc;
-using IT.Tangdao.Framework.Abstractions.Configurations;
+using IT.Tangdao.Framework.Abstractions;
 
 namespace IT.Tangdao.Framework.Bootstrap
 {
     internal sealed class FrameworkDefaultComponent : ITangdaoContainerComponent
     {
-        public void Load(ITangdaoContainer container, DaoComponentContext context)
+        public void Load(ITangdaoContainer container, TangdaoComponentContext context)
         {
             // 框架级默认服务
             container.AddTangdaoSingleton<IReadService, ReadService>();

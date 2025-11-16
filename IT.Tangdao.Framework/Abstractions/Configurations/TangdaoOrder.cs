@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions.Configurations
+namespace IT.Tangdao.Framework.Abstractions
 {
     internal class TangdaoOrder : ITangdaoOrder
     {

@@ -29,16 +29,6 @@ namespace IT.Tangdao.Framework.Abstractions.Results
             };
         }
 
-        //public static ResponseResult Success(string message = "操作成功", object payload = null)
-        //{
-        //    return new ResponseResult
-        //    {
-        //        IsSuccess = true,
-        //        Message = message,
-        //        Payload = payload
-        //    };
-        //}
-
         public static ResponseResult Failure(string message, Exception exception = null, string value = null)
         {
             return new ResponseResult

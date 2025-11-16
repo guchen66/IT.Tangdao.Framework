@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Faker;
 
 namespace IT.Tangdao.Framework.Helpers
 {
-    public static class FakeDataHelper
+    internal static class FakeDataHelper
     {
         private static readonly Random _random = new Random();
         private static readonly HashSet<int> _usedIds = new HashSet<int>();
@@ -16,7 +17,7 @@ namespace IT.Tangdao.Framework.Helpers
         private static readonly string[] ChineseCities = { "北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "南京" };
 
         private static readonly string[] CommonHobbies = { "阅读", "旅行", "摄影", "烹饪", "运动", "音乐", "电影" };
-        private static readonly string[] CommonNames = { "张三", "李四", "王五", "赵六", "钱七", "孙八" };
+        public static readonly string[] CommonNames = { "张三", "李四", "王五", "赵六", "钱七" };
         private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
         // 手机号正则（符合中国手机号规则）
@@ -129,6 +130,33 @@ namespace IT.Tangdao.Framework.Helpers
             return returnString ? value.ToString() : value;
         }
 
+        /// <summary>
+        /// 根据模板键返回随机值（.NET Framework 版）
+        /// </summary>
+        public static object GetRandomTemplateValue(string template)
+        {
+            switch (template)
+            {
+                case MockTemplate.ChineseName:
+                    return GetRandomChineseName();
+
+                case MockTemplate.Mobile:
+                    return GenerateChineseMobileNumber();
+
+                case MockTemplate.City:
+                    return GetRandomChineseCity();
+
+                case MockTemplate.Date:
+                    return GenerateRandomDateTime();
+
+                case MockTemplate.Email:
+                    return StringHelper.GenerateRandomEmail();
+
+                default:
+                    return GenerateRandomString(6);
+            }
+        }
+
         public static T GetRandomEnumValue<T>() where T : Enum
         {
             var values = Enum.GetValues(typeof(T));
@@ -144,5 +172,13 @@ namespace IT.Tangdao.Framework.Helpers
         public static bool GetRandomBoolean() => _random.Next(2) == 1;
 
         public static int GetNextAutoIncrementId() => _intIdCounter++;
+
+        public static string CurrentRandomChineseName => GetCurrentRandomChineseName();
+        public static string RandomChineseName => GetRandomChineseName();
+
+        public static string GetCurrentRandomChineseName()
+        {
+            return CultureHelper.GetCultureSpecificNames()[_random.Next(CommonNames.Length)];
+        }
     }
 }
