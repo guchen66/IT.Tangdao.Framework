@@ -22,14 +22,4 @@ namespace IT.Tangdao.Framework.Ioc
                 _ => context.Factory.Create(context.Entry));
         }
     }
-
-    /// <summary>
-    /// 专门为“实例单例”写的生命周期策略——永远返回同一对象。
-    /// </summary>
-    //public sealed class SingletonInstanceStrategy : ILifecycleStrategy
-    //{
-    //    private readonly object _instance;
-    //    public SingletonInstanceStrategy(object instance) => _instance = instance;
-    //    public object CreateInstance(ServiceCreationContext context) => _instance;
-    //}
 }

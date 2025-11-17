@@ -14,7 +14,7 @@ namespace IT.Tangdao.Framework.Common
     /// </summary>
     public sealed class TangdaoTempDirectory : IDisposable
     {
-        private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(TangdaoTempDirectory));
+        private static readonly TangdaoLogger Logger = TangdaoLogger.Get(typeof(TangdaoTempDirectory));
 
         public string Path { get; }
 

@@ -10,7 +10,7 @@ namespace IT.Tangdao.Framework.Extensions
     public static class ViewModelTemplateExtension
     {
         /// <summary>
-        /// 只要 VM 实现了 IViewModel，就自动创建 DataTemplate 并注入全局资源。
+        /// 自动创建 DataTemplate 并注入全局资源。
         /// </summary>
         public static FrameworkElement AddTemplate<TVM, TView>(this FrameworkElement vm) where TVM : FrameworkElement where TView : FrameworkElement, new()
         {

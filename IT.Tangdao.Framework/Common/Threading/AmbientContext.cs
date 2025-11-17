@@ -74,40 +74,40 @@ namespace IT.Tangdao.Framework.Threading
 
         /* ---------- 引用类型版本：CallContext 回落 ---------- */
 
-        public static T GetCurrent<T>() where T : class
+        public static T GetObject<T>() where T : class
         {
             // return CallContext.LogicalGetData(KeyOf<T>()) as T;
-            return GetCurrentCore(KeyOf<T>()) as T;
+            return InternalGetObject(KeyOf<T>()) as T;
         }
 
-        public static void SetCurrent<T>(T value) where T : class
+        public static void SetObject<T>(T value) where T : class
         {
             // CallContext.LogicalSetData(KeyOf<T>(), value);
-            SetCurrentCore(KeyOf<T>(), value);
+            InternalSetObject(KeyOf<T>(), value);
         }
 
-        public static void ClearCurrent<T>() where T : class
+        public static void ClearObject<T>() where T : class
         {
             CallContext.FreeNamedDataSlot(KeyOf<T>());
         }
 
         /* ---------- 具名槽 ---------- */
 
-        public static void SetCurrent<T>(string name, T value) where T : class
-            => SetCurrentCore(KeyOf<T>() + ":" + name, value);
+        public static void SetObject<T>(string name, T value) where T : class
+            => InternalSetObject(KeyOf<T>() + ":" + name, value);
 
-        public static T GetCurrent<T>(string name) where T : class
-            => GetCurrentCore(KeyOf<T>() + ":" + name) as T;
+        public static T GetObject<T>(string name) where T : class
+            => InternalGetObject(KeyOf<T>() + ":" + name) as T;
 
-        public static void ClearCurrent<T>(string name) where T : class
+        public static void ClearObject<T>(string name) where T : class
             => CallContext.FreeNamedDataSlot(KeyOf<T>() + ":" + name);
 
         /* ---------- 唯一底层 ---------- */
 
-        private static void SetCurrentCore(string key, object value)
+        private static void InternalSetObject(string key, object value)
             => CallContext.LogicalSetData(key, value);
 
-        private static object GetCurrentCore(string key)
+        private static object InternalGetObject(string key)
             => CallContext.LogicalGetData(key);
     }
 }

@@ -7,7 +7,7 @@ using IT.Tangdao.Framework.Enums;
 
 namespace IT.Tangdao.Framework.Ambient
 {
-    public class FileContentCacheKey
+    internal sealed class FileContentCacheKey
     {
         public static string Create(string path, DaoFileType type)
         {

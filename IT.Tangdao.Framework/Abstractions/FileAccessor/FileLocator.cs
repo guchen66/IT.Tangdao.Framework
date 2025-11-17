@@ -9,31 +9,70 @@ using System.Threading.Tasks;
 using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Extensions;
 using System.Xml.Linq;
+using IT.Tangdao.Framework.Paths;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
-    internal sealed class FileLocator : IFileLocator
+    public sealed class FileLocator : IFileLocator
     {
+        /// <summary>
+        /// 返回指定后缀的所有文件
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        /// <param name="type"></param>
+        /// <param name="searchSubdirectories"></param>
+        /// <returns></returns>
         public IEnumerable<string> FindFiles(string directoryPath, DaoFileType type, bool searchSubdirectories)
         {
-            if (!Directory.Exists(directoryPath))
-                return Enumerable.Empty<string>();
-
-            var option = searchSubdirectories ? SearchOption.AllDirectories
-                                              : SearchOption.TopDirectoryOnly;
-            var ext = GetExtension(type);          // 把 DaoFileType 映射到 "*.xml" 等
-            return Directory.EnumerateFiles(directoryPath, ext, option);
+            return InternalFindFiles(directoryPath, type, searchSubdirectories);
         }
 
-        public string FindFirst(string directoryPath,
-                                 DaoFileType type,
-                                 bool searchSubdirectories)
+        /// <summary>
+        /// 返回指定后缀的所有文件
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        /// <param name="type"></param>
+        /// <param name="searchSubdirectories"></param>
+        /// <returns></returns>
+        public IEnumerable<string> FindFiles(AbsolutePath absolutePath, DaoFileType type, bool searchSubdirectories)
+        {
+            return InternalFindFiles(absolutePath.Value, type, searchSubdirectories);
+        }
+
+        /// <summary>
+        /// 返回第一个指定后缀文件
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        /// <param name="type"></param>
+        /// <param name="searchSubdirectories"></param>
+        /// <returns></returns>
+        public string FindFirst(string directoryPath, DaoFileType type, bool searchSubdirectories)
             => FindFiles(directoryPath, type, searchSubdirectories).FirstOrDefault();
 
         /* 把之前 private static QueryFilter 逻辑搬进来即可 */
 
+        /// <summary>
+        /// 返回指定后缀规则
+        /// .全部返回
+        /// 否则没根据DaoFileType，返回指定类型
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         private static string GetExtension(DaoFileType type)
             => type == DaoFileType.None ? "*.*" : $"*.{type.ToString().ToLowerInvariant()}";
+
+        /// <summary>
+        /// 共享核心逻辑
+        /// </summary>
+        private static IEnumerable<string> InternalFindFiles(string directory, DaoFileType type, bool searchSubdirectories)
+        {
+            if (!Directory.Exists(directory))
+                return Enumerable.Empty<string>();
+
+            var option = searchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            var ext = GetExtension(type);
+            return Directory.EnumerateFiles(directory, ext, option);
+        }
 
         /// <inheritdoc/>
         public async Task<TEntity> ReadXmlToEntityAsync<TEntity>(string path, DaoFileType daoFileType) where TEntity : class, new()

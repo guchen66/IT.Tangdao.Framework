@@ -21,7 +21,7 @@ namespace IT.Tangdao.Framework.Bootstrap
             container.AddTangdaoSingleton<IReadService, ReadService>();
             container.AddTangdaoSingleton<IWriteService, WriteService>();
             container.AddTangdaoSingleton<IAlarmService, AlarmService>();
-
+            container.AddTangdaoSingleton<IFileLocator, FileLocator>();
             var loader = new TangdaoConfigLoader();
             // 2. 立即 Load 并塞进容器
             container.AddTangdaoSingleton(loader.Load());

@@ -13,7 +13,10 @@ namespace IT.Tangdao.Framework.Helpers
     {
         public static DragMoveHelper Instance { get; } = new DragMoveHelper();
 
-        // 关键：公开一个 ICommand，而不是方法
+        /// <summary>
+        /// 关键：公开一个 ICommand，而不是方法
+        /// </summary>
+        /// <returns></returns>
         public ICommand CreateDragMoveCommand()
         {
             return new TangdaoCommand(() =>

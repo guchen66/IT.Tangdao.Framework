@@ -27,11 +27,11 @@ namespace IT.Tangdao.Framework.DaoTasks
             {
                 task = new TangdaoTask();
                 UI(() => dao(task));          // 同步 Invoke，执行完才退出
-                task.MarkCompleted();
+                task.OnCompleted();
             }
             catch (Exception ex)
             {
-                task?.MarkFaulted(ex);
+                task?.OnFaulted(ex);
                 throw;
             }
             finally
@@ -51,11 +51,11 @@ namespace IT.Tangdao.Framework.DaoTasks
             {
                 task = new TangdaoTask();
                 UIAsync(() => dao(task));          // 同步 Invoke，执行完才退出
-                task.MarkCompleted();
+                task.OnCompleted();
             }
             catch (Exception ex)
             {
-                task?.MarkFaulted(ex);
+                task?.OnFaulted(ex);
                 throw;
             }
             finally
@@ -79,11 +79,11 @@ namespace IT.Tangdao.Framework.DaoTasks
                 try
                 {
                     daoAsync(task);
-                    task.MarkCompleted();
+                    task.OnCompleted();
                 }
                 catch (Exception ex)
                 {
-                    task.MarkFaulted(ex);
+                    task.OnFaulted(ex);
                     throw;
                 }
                 finally
@@ -110,17 +110,17 @@ namespace IT.Tangdao.Framework.DaoTasks
                     await Task.Run(() =>
                     {
                         daoAsync(asyncTask);
-                        asyncTask.MarkCompleted();
+                        asyncTask.OnCompleted();
                     }, token);
                 }
                 catch (OperationCanceledException) when (token.IsCancellationRequested)
                 {
-                    asyncTask?.MarkFaulted(new TaskCanceledException("后台任务被取消"));
+                    asyncTask?.OnFaulted(new TaskCanceledException("后台任务被取消"));
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    asyncTask?.MarkFaulted(ex);
+                    asyncTask?.OnFaulted(ex);
                     throw;
                 }
                 finally
@@ -136,12 +136,12 @@ namespace IT.Tangdao.Framework.DaoTasks
                     {
                         uiTask = new TangdaoTask();
                         dao(uiTask);
-                        uiTask.MarkCompleted();
+                        uiTask.OnCompleted();
                     });
                 }
                 catch (Exception ex)
                 {
-                    uiTask?.MarkFaulted(ex);
+                    uiTask?.OnFaulted(ex);
                     throw;
                 }
                 finally

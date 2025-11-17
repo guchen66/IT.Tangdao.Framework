@@ -17,7 +17,7 @@ namespace IT.Tangdao.Framework.Events
     /// </summary>
     public class TangdaoExceptionHandler
     {
-        private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(TangdaoExceptionHandler));
+        private static readonly TangdaoLogger Logger = TangdaoLogger.Get(typeof(TangdaoExceptionHandler));
 
         private bool _isShowed;
 

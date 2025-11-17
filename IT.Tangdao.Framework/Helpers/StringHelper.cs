@@ -32,7 +32,7 @@ namespace IT.Tangdao.Framework.Helpers
         /// </summary>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static string GenerateRandomString(int length)
+        public static string CreateRandomString(int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
 
@@ -55,7 +55,7 @@ namespace IT.Tangdao.Framework.Helpers
         /// 使用正则随机生成一个邮箱（.NET Framework 版）
         /// 正则：^[a-z]{6,12}@[a-z]{3,6}\.(com|cn|net|org)$
         /// </summary>
-        public static string GenerateRandomEmail()
+        public static string CreateRandomEmail()
         {
             // 1. 小写字母池
             const string letters = "abcdefghijklmnopqrstuvwxyz";
@@ -81,6 +81,6 @@ namespace IT.Tangdao.Framework.Helpers
         /// <summary>
         /// 这个字段可以作为日志标识符使用
         /// </summary>
-        public static string LogId => GenerateRandomString(48);
+        public static string LogId => CreateRandomString(48);
     }
 }

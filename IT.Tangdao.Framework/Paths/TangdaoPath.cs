@@ -34,14 +34,16 @@ namespace IT.Tangdao.Framework.Paths
         /// 当前源文件绝对路径（编译期注入）
         /// </summary>
         public AbsolutePath GetThisFilePath([CallerFilePath] string filePath = null)
-            => new AbsolutePath(filePath);
+        {
+            return new AbsolutePath(filePath);
+        }
 
         /// <summary>
         /// 解决方案根目录（带缓存）
         /// </summary>
-        public AbsolutePath GetSolutionDirectory() => _cache.GetOrAdd("__sln", _ => GetSolutionDirectoryCore());
+        public AbsolutePath GetSolutionDirectory() => _cache.GetOrAdd("__sln", _ => InternalGetSolutionDirectory());
 
-        private AbsolutePath GetSolutionDirectoryCore()
+        private AbsolutePath InternalGetSolutionDirectory()
         {
             var dir = FindSolutionDirectory();
             if (dir == null)
@@ -67,8 +69,7 @@ namespace IT.Tangdao.Framework.Paths
         public AbsolutePath GetEnvironmentDirectory(string envKey, AbsolutePath? fallback = null)
         {
             var val = Environment.GetEnvironmentVariable(envKey);
-            return !string.IsNullOrEmpty(val) ? new AbsolutePath(val)
-                                              : fallback ?? GetCurrentDirectory();
+            return !string.IsNullOrEmpty(val) ? new AbsolutePath(val) : fallback ?? GetCurrentDirectory();
         }
 
         #endregion 核心工厂
@@ -115,8 +116,6 @@ namespace IT.Tangdao.Framework.Paths
         }
 
         #endregion 私有辅助
-
-        // 在 TangdaoPath 类中添加以下方法
 
         #region 日期路径功能
 

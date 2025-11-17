@@ -41,7 +41,7 @@ namespace IT.Tangdao.Framework.Component
         /// <summary>
         /// 是否是根组件
         /// </summary>
-        internal bool IsRoot { get; set; } = false;
+        internal bool IsRoot { get; set; }
 
         /// <summary>
         /// 设置组件属性参数

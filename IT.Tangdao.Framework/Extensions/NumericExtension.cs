@@ -11,12 +11,10 @@ namespace IT.Tangdao.Framework.Extensions
     /// </summary>
     public static class NumericExtension
     {
-        public static int Square(this int value) => (int)SquareCore(value);
+        public static int Square(this int value) => (int)InternalSquare(value);
 
-        public static double Square(this double value) => SquareCore(value);
+        public static double Square(this double value) => InternalSquare(value);
 
-        //public static decimal Square(this decimal value) => SquareCore(value);
-
-        private static double SquareCore(double value) => value * value;
+        private static double InternalSquare(double value) => value * value;
     }
 }

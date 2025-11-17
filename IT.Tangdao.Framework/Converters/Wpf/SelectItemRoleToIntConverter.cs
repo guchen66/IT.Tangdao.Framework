@@ -15,13 +15,13 @@ namespace IT.Tangdao.Framework.Converters.Wpf
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is RoleEnum selectedRole)
+            if (value is TangdaoRole selectedRole)
             {
                 // 获取选中角色的FieldInfo
-                FieldInfo fieldInfo = typeof(RoleEnum).GetField(selectedRole.ToString());
+                FieldInfo fieldInfo = typeof(TangdaoRole).GetField(selectedRole.ToString());
 
                 // 获取角色特性
-                RoleRemarkAttribute attribute = fieldInfo.GetCustomAttribute<RoleRemarkAttribute>();
+                TangdaoRoleAttribute attribute = fieldInfo.GetCustomAttribute<TangdaoRoleAttribute>();
 
                 // 返回特性中的等级值
                 return attribute?.Remark;

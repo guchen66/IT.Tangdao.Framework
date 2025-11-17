@@ -9,7 +9,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     /// <summary>
     /// 本地文件（增删改）监控接口
     /// </summary>
-    public interface IMonitorService
+    public interface IFileMonitor : IDisposable
     {
         event EventHandler<DaoFileChangedEventArgs> FileChanged;
 
@@ -31,6 +31,6 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// <summary>
         /// 获取当前监控状态
         /// </summary>
-        DaoMonitorStatus GetStatus();
+        MonitorStatus GetStatus();
     }
 }

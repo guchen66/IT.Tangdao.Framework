@@ -184,6 +184,15 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
         /// <summary>
+        /// 比较字符串（不区分大小写），返回排序结果
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static int CompareIgnoreCase(this string source, string value)
+        {
+            return string.Compare(source, value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
         /// 检查字符串是否以指定值开头（不区分大小写）
         /// </summary>
         public static bool StartsWithIgnoreCase(this string source, string value)
@@ -203,15 +212,6 @@ namespace IT.Tangdao.Framework.Extensions
                 return false;
 
             return source.EndsWith(value, StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// 比较字符串（不区分大小写），返回排序结果
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public static int CompareIgnoreCase(this string source, string value)
-        {
-            return string.Compare(source, value, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

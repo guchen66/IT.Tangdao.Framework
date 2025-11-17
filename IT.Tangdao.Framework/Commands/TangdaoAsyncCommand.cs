@@ -13,7 +13,7 @@ namespace IT.Tangdao.Framework.Commands
 
         private readonly Func<bool> _canExecuteAsync;
 
-        private bool _isExecuting = false;
+        private bool _isExecuting;
 
         public TangdaoAsyncCommand(Func<Task> executeAsync, Func<bool> canExecuteAsync = null)
         {

@@ -862,7 +862,7 @@ class Program
   protected override void Configure()
   {
       // 启动监控服务
-      var monitorService = Provider.GetService<IMonitorService>();
+      var monitorService = Provider.GetService<IFileMonitor>();
       monitorService.FileChanged += OnFileChanged;
       monitorService.StartMonitoring();
   }
@@ -887,9 +887,9 @@ class Program
      DebounceMilliseconds = 800,
      FileReadRetryCount = 3
  });
- container.AddTangdaoSingletonFactory<IMonitorService>(provider =>
+ container.AddTangdaoSingletonFactory<IFileMonitor>(provider =>
  {
-     return new FileMonitorService
+     return new FileMonitor
      {
          
      };
@@ -999,7 +999,7 @@ public class ComboboxOptions
                    Width="70"
                    Margin="0,0,15,0"
                    Background="LightGreen"
-                   Command="{markup:AncestorBinding Path=DataContext.UpdateUserCommand,AncestorType=UserControl}"
+                   Command="{markup:AncestorBinding Path=DataContext.UpdateUserCommand}"
                    CommandParameter="{Binding Id}"
                    Content="修改"
                    FontSize="14"

@@ -24,6 +24,6 @@ namespace IT.Tangdao.Framework.Paths
         /// <summary>
         /// .xaml解析数据
         /// </summary>
-        public string ComponentFile { get; set; } //
+        public string ComponentFile { get; set; }
     }
 }

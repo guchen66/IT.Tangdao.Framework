@@ -165,5 +165,8 @@
      <!-- 确保嵌入 -->
      <EmbeddedResource Include="Settings\tangdao.json" />
     </ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Abstractions\Reactive\" />
+	</ItemGroup>
 	
 </Project>

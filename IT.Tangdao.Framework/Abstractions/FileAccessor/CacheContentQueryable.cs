@@ -22,10 +22,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             set => _content = value;
         }
 
-        public CacheContentQueryable()
-        { }
-
-        private ContentQueryable _inner = null;
+        private ContentQueryable _inner;
         /* ========== 缓存版 Read - 用 new 隐藏父接口签名 ========== */
 
         public IContentQueryable Read(string path, DaoFileType type)

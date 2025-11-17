@@ -1,5 +1,4 @@
-﻿using IT.Tangdao.Framework.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoTasks
 {
-    public sealed class TangdaoTask : IMarkable, IDisposable
+    public sealed class TangdaoTask : ITaskAwaitable, IDisposable
     {
         private readonly Stopwatch _sw = Stopwatch.StartNew();
         private bool _disposed;                       // 防止重复 Dispose
@@ -26,7 +25,7 @@ namespace IT.Tangdao.Framework.DaoTasks
 
         #region ---- 生命周期钩子（调度器会调用） ----
 
-        public void MarkCompleted()
+        public void OnCompleted()
         {
             lock (_lock)
             {
@@ -35,7 +34,7 @@ namespace IT.Tangdao.Framework.DaoTasks
             }
         }
 
-        public void MarkFaulted(Exception ex)
+        public void OnFaulted(Exception ex)
         {
             lock (_lock)
             {

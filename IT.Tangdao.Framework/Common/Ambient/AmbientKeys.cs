@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Ambient
 {
-    internal static class AmbientKeys
+    internal sealed class AmbientKeys
     {
         public const string Content = "ContentQuery_Content";
         public const string FileType = "ContentQuery_FileType";

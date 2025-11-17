@@ -11,9 +11,12 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
 using IT.Tangdao.Framework.Abstractions;
+using System.ComponentModel;
 
 namespace IT.Tangdao.Framework.Extensions
 {
+    [EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [Obsolete("此类在优化中，暂时不使用")]
     public static class TangdaoViewExtension
     {
         //public static Task RunParentWindowAsync<TWindow>(this DaoViewModelBase viewModel, ITangdaoParameter tangdaoParameter) where TWindow : Window, new()

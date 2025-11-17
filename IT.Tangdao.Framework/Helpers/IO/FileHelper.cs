@@ -98,17 +98,17 @@ namespace IT.Tangdao.Framework.Helpers
             }
         }
 
-        public static DaoXmlType DetectXmlStructure(XDocument doc)
+        public static XmlStruct DetectXmlStructure(XDocument doc)
         {
-            if (doc == null) return DaoXmlType.Empty;
+            if (doc == null) return XmlStruct.Empty;
 
             var root = doc.Root;
 
             // 检查是否只有XML声明没有内容
-            if (root == null) return DaoXmlType.None;
+            if (root == null) return XmlStruct.None;
 
             // 检查根节点是否有子元素
-            if (!root.HasElements) return DaoXmlType.Empty;
+            if (!root.HasElements) return XmlStruct.Empty;
 
             // 获取根节点的直接子元素
             var elements = root.Elements();
@@ -116,11 +116,11 @@ namespace IT.Tangdao.Framework.Helpers
             // 只有一个子元素的情况
             if (elements.Count() == 1)
             {
-                return DaoXmlType.Single;
+                return XmlStruct.Single;
             }
 
             // 多个子元素的情况
-            return DaoXmlType.Multiple;
+            return XmlStruct.Multiple;
         }
 
         /// <summary>

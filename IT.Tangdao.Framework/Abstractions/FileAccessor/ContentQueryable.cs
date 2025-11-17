@@ -74,7 +74,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         internal string _path = string.Empty;
 
-        protected internal DaoFileType DetectedType => _detected;
+        internal DaoFileType DetectedType => _detected;
         private DaoFileType _detected = DaoFileType.None;
 
         /* ========== IContentQueryable 通用方法 **只写一次** ========== */
@@ -175,13 +175,13 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
                 switch (xmlType)
                 {
-                    case DaoXmlType.Empty:
+                    case XmlStruct.Empty:
                         return ResponseResult.Failure("XML内容为空", new XmlException($"XML内容为空 {node}"));
 
-                    case DaoXmlType.None:
+                    case XmlStruct.None:
                         return ResponseResult.Failure("XML只有声明没有内容", new XmlException($"XML只有声明没有内容: {node}"));
 
-                    case DaoXmlType.Single:
+                    case XmlStruct.Single:
                         // 单节点结构 - 直接查找目标节点
                         var singleElement = root.Element(node) ?? root.Elements().First().Element(node);
                         if (singleElement == null)
@@ -190,7 +190,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                         }
                         return ResponseResult.Success(value: singleElement.Value);
 
-                    case DaoXmlType.Multiple:
+                    case XmlStruct.Multiple:
                         if (ReadIndex < 0)
                         {
                             // 尝试直接查找节点(适用于扁平结构)

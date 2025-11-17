@@ -9,7 +9,7 @@ namespace IT.Tangdao.Framework.Enums
     /// <summary>
     /// 对XML文件指定类型
     /// </summary>
-    public enum DaoXmlType
+    public enum XmlStruct
     {
         /// <summary>
         /// XML文件但内容为空

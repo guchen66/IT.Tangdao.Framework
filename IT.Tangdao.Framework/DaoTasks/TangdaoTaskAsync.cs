@@ -1,5 +1,4 @@
-﻿using IT.Tangdao.Framework.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.DaoTasks
 {
-    public sealed class TangdaoTaskAsync : IMarkable, IDisposable
+    public sealed class TangdaoTaskAsync : ITaskAwaitable, IDisposable
     {
         private readonly Stopwatch _sw = Stopwatch.StartNew();
         private bool _disposed;
@@ -27,7 +26,7 @@ namespace IT.Tangdao.Framework.DaoTasks
         public CancellationToken CancellationToken { get; internal set; }
 
         // 3. 生命周期钩子（调度器调用）
-        public void MarkCompleted()
+        public void OnCompleted()
         {
             lock (_lock)
             {
@@ -36,7 +35,7 @@ namespace IT.Tangdao.Framework.DaoTasks
             }
         }
 
-        public void MarkFaulted(Exception ex)
+        public void OnFaulted(Exception ex)
         {
             lock (_lock)
             {

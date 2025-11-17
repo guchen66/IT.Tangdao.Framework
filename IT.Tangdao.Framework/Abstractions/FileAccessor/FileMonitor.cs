@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
-    public class FileMonitorService : IMonitorService, IDisposable
+    public class FileMonitor : IFileMonitor, IDisposable
     {
         /// <summary>
         /// 线程安全的字典，存储目录路径和对应的文件监控器
@@ -41,9 +41,9 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         private FileMonitorConfig _config;
 
         private bool _isDisposed;
-        private DaoMonitorStatus _status = DaoMonitorStatus.Stopped;
+        private MonitorStatus _status = MonitorStatus.Stopped;
 
-        public FileMonitorService()
+        public FileMonitor()
         {
             _watchers = new ConcurrentDictionary<string, FileSystemWatcher>();
             _fileStates = new ConcurrentDictionary<string, FileState>();
@@ -53,11 +53,14 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             _config = new FileMonitorConfig();
         }
 
-        public FileMonitorService(FileMonitorConfig config) : this()
+        public FileMonitor(FileMonitorConfig config) : this()
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
+        /// <summary>
+        /// 开始监控
+        /// </summary>
         public void StartMonitoring()
         {
             StartMonitoring(_config);
@@ -73,7 +76,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             if (config == null) throw new ArgumentNullException(nameof(config));
 
             _config = config;
-            _status = DaoMonitorStatus.Monitoring;
+            _status = MonitorStatus.Monitoring;
 
             // 为每种文件类型创建监控
             foreach (var fileType in config.MonitorFileTypes)
@@ -177,7 +180,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             catch (Exception ex)
             {
                 Console.WriteLine($"监控目录 {directoryPath} 失败: {ex.Message}");
-                _status = DaoMonitorStatus.Error;
+                _status = MonitorStatus.Error;
             }
         }
 
@@ -211,7 +214,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         private void OnWatcherError(object sender, ErrorEventArgs e)
         {
             Console.WriteLine($"文件监控错误: {e.GetException().Message}");
-            _status = DaoMonitorStatus.Error;
+            _status = MonitorStatus.Error;
         }
 
         /// <summary>
@@ -415,7 +418,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             return true;
         }
 
-        public DaoMonitorStatus GetStatus()
+        public MonitorStatus GetStatus()
         {
             return _status;
         }
@@ -430,7 +433,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             _watchers.Clear();
             _fileStates.Clear();
             _lastEventTimes.Clear();
-            _status = DaoMonitorStatus.Stopped;
+            _status = MonitorStatus.Stopped;
         }
 
         public void Dispose()
@@ -442,7 +445,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             GC.SuppressFinalize(this);
         }
 
-        ~FileMonitorService()
+        ~FileMonitor()
         {
             Dispose();
         }

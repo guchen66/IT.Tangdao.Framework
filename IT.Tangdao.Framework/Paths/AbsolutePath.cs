@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,7 +13,6 @@ namespace IT.Tangdao.Framework.Paths
     {
         private readonly string _path;
 
-        // 私有构造：用于创建空实例，跳过 GetFullPath 避免异常
         private AbsolutePath(bool _) => _path = string.Empty;
 
         public AbsolutePath(string path)
@@ -23,28 +23,28 @@ namespace IT.Tangdao.Framework.Paths
             _path = Path.GetFullPath(path); // 确保是绝对路径
         }
 
+        /// <summary>
+        /// 空对象模式
+        /// </summary>
+        public static AbsolutePath Empty { get; } = new AbsolutePath(false);
+
         public string Value => _path;
+        public bool Exists => File.Exists(_path) || Directory.Exists(_path);
+        public bool FileExists => File.Exists(_path);
+        public bool DirectoryExists => Directory.Exists(_path);
 
         /// <summary>
         /// 判断是否是根目录
+        /// 根目录格式（如 "E:\\" 或 "/" 或"E:/"或"E://"）
         /// </summary>
         public bool IsRooted
         {
             get
             {
-                // 获取根目录（如 "C:\" 或 "/"）
                 string root = Path.GetPathRoot(_path);
-                // 如果路径等于根目录，说明就是根目录
-                return _path.Equals(root, StringComparison.OrdinalIgnoreCase);
+                return _path.EqualsIgnoreCase(root);
             }
         }
-
-        public bool Exists => File.Exists(_path) || Directory.Exists(_path);
-        public bool FileExists => File.Exists(_path);
-        public bool DirectoryExists => Directory.Exists(_path);
-
-        // 添加空对象模式
-        public static AbsolutePath Empty { get; } = new AbsolutePath(string.Empty);
 
         public override string ToString() => _path;
 
@@ -62,29 +62,50 @@ namespace IT.Tangdao.Framework.Paths
 
         public static explicit operator string(AbsolutePath path) => path._path;
 
-        // 路径操作方法
+        /// <summary>
+        /// 组合路径
+        /// </summary>
+        /// <param name="relativePath"></param>
+        /// <returns></returns>
         public AbsolutePath Combine(string relativePath)
         {
             string newPath = Path.Combine(_path, relativePath);
             return new AbsolutePath(newPath);
         }
 
+        /// <summary>
+        /// 对路径追加扩展名
+        /// </summary>
+        /// <param name="extension"></param>
+        /// <returns></returns>
         public AbsolutePath WithExtension(string extension)
         {
             string newPath = Path.ChangeExtension(_path, extension);
             return new AbsolutePath(newPath);
         }
 
+        /// <summary>
+        /// 返回路径的上一级目录
+        /// </summary>
+        /// <returns></returns>
         public AbsolutePath Parent()
         {
             string parent = Path.GetDirectoryName(_path);
             return new AbsolutePath(parent ?? _path);
         }
 
+        /// <summary>
+        /// 目录名称或文件名称
+        /// </summary>
         public string FileName => Path.GetFileName(_path);
+
         public string FileNameWithoutExtension => Path.GetFileNameWithoutExtension(_path);
 
-        // 🔥 核心方法：转换为相对于解决方案的相对路径
+        /// <summary>
+        /// 转换为相对于解决方案的相对路径
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public RelativePath InSolution()
         {
             // 方法1：自动查找解决方案目录（推荐）
@@ -182,7 +203,9 @@ namespace IT.Tangdao.Framework.Paths
             return null;
         }
 
-        public int CompareTo(AbsolutePath other) =>
-            string.Compare(_path, other._path, StringComparison.OrdinalIgnoreCase);
+        public int CompareTo(AbsolutePath other)
+        {
+            return _path.CompareIgnoreCase(other.Value);
+        }
     }
 }

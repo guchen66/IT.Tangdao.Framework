@@ -12,25 +12,18 @@ namespace IT.Tangdao.Framework.Extensions
     /// </summary>
     public static class FunctionalExtensions
     {
-        public static Func<TInput, IEnumerable<T>> Then<TInput, TOutput, T>(this Func<TInput, IEnumerable<TOutput>> @this,Func<TOutput, T> function)
+        public static Func<TInput, IEnumerable<T>> Then<TInput, TOutput, T>(this Func<TInput, IEnumerable<TOutput>> @this, Func<TOutput, T> function)
         {
             return input => @this(input).Select(function);
         }
 
-        public static Func<TInput, T> Then<TInput, TOutput, T>(
-            this Func<TInput, TOutput> @this,
-            Func<TOutput, T> function)
+        public static Func<TInput, T> Then<TInput, TOutput, T>(this Func<TInput, TOutput> @this, Func<TOutput, T> function)
         {
-
             return input => function(@this(input));
         }
 
-        public static Func<TInput, Task<T>> ThenAsync<TInput, TOutput, T>(
-            this Func<TInput, Task<TOutput>> @this,
-            Func<TOutput, T> function,
-            CancellationToken cancellationToken = default)
+        public static Func<TInput, Task<T>> ThenAsync<TInput, TOutput, T>(this Func<TInput, Task<TOutput>> @this, Func<TOutput, T> function, CancellationToken cancellationToken = default)
         {
-
             return async input =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -40,12 +33,8 @@ namespace IT.Tangdao.Framework.Extensions
             };
         }
 
-        public static Func<TInput, Task<IEnumerable<T>>> ThenAsync<TInput, TOutput, T>(
-            this Func<TInput, Task<IEnumerable<TOutput>>> @this,
-            Func<TOutput, T> function,
-            CancellationToken cancellationToken = default)
+        public static Func<TInput, Task<IEnumerable<T>>> ThenAsync<TInput, TOutput, T>(this Func<TInput, Task<IEnumerable<TOutput>>> @this, Func<TOutput, T> function, CancellationToken cancellationToken = default)
         {
-
             return async input =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -59,12 +48,8 @@ namespace IT.Tangdao.Framework.Extensions
             };
         }
 
-        public static Func<TInput, Task<T>> ThenAsync<TInput, TOutput, T>(
-            this Func<TInput, Task<TOutput>> @this,
-            Func<TOutput, Task<T>> function,
-            CancellationToken cancellationToken = default)
+        public static Func<TInput, Task<T>> ThenAsync<TInput, TOutput, T>(this Func<TInput, Task<TOutput>> @this, Func<TOutput, Task<T>> function, CancellationToken cancellationToken = default)
         {
-
             return async input =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -74,12 +59,8 @@ namespace IT.Tangdao.Framework.Extensions
             };
         }
 
-        public static Func<TInput, Task<IEnumerable<T>>> ThenAsync<TInput, TOutput, T>(
-            this Func<TInput, Task<IEnumerable<TOutput>>> @this,
-            Func<TOutput, Task<T>> function,
-            CancellationToken cancellationToken = default)
+        public static Func<TInput, Task<IEnumerable<T>>> ThenAsync<TInput, TOutput, T>(this Func<TInput, Task<IEnumerable<TOutput>>> @this, Func<TOutput, Task<T>> function, CancellationToken cancellationToken = default)
         {
-
             return async input =>
             {
                 cancellationToken.ThrowIfCancellationRequested();

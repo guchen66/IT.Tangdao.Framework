@@ -33,6 +33,15 @@ namespace IT.Tangdao.Framework.Enums
         Config,
 
         /// <summary>Ini配置文件。</summary>
-        Ini
+        Ini,
+
+        /// <summary>Log配置文件。</summary>
+        Log,
+
+        /// <summary>Back配置文件。</summary>
+        Back,
+
+        /// <summary>cs配置文件。</summary>
+        Cs,
     }
 }

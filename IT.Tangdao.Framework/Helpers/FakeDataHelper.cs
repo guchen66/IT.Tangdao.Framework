@@ -150,7 +150,7 @@ namespace IT.Tangdao.Framework.Helpers
                     return GenerateRandomDateTime();
 
                 case MockTemplate.Email:
-                    return StringHelper.GenerateRandomEmail();
+                    return StringHelper.CreateRandomEmail();
 
                 default:
                     return GenerateRandomString(6);

@@ -21,7 +21,7 @@ using IT.Tangdao.Framework.Mvvm;
 
 namespace IT.Tangdao.Framework.Bootstrap
 {
-    internal class AutoRegisterComponentModule : TangdaoModuleBase
+    internal sealed class AutoRegisterComponentModule : TangdaoModuleBase
     {
         private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(AutoRegisterComponentModule));
 
