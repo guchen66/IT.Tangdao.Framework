@@ -13,7 +13,7 @@ namespace IT.Tangdao.Framework.Helpers
     /// <summary>
     /// Json帮助类
     /// </summary>
-    public static class JsonConverHelper
+    public static class TangdaoJsonFileHelper
     {
         /// <summary>
         /// 获取根目录下的所有json文件

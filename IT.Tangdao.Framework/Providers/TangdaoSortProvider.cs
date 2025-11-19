@@ -12,8 +12,7 @@ namespace IT.Tangdao.Framework.Providers
         /// <summary>
         /// 用 TangdaoSortedDictionary 做底层映射，支持 Key 有序遍历
         /// </summary>
-        public static IComparer<T> Priority<T>(Func<T, string> keySelector,
-                                               IEnumerable<KeyValuePair<string, int>> rules)
+        public static IComparer<T> Priority<T>(Func<T, string> keySelector, IEnumerable<KeyValuePair<string, int>> rules)
         {
             var dict = new TangdaoSortedDictionary<string, int>();
             foreach (var r in rules) dict.Add(r.Key, r.Value);

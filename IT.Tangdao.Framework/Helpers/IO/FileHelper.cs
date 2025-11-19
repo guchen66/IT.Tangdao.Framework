@@ -11,38 +11,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Extensions;
 
 namespace IT.Tangdao.Framework.Helpers
 {
     /// <summary>
-    /// 判断文件的后缀
+    /// 文件的帮助类
     /// </summary>
     public class FileHelper
     {
-        public bool Root { get; set; }
-
-        public static string GetFileType(string filePath)
-        {
-            if (string.IsNullOrEmpty(filePath))
-                throw new ArgumentException("文件路径不能为空", nameof(filePath));
-
-            // 获取文件扩展名（包括点）
-            string extension = Path.GetExtension(filePath);
-
-            // 根据扩展名判断文件类型
-            switch (extension.ToLower())
-            {
-                case ".xaml":
-                    return "XAML";
-
-                case ".cs":
-                    return "CS";
-
-                default:
-                    return "Unknown";
-            }
-        }
-
         /// <summary>
         /// 获取当前路径文件类型
         /// </summary>
@@ -58,6 +35,67 @@ namespace IT.Tangdao.Framework.Helpers
                 ? PathKind.Directory
                 : PathKind.File;
         }
+
+        /// <summary>
+        /// 判断该路径是否是根目录
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static bool IsRoot(string path)
+        {
+            string root = Path.GetPathRoot(path);
+            return path.EqualsIgnoreCase(root);
+        }
+
+        #region 文件的读取
+
+        public static string ReadAllText(string path)
+        {
+            if (!File.Exists(path)) throw new FileNotFoundException("指定文件未找到。", path);
+            return File.ReadAllText(path);
+        }
+
+        public static string[] ReadAllLines(string path)
+        {
+            if (!File.Exists(path)) throw new FileNotFoundException("指定文件未找到。", path);
+            return File.ReadAllLines(path);
+        }
+
+        /// <summary>
+        /// .NET Framework 4.6 兼容：通过 Stream 读取全部文本（同步）
+        /// </summary>
+        public static string ReadTextWithStream(string path)
+        {
+            if (!File.Exists(path))
+                throw new FileNotFoundException("指定文件未找到。", path);
+
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (var sr = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+            {
+                return sr.ReadToEnd();
+            }
+        }
+
+        /// <summary>
+        /// .NET Framework 4.6 兼容：通过 Stream 异步读取全部文本（Task 模拟）
+        /// </summary>
+        public static Task<string> ReadTextWithStreamAsync(string path)
+        {
+            if (!File.Exists(path))
+                throw new FileNotFoundException("指定文件未找到。", path);
+
+            // Framework 4.6 没有真正的 ReadToEndAsync，用 Task.Run 把同步 IO 抛给线程池
+            return Task.Run(() =>
+            {
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: false))
+                using (var sr = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+                {
+                    return sr.ReadToEnd();
+                }
+            });
+        }
+
+        #endregion 文件的读取
 
         /// <summary>
         /// 解析当前类型属于指定枚举
@@ -98,6 +136,11 @@ namespace IT.Tangdao.Framework.Helpers
             }
         }
 
+        /// <summary>
+        /// 解析当前XML数据的结构
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <returns></returns>
         public static XmlStruct DetectXmlStructure(XDocument doc)
         {
             if (doc == null) return XmlStruct.Empty;
@@ -188,19 +231,5 @@ namespace IT.Tangdao.Framework.Helpers
         }
 
         private static readonly ConcurrentDictionary<string, string> _cache = new ConcurrentDictionary<string, string>();
-
-        /// <summary>
-        /// 文件导入
-        /// </summary>
-        public static void Import()
-        {
-        }
-
-        /// <summary>
-        /// 文件导出
-        /// </summary>
-        public static void Export()
-        {
-        }
     }
 }

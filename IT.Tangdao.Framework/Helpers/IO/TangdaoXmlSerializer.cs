@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace IT.Tangdao.Framework.Helpers
 {
-    public class XmlFolderHelper
+    public class TangdaoXmlSerializer
     {
         /// <summary>
         /// 将对象序列化为 XML 字符串，并指定编码格式（默认 UTF-8）
@@ -81,20 +81,20 @@ namespace IT.Tangdao.Framework.Helpers
                 return (T)serializer.Deserialize(reader);
             }
         }
-    }
 
-    /// <summary>
-    /// 自定义 StringWriter，支持指定编码
-    /// </summary>
-    public class StringWriterWithEncoding : StringWriter
-    {
-        private readonly Encoding _encoding;
-
-        public StringWriterWithEncoding(Encoding encoding)
+        /// <summary>
+        /// 自定义 StringWriter，支持指定编码
+        /// </summary>
+        private class StringWriterWithEncoding : StringWriter
         {
-            _encoding = encoding;
-        }
+            private readonly Encoding _encoding;
 
-        public override Encoding Encoding => _encoding;
+            public StringWriterWithEncoding(Encoding encoding)
+            {
+                _encoding = encoding;
+            }
+
+            public override Encoding Encoding => _encoding;
+        }
     }
 }

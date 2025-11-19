@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Configurations;
 
 namespace IT.Tangdao.Framework.Helpers
@@ -13,9 +14,6 @@ namespace IT.Tangdao.Framework.Helpers
     /// </summary>
     internal static class IniParser
     {
-        // 在类级别添加 static readonly 字段
-        private static readonly char[] LineSeparators = new[] { '\r', '\n' };
-
         /// <summary>
         /// 解析 INI 文件内容
         /// </summary>
@@ -26,7 +24,7 @@ namespace IT.Tangdao.Framework.Helpers
             IniConfig currentSection = null;
 
             // 使用预定义的字符数组，避免每次调用都创建新数组
-            foreach (var line in iniContent.Split(LineSeparators, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var line in iniContent.Split(Separators.Line, StringSplitOptions.RemoveEmptyEntries))
             {
                 var trimmedLine = line.Trim();
 
@@ -80,7 +78,7 @@ namespace IT.Tangdao.Framework.Helpers
             if (string.IsNullOrWhiteSpace(content))
                 return false;
 
-            var lines = content.Split(LineSeparators, StringSplitOptions.RemoveEmptyEntries);
+            var lines = content.Split(Separators.Line, StringSplitOptions.RemoveEmptyEntries);
 
             // 统计 INI 格式特征
             int sectionCount = 0;

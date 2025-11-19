@@ -1,9 +1,9 @@
 ﻿namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     /// <summary>
-    /// 定义读取文本的服务
+    /// 内容读取器
     /// </summary>
-    public interface IReadService
+    public interface IContentReader
     {
         /// <summary>
         /// 默认读取内容接口

@@ -6,7 +6,7 @@ using System;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
-    public class WriteService : IWriteService
+    public class ContentWriter : IContentWriter
     {
         public IContentWritable Default => new ContentWritable();
     }

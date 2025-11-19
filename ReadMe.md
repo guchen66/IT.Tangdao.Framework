@@ -179,7 +179,7 @@ cs代码：
 
 ```C#
  string foldPath = Path.Combine(IgniteInfoLocation.Cache, "LoginInfo.xml");
- var isRememberValue = _readService.Default.Read(foldPath).AsXml().SelectNode("IsRemember").Value;
+ var isRememberValue = _reader.Default.Read(foldPath).AsXml().SelectNode("IsRemember").Value;
 ```
 
 支持XML的序列化和反序列化
@@ -192,7 +192,7 @@ cs代码：
 也可以使用缓存模式序列化，只要读过本地的文件，就可以使用缓存转成对象实例
 
 ```C#
-_readService.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
+_reader.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
 ```
 
 
@@ -290,7 +290,7 @@ var responseResult = readService.Default.Read(configPath).AsConfig().SelectCusto
 ###### 5-3、对Json文件的读写
 
 ```C#
-var json = _readService.Default.Read(foldPath).AsJson(); 
+var json = _reader.Default.Read(foldPath).AsJson(); 
 
 ```
 
@@ -309,7 +309,7 @@ socket_port=7181
 ```
 
 ```C#
- var result = _readService.Default.Read(foldPath).AsIni().SelectIni("socket_port");
+ var result = _reader.Default.Read(foldPath).AsIni().SelectIni("socket_port");
 ```
 
 
@@ -374,16 +374,16 @@ socket_port=7181
 
 ```C#
 // 正确调用（多节点必须指定索引）
-var ip1 = _readService.Default.AsXml().SelectNode("IP").Value;
+var ip1 = _reader.Default.AsXml().SelectNode("IP").Value;
 
-var ipAll = _readService.Default.AsXml().SelectNodes(); 
+var ipAll = _reader.Default.AsXml().SelectNodes(); 
 
 ```
 
 优化繁琐的读取,不需要知道类的所有属性
 
 ```C#
-  var readResult = _readService.Default.SelectNodes("ProcessItem", x => new ProcessItem
+  var readResult = _reader.Default.SelectNodes("ProcessItem", x => new ProcessItem
   {
       Name = x.Element("Name")?.Value,
       IsFeeding = (bool)x.Element("IsFeeding"),
@@ -400,7 +400,7 @@ var ipAll = _readService.Default.AsXml().SelectNodes();
 直接通过反射+泛型
 
 ```C#
- var readResult = _readService.Default.AsXml().SelectNodes<ProcessItem>();
+ var readResult = _reader.Default.AsXml().SelectNodes<ProcessItem>();
 ```
 
 #### 6、扩展

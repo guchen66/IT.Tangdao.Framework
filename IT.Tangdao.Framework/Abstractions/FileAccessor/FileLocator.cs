@@ -10,167 +10,69 @@ using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Extensions;
 using System.Xml.Linq;
 using IT.Tangdao.Framework.Paths;
+using System.Management;
+using IT.Tangdao.Framework.Common;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     public sealed class FileLocator : IFileLocator
     {
-        /// <summary>
-        /// 返回指定后缀的所有文件
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <param name="type"></param>
-        /// <param name="searchSubdirectories"></param>
-        /// <returns></returns>
-        public IEnumerable<string> FindFiles(string directoryPath, DaoFileType type, bool searchSubdirectories)
+        /// <inheritdoc/>
+        public IEnumerable<string> FindFiles(string directoryPath, string searchPattern, bool searchSubdirectories)
         {
-            return InternalFindFiles(directoryPath, type, searchSubdirectories);
+            return InternalFindFiles(directoryPath, searchPattern, searchSubdirectories);
         }
 
-        /// <summary>
-        /// 返回指定后缀的所有文件
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <param name="type"></param>
-        /// <param name="searchSubdirectories"></param>
-        /// <returns></returns>
-        public IEnumerable<string> FindFiles(AbsolutePath absolutePath, DaoFileType type, bool searchSubdirectories)
+        /// <inheritdoc/>
+        public IEnumerable<string> FindFiles(AbsolutePath absolutePath, string searchPattern, bool searchSubdirectories)
         {
-            return InternalFindFiles(absolutePath.Value, type, searchSubdirectories);
+            return InternalFindFiles(absolutePath.Value, searchPattern, searchSubdirectories);
         }
 
-        /// <summary>
-        /// 返回第一个指定后缀文件
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <param name="type"></param>
-        /// <param name="searchSubdirectories"></param>
-        /// <returns></returns>
-        public string FindFirst(string directoryPath, DaoFileType type, bool searchSubdirectories)
-            => FindFiles(directoryPath, type, searchSubdirectories).FirstOrDefault();
+        /// <inheritdoc/>
+        public string FindFirst(string directoryPath, string searchPattern, bool searchSubdirectories)
+        {
+            return FindFiles(directoryPath, searchPattern, searchSubdirectories).FirstOrDefault();
+        }
 
-        /* 把之前 private static QueryFilter 逻辑搬进来即可 */
-
-        /// <summary>
-        /// 返回指定后缀规则
-        /// .全部返回
-        /// 否则没根据DaoFileType，返回指定类型
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private static string GetExtension(DaoFileType type)
-            => type == DaoFileType.None ? "*.*" : $"*.{type.ToString().ToLowerInvariant()}";
+        /// <inheritdoc/>
+        public string FindFirst(AbsolutePath absolutePath, string searchPattern, bool searchSubdirectories)
+        {
+            return FindFiles(absolutePath.Value, searchPattern, searchSubdirectories).FirstOrDefault();
+        }
 
         /// <summary>
         /// 共享核心逻辑
         /// </summary>
-        private static IEnumerable<string> InternalFindFiles(string directory, DaoFileType type, bool searchSubdirectories)
+        private static IEnumerable<string> InternalFindFiles(string directory, string searchPattern, bool searchSubdirectories)
         {
             if (!Directory.Exists(directory))
                 return Enumerable.Empty<string>();
 
+            var patterns = string.IsNullOrWhiteSpace(searchPattern) ? new[] { "*.*" } : searchPattern
+                            .Split(Separators.Semicolon, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(p => p.StartsWith("*") ? p : $"*{p.Trim()}")
+                            .ToArray();
             var option = searchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            var ext = GetExtension(type);
-            return Directory.EnumerateFiles(directory, ext, option);
-        }
-
-        /// <inheritdoc/>
-        public async Task<TEntity> ReadXmlToEntityAsync<TEntity>(string path, DaoFileType daoFileType) where TEntity : class, new()
-        {
-            string xml = string.Empty;
-            TEntity Entity = new TEntity();
-            if (daoFileType == DaoFileType.Xml)
-            {
-                xml = await ReadXmlAsync(path);
-                Entity = XmlFolderHelper.Deserialize<TEntity>(xml);
-            }
-            return Entity;
-        }
-
-        public ResponseResult<string> BatchReadFileAsync(string path, DaoFileType daoFileType = DaoFileType.Txt)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                return ResponseResult<string>.Failure("路径不能为空。");
-
-            if (FileHelper.GetPathKind(path) != PathKind.Directory)
-                return ResponseResult<string>.Failure("指定路径必须是有效目录。");
-
-            // 1. 先拿过滤后的文件列表（私有方法，见下）
-            var files = QueryFilter(path, daoFileType);
-            if (!files.Any())
-                return ResponseResult<string>.Failure($"目录下未找到 {daoFileType} 类型文件。");
-
-            // 2. 逐个读并合并
-            var sb = new StringBuilder();
-            foreach (var file in files)
-            {
-                try
-                {
-                    sb.AppendLine(File.ReadAllText(file));
-                }
-                catch (Exception ex)
-                {
-                    return ResponseResult<string>.Failure($"读取文件失败：{ex.Message}");
-                }
-            }
-            return ResponseResult<string>.Success(sb.ToString());
+            return patterns.SelectMany(pat => SafeEnumerateFiles(directory, pat, option)).Distinct(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
-        /// 私有过滤：只返回指定后缀的文件路径。
+        /// .NET Framework 4.x 专用：遇到无权限子目录返回空，不炸。
         /// </summary>
-        private static IEnumerable<string> QueryFilter(string directoryPath, DaoFileType type)
+        private static IEnumerable<string> SafeEnumerateFiles(string path, string searchPattern, SearchOption option)
         {
-            switch (type)
+            try
             {
-                case DaoFileType.None:
-                    break;
-
-                case DaoFileType.Txt:
-                    break;
-
-                case DaoFileType.Xml:
-                    break;
-
-                case DaoFileType.Xlsx:
-                    break;
-
-                case DaoFileType.Xaml:
-                    break;
-
-                case DaoFileType.Json:
-                    break;
-
-                case DaoFileType.Config:
-                    break;
-
-                default:
-                    break;
+                return Directory.EnumerateFiles(path, searchPattern, option);
             }
-
-            return Directory.EnumerateFiles(directoryPath, $"*{type}", SearchOption.AllDirectories);
-        }
-
-        private static async Task<string> ReadTxtAsync(string path)
-        {
-            using (var stream = new StreamReader(path.UseFileOpenRead()))
+            catch (UnauthorizedAccessException)
             {
-                return await stream.ReadToEndAsync();
+                return Enumerable.Empty<string>();
             }
-        }
-
-        private static async Task<string> ReadXmlAsync(string path)
-        {
-            using (var stream = new StreamReader(path.UseFileOpenRead()))
+            catch (DirectoryNotFoundException)
             {
-                var xmlContent = await stream.ReadToEndAsync();
-                // 这里可以根据需要对xmlContent进行解析
-                // 例如，使用XDocument加载XML内容
-                var doc = XDocument.Parse(xmlContent);
-                // 对doc进行处理，例如提取数据
-                // ...
-                // 返回处理后的字符串或XML文档的字符串表示
-                return doc.ToString();
+                return Enumerable.Empty<string>();
             }
         }
     }

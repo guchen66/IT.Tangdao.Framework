@@ -13,7 +13,7 @@ namespace IT.Tangdao.Framework.Providers
     public class BindModelProvider<T> : DaoViewModelBase, IBindModelProvider<T>
     {
         public T Default { get; set; }
-        private readonly IReadService _readService;
+        private readonly IContentReader _readService;
         private string _objectPath;
 
         public string ObjectPath
@@ -24,7 +24,7 @@ namespace IT.Tangdao.Framework.Providers
 
         public BindModelProvider()
         {
-            _readService = TangdaoApplication.Provider.GetService<IReadService>();
+            _readService = TangdaoApplication.Provider.GetService<IContentReader>();
             // var xmlData = _readService.Read(ObjectPath);
             //  Default = XmlFolderHelper.Deserialize<T>(new ContentQueryable(xmlData));
         }

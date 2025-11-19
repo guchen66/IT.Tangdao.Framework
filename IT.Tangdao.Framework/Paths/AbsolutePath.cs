@@ -1,4 +1,5 @@
 ﻿using IT.Tangdao.Framework.Extensions;
+using IT.Tangdao.Framework.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,8 +42,7 @@ namespace IT.Tangdao.Framework.Paths
         {
             get
             {
-                string root = Path.GetPathRoot(_path);
-                return _path.EqualsIgnoreCase(root);
+                return FileHelper.IsRoot(_path);
             }
         }
 

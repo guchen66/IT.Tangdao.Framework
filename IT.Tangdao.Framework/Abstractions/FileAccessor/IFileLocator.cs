@@ -12,23 +12,39 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     {
         /// <summary>
         /// 返回指定目录下匹配后缀的所有文件路径。
-        /// 默认不搜索子目录
+        ///默认不搜索子目录
         /// </summary>
-        IEnumerable<string> FindFiles(string directoryPath, DaoFileType type = DaoFileType.None, bool searchSubdirectories = false);
+        /// <param name="directoryPath">搜索的地址</param>
+        /// <param name="searchPattern">搜索的后缀</param>
+        /// <param name="searchSubdirectories">是否搜索子目录</param>
+        /// <returns></returns>
+        IEnumerable<string> FindFiles(string directoryPath, string searchPattern, bool searchSubdirectories = false);
 
         /// <summary>
         /// 返回指定目录下匹配后缀的所有文件路径。
         /// </summary>
-        /// <param name="absolutePath"></param>
-        /// <param name="type"></param>
-        /// <param name="searchSubdirectories"></param>
+        /// <param name="absolutePath">搜索的地址</param>
+        /// <param name="searchPattern">搜索的后缀</param>
+        /// <param name="searchSubdirectories">是否搜索子目录</param>
         /// <returns></returns>
-        IEnumerable<string> FindFiles(AbsolutePath absolutePath, DaoFileType type = DaoFileType.None, bool searchSubdirectories = false);
+        IEnumerable<string> FindFiles(AbsolutePath absolutePath, string searchPattern, bool searchSubdirectories = false);
 
         /// <summary>
         /// 返回第一个匹配的文件路径；找不到返回 null。
-        /// 默认不搜索子目录
         /// </summary>
-        string FindFirst(string directoryPath, DaoFileType type = DaoFileType.None, bool searchSubdirectories = false);
+        /// <param name="directoryPath">搜索的地址</param>
+        /// <param name="searchPattern">搜索的后缀</param>
+        /// <param name="searchSubdirectories">是否搜索子目录</param>
+        /// <returns></returns>
+        string FindFirst(string directoryPath, string searchPattern, bool searchSubdirectories = false);
+
+        /// <summary>
+        /// 返回第一个匹配的文件路径；找不到返回 null。
+        /// </summary>
+        /// <param name="absolutePath">搜索的地址</param>
+        /// <param name="searchPattern">搜索的后缀</param>
+        /// <param name="searchSubdirectories">是否搜索子目录</param>
+        /// <returns></returns>
+        string FindFirst(AbsolutePath absolutePath, string searchPattern, bool searchSubdirectories);
     }
 }

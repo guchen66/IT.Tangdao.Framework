@@ -1,9 +1,9 @@
 ﻿namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     /// <summary>
-    /// 定义写入文本的服务
+    /// 内容写入器
     /// </summary>
-    public interface IWriteService
+    public interface IContentWriter
     {
         /// <summary>
         /// 默认写入内容接口
