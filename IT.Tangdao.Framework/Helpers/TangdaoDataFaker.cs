@@ -102,6 +102,16 @@ namespace IT.Tangdao.Framework.Helpers
                     return FakeDataHelper.GenerateRandomString(fakeDataAttr.Length);
                 }
 
+                if ((property.PropertyType == typeof(float) || property.PropertyType == typeof(double)))
+                {
+                    return FakeDataHelper.GenerateDoubleUniqueId(fakeDataAttr.Min, fakeDataAttr.Max, fakeDataAttr.Point);
+                }
+
+                if (property.PropertyType == typeof(decimal))
+                {
+                    return FakeDataHelper.GenerateDecimalUniqueId(fakeDataAttr.Min, fakeDataAttr.Max, fakeDataAttr.Point);
+                }
+
                 // 2.3 第三优先级：DataType
                 if (property.PropertyType.IsEnum)
                 {
@@ -140,7 +150,9 @@ namespace IT.Tangdao.Framework.Helpers
         {
             if (propertyType == typeof(string)) return FakeDataHelper.GenerateRandomString();
             if (propertyType == typeof(int)) return FakeDataHelper.GenerateUniqueId();
+            if (propertyType == typeof(double) || propertyType == typeof(float)) return FakeDataHelper.GenerateDoubleUniqueId();
             if (propertyType == typeof(long)) return (long)FakeDataHelper.GenerateUniqueId();
+            if (propertyType == typeof(decimal)) return (long)FakeDataHelper.GenerateDecimalUniqueId();
             if (propertyType == typeof(DateTime)) return FakeDataHelper.GenerateRandomDateTime();
             if (propertyType == typeof(bool)) return FakeDataHelper.GetRandomBoolean();
             if (propertyType.IsEnum) return FakeDataHelper.GetRandomEnumValue(propertyType);

@@ -12,6 +12,8 @@ namespace IT.Tangdao.Framework.Helpers
     {
         private static readonly Random _random = new Random();
         private static readonly HashSet<int> _usedIds = new HashSet<int>();
+        private static readonly HashSet<decimal> _usedDecimalIds = new HashSet<decimal>();
+        private static readonly HashSet<double> _usedDoubleIds = new HashSet<double>();
 
         // 常用数据池
         private static readonly string[] ChineseCities = { "北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "南京" };
@@ -65,6 +67,12 @@ namespace IT.Tangdao.Framework.Helpers
             _usedIds.Clear();
         }
 
+        /// <summary>
+        /// int类型使用，生成随机数
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         public static int GenerateUniqueId(int min = 1, int max = 1000)
         {
             int id;
@@ -74,6 +82,78 @@ namespace IT.Tangdao.Framework.Helpers
             } while (_usedIds.Contains(id));
 
             _usedIds.Add(id);
+            return id;
+        }
+
+        /// <summary>
+        /// double类型使用，生成随机数
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static double GenerateDoubleUniqueId(int min = 0, int max = 1000, int point = 4)
+        {
+            if (min >= max)
+                throw new ArgumentException("min must be less than max");
+
+            if (point < 0 || point > 15)
+                throw new ArgumentException("point must be between 0 and 15");
+
+            double id;
+            do
+            {
+                // 先生成整数，再添加小数部分
+                int integerPart = _random.Next(min, max);
+
+                if (point == 0)
+                {
+                    id = integerPart;
+                }
+                else
+                {
+                    int maxFraction = (int)Math.Pow(10, point);
+                    double fractionalPart = _random.Next(0, maxFraction) / (double)maxFraction;
+                    id = integerPart + fractionalPart;
+                    id = Math.Round(id, point);
+                }
+            } while (_usedDoubleIds.Contains(id));
+
+            _usedDoubleIds.Add(id);
+            return id;
+        }
+
+        /// <summary>
+        /// decimal类型使用，生成随机数
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static decimal GenerateDecimalUniqueId(int min = 0, int max = 1000, int point = 4)
+        {
+            if (min >= max)
+                throw new ArgumentException("min must be less than max");
+
+            if (point < 0 || point > 15)
+                throw new ArgumentException("point must be between 0 and 15");
+
+            decimal id;
+            do
+            {
+                // 生成整数部分
+                int integerPart = _random.Next(min, max);
+
+                // 生成小数部分
+                decimal fractionalPart = 0;
+                if (point > 0)
+                {
+                    int maxFraction = (int)Math.Pow(10, point);
+                    fractionalPart = (decimal)_random.Next(0, maxFraction) / maxFraction;
+                }
+
+                id = integerPart + fractionalPart;
+            } while (_usedDecimalIds.Contains(id));
+
+            _usedDecimalIds.Add(id);
             return id;
         }
 

@@ -1,6 +1,94 @@
+IT.Tangdao以下简称唐刀，是我开发的一款适用于WPF的专属框架。
+
+内置了IOC容器ITangdaoContainer、
+
+事件聚合器IDaoEventAggregator、
+
+内容读写器IContentReader、IContentWriter、
+
+路径优化类TangdaoPath、
+
+文件监控器IFileMonitor、
+
+文件路径查询器IFileLocator、
+
+自带日志监控ITangdaoLogger、
+
+进程参数传输器ITangdaoParameter、
+
+线程直接传输类AmbientContext、
+
+简单的翻页导航ISingleRouter、
+
+带有拦截功能和传输功能的导航系统ITangdaoRouter、
+
+虚假数据生成器TangdaoDataFaker、
+
+任务调度器TangdaoTaskScheduler、
+
+事件监听器、在开发中
+
+拦截器、在开发中
+
+此外还内置了常用的WPF转换器和markup扩展
+
+#### 1、启动
+
+1-1、修改App.xaml
+
+```C#
+<td:TangdaoApplication
+    x:Class="TangdaoDemo.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:TangdaoDemo"
+    xmlns:td="clr-namespace:IT.Tangdao.Framework;assembly=IT.Tangdao.Framework"
+    xmlns:vm="clr-namespace:TangdaoDemo.ViewModels">
+    <Application.Resources>
+
+    </Application.Resources>
+</td:TangdaoApplication>
+```
+
+1-2、修改App.xaml.cs
+
+```C#
+ public partial class App : TangdaoApplication
+ {
+     private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(App));
+     protected override void Configure()
+     {
+         base.Configure();
+     }
+
+     protected override void RegisterServices(ITangdaoContainer container)
+     {
+         container.AddTangdaoSingleton<MainView>();
+         container.AddTangdaoSingleton<MainViewModel>();
+         Logger.WriteLocal("Tangdao测试代码启动");
+     }
+
+     protected override Window CreateWindow()
+     {
+         return CreateShell<MainView>();
+     }
+
+     private void RegisterExceptionEvents()
+     {
+         TangdaoExceptionHandler handler = new TangdaoExceptionHandler();
+         //Task线程内未捕获异常处理事件
+         TaskScheduler.UnobservedTaskException += handler.TaskScheduler_UnobservedTaskException;
+         //UI线程未捕获异常处理事件（UI主线程）
+         this.DispatcherUnhandledException += handler.App_DispatcherUnhandledException;
+         //非UI线程未捕获异常处理事件(例如自己创建的一个子线程)
+         AppDomain.CurrentDomain.UnhandledException += handler.CurrentDomain_UnhandledException;
+     }
+ }
+```
 
 
-#### 1、命令
+
+#### 2、唐刀命令
 
 正常命令：TangdaoCommand   
 
@@ -27,11 +115,11 @@ public ICommand SaveCommand => this.Cmd(Execute);
 
 
 
-#### 2、事件聚合器 
+#### 3、事件聚合器 
 
 IDaoEventAggregator
 
-###### 2-1、用法
+###### 3-1、用法
 
 ```C#
  public IDaoEventAggregator _daoEventAggregator;
@@ -43,9 +131,9 @@ _daoEventAggregator.Subscribe<T>(Execute);
 T:DaoEventBase
 ```
 
-#### 3、IOC容器
+#### 4、IOC容器
 
-###### 3-1、容器ITangdaoContainer
+###### 4-1、容器ITangdaoContainer
 
 修改启动项
 
@@ -79,21 +167,21 @@ public partial class App : TangdaoApplication
 new WeatherService(provider.GetService<ITangdaoLogger>(), provider.GetService<IConfig>()));
 ```
 
-###### 3-2、解析器ITangdaoProvider
+###### 4-2、解析器ITangdaoProvider
 
 ```
 Provider.GetService<T>();
 ```
 
-###### 3-3、服务定位器
+###### 4-3、服务定位器
 
 ```C#
 TangdaoApplication.Provider.GetService(viewModel);
 ```
 
-#### 4、插件式注册
+#### 5、插件式注册
 
-###### 4-1、对于.Netframwork版本继承TangdaoModuleBase
+###### 5-1、对于.Netframwork版本继承TangdaoModuleBase
 
 ```C#
  public class DemoModule : TangdaoModuleBase
@@ -112,7 +200,7 @@ TangdaoApplication.Provider.GetService(viewModel);
  }
 ```
 
-###### 4-2、对于.NetCore版本继承ITangdaoModule
+###### 5-2、对于.NetCore版本继承ITangdaoModule
 
 ```C#
  public class DemoModule : ITangdaoModule
@@ -131,7 +219,7 @@ TangdaoApplication.Provider.GetService(viewModel);
  }
 ```
 
-###### 4-3、AutoViewAttribute
+###### 5-3、AutoViewAttribute
 
 当对于ViewModel使用特性的时候，自动关联View和ViewModel
 
@@ -158,9 +246,9 @@ TangdaoApplication.Provider.GetService(viewModel);
 
 默认绑定不会生效
 
-#### 5、常用文件的读写
+#### 6、常用文件的读写
 
-###### 5-1、对XML文件的读写
+###### 6-1、对XML文件的读写
 
 xml文件：
 
@@ -197,7 +285,7 @@ _reader.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
 
 
 
-###### 5-2、对Config文件的读写
+###### 6-2、对Config文件的读写
 
 1、读取默认的App.config配置
 
@@ -287,7 +375,7 @@ var responseResult = readService.Default.Read(configPath).AsConfig().SelectCusto
 
 
 
-###### 5-3、对Json文件的读写
+###### 6-3、对Json文件的读写
 
 ```C#
 var json = _reader.Default.Read(foldPath).AsJson(); 
@@ -296,7 +384,7 @@ var json = _reader.Default.Read(foldPath).AsJson();
 
 
 
-###### 5-4、对ini文件的读写
+###### 6-4、对ini文件的读写
 
 ini文件内容
 
@@ -403,9 +491,9 @@ var ipAll = _reader.Default.AsXml().SelectNodes();
  var readResult = _reader.Default.AsXml().SelectNodes<ProcessItem>();
 ```
 
-#### 6、扩展
+#### 7、扩展
 
-###### 6-1、基于ViewModel命名约定的隐式键展开容器字典
+###### 7-1、基于ViewModel命名约定的隐式键展开容器字典
 
 ```C#
  public class Test
@@ -429,7 +517,7 @@ var ipAll = _reader.Default.AsXml().SelectNodes();
 
 
 
-###### 6-2、增加另外一种全新的方式去发送数据
+###### 7-2、增加另外一种全新的方式去发送数据
 
 ```C#
 MainViewModel: 发送
@@ -450,7 +538,7 @@ LoginViewModel:接收
 
 对PLC的读取进行了扩展
 
-注意：已迁移到IT.Tangdao.Core.Device.dll或IT.Tangdao.Framework.Device.dll
+注意：已迁移到IT.Tangdao.Core.Bridge.dll或IT.Tangdao.Framework.Bridge.dll
 
 ```c#
   container.RegisterPlcServer(plc => 
@@ -481,7 +569,7 @@ Console.WriteLine(maybe);   // HELLO
 
 
 
-#### 7、组件通信
+#### 8、组件通信
 
 ```C#
 //同级别窗体通信 
@@ -492,7 +580,7 @@ this.RunSameLevelWindowAsync<LoginView>(tangdaoParameter);
 this.RunChildWindowAsync<LoginView>();
 ```
 
-###### 7-1、线程之间的数据传输 AmbientContext
+###### 8-1、线程之间的数据传输 AmbientContext
 
 ```C#
 //值类型使用
@@ -510,7 +598,7 @@ AmbientContext.Get<Student>("学生");
 
 ```
 
-###### 7-2、进程之间的数据传输 TangdaoContext
+###### 8-2、进程之间的数据传输 TangdaoContext
 
 功能更加强大，可以进行数据传输，委托传输，字典传输，命令传输
 
@@ -520,7 +608,7 @@ TangdaoContext.SetTangdaoParameter<T>();
 TangdaoContext.GetTangdaoParameter<T>();
 ```
 
-###### 7-3、Socket通信
+###### 8-3、Socket通信，注意：此功能已迁移到IT.Tangdao.Core.Bridge.dll或IT.Tangdao.Framework.Bridge.dll
 
 ```C#
  string connUri = "tcp://127.0.0.1:502";
@@ -535,7 +623,7 @@ TangdaoContext.GetTangdaoParameter<T>();
 
 
 
-#### 8、日志DaoLogger
+#### 9、日志DaoLogger
 
 日志默认是写在桌面上的
 
@@ -552,7 +640,7 @@ TangdaoContext.GetTangdaoParameter<T>();
  LogPathConfig.SetRoot($@"{IgniteInfoLocation.Logger}");
 ```
 
-#### 9、自动生成器
+#### 10、自动生成器
 
 可以自动生成虚假数据，用于平时调试
 
@@ -600,7 +688,7 @@ public class MainWindowViewModel : BindableBase
 
 
 
-#### 10、增加路由导航
+#### 11、增加路由导航
 
 ###### 1、简单的导航，具有翻页功能ISingleRouter
 
@@ -806,7 +894,7 @@ CS Code:
 
 
 
-#### 11、时间轮
+#### 12、时间轮
 
 ```C#
 class Program
@@ -854,7 +942,7 @@ class Program
 
 
 
-#### 12、文本监控
+#### 13、文本监控
 
 在程序启动时注册事件
 
@@ -896,7 +984,7 @@ class Program
  });
 ```
 
-#### 13、任务调度器
+#### 14、任务调度器
 
 ```C#
   TangdaoTaskScheduler.Execute(dao: daoTask =>
@@ -913,7 +1001,7 @@ class Program
   TangdaoTaskScheduler.Execute(daoAsync => { }, dao => { });
 ```
 
-#### 14、Markup的扩展
+#### 15、Markup的扩展
 
 ###### 1、对Combobox进行定制列表
 
@@ -1018,7 +1106,7 @@ public class ComboboxOptions
 </DataGridTemplateColumn>
 ```
 
-#### 15、路径处理
+#### 16、路径处理
 
 | 场景                                       | 用途                                 | 如何使用                                                     |
 | ------------------------------------------ | ------------------------------------ | ------------------------------------------------------------ |
@@ -1145,7 +1233,7 @@ AbsolutePath sourcePath = TangdaoPath.Instance
  var backup = sourcePath.Backup(".bak");
 ```
 
-#### 16、自定义排序
+#### 17、自定义排序
 
 带后期增加接口优化
 
@@ -1170,7 +1258,7 @@ var priority = new Dictionary<string, int>
 var comparer = TangdaoSortProvider.Priority<Student>(s => s.Education, priority);
 ```
 
-#### 17、特性
+#### 18、特性
 
 AutoRegisterAttribute:自动注册特性
 

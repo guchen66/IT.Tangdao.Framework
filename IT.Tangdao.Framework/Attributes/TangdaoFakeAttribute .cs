@@ -30,6 +30,16 @@ namespace IT.Tangdao.Framework.Attributes
         /// </summary>
         public bool Random { get; set; }
 
+        #region 值类型使用
+
+        public int Min { get; set; }
+
+        public int Max { get; set; }
+
+        public int Point { get; set; }
+
+        #endregion 值类型使用
+
         /// <summary>
         /// 指定生成模板，请使用 <see cref="MockTemplate"/> 里的常量：
         /// <para> 示例：Template = nameof(MockTemplate.ChineseName) </para>
