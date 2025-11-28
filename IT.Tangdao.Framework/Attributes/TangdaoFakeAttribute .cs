@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,11 +33,20 @@ namespace IT.Tangdao.Framework.Attributes
 
         #region 值类型使用
 
-        public int Min { get; set; }
+        /// <summary>
+        /// 最小值，默认0
+        /// </summary>
+        public int Min { get; set; } = 0;
 
-        public int Max { get; set; }
+        /// <summary>
+        /// 最大值，默认1000
+        /// </summary>
+        public int Max { get; set; } = 1000;
 
-        public int Point { get; set; }
+        /// <summary>
+        /// 小数位数，默认4
+        /// </summary>
+        public int Point { get; set; } = 4;
 
         #endregion 值类型使用
 
@@ -45,6 +55,7 @@ namespace IT.Tangdao.Framework.Attributes
         /// <para> 示例：Template = nameof(MockTemplate.ChineseName) </para>
         /// <para> 可选常量：ChineseName, Mobile, City, Date, Email ... </para>
         /// </summary>
+        [Description("使用预定义的数据模板")]
         public string Template { get; set; }
     }
 }

@@ -8,13 +8,18 @@ namespace IT.Tangdao.Framework.DaoTasks
 {
     public readonly struct TangdaoTaskAwaitable<TResult>
     {
-        public TangdaoTaskAwaitable<TResult>.Configure GetAwaiter()
+        private readonly Task<TResult> _task;
+        private readonly bool _continueOnCapturedContext;
+
+        public TangdaoTaskAwaitable(Task<TResult> task, bool continueOnCapturedContext = true)
         {
-            return default;
+            _task = task ?? throw new ArgumentNullException(nameof(task));
+            _continueOnCapturedContext = continueOnCapturedContext;
         }
 
-        public readonly struct Configure
+        public TangdaoTaskAwaiter<TResult> GetAwaiter()
         {
+            return new TangdaoTaskAwaiter<TResult>(_task, _continueOnCapturedContext);
         }
     }
 }

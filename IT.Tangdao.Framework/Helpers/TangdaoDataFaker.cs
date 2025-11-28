@@ -20,8 +20,33 @@ namespace IT.Tangdao.Framework.Helpers
     /// <typeparam name="T"></typeparam>
     public class TangdaoDataFaker<T> where T : new()
     {
-        private static readonly ConcurrentDictionary<string, Action<T, object>> _propertySetters =
+        //缓存属性生成setter
+        private static readonly ConcurrentDictionary<string, Action<T, object>> _cachePropertySetters =
             new ConcurrentDictionary<string, Action<T, object>>();
+
+        // 缓存属性信息，避免重复反射
+        private static readonly Lazy<PropertyInfo[]> _cachedProperties = new Lazy<PropertyInfo[]>(() =>
+            typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => !p.IsDefined(typeof(IgnoreAttribute), false))
+                .ToArray());
+
+        // 缓存属性的特性信息
+        private static readonly ConcurrentDictionary<string, TangdaoFakeAttribute> _cachedAttributes =
+            new ConcurrentDictionary<string, TangdaoFakeAttribute>();
+
+        // 缓存类型到生成方法的映射，避免多次if-else判断
+        private static readonly Lazy<Dictionary<Type, Func<object>>> _typeGenerators = new Lazy<Dictionary<Type, Func<object>>>(() =>
+            new Dictionary<Type, Func<object>>
+            {
+                { typeof(string), () => FakeDataHelper.GenerateRandomString() },
+                { typeof(int), () => FakeDataHelper.GenerateUniqueId() },
+                { typeof(double), () => FakeDataHelper.GenerateDoubleUniqueId() },
+                { typeof(float), () => FakeDataHelper.GenerateDoubleUniqueId() },
+                { typeof(long), () => (long)FakeDataHelper.GenerateUniqueId() },
+                { typeof(decimal), () => FakeDataHelper.GenerateDecimalUniqueId() },
+                { typeof(DateTime), () => FakeDataHelper.GenerateRandomDateTime() },
+                { typeof(bool), () => FakeDataHelper.GetRandomBoolean() }
+            });
 
         /// <summary>
         /// 通过动态委托自动生成数据
@@ -30,18 +55,19 @@ namespace IT.Tangdao.Framework.Helpers
         /// <returns></returns>
         public List<T> Build(int count)
         {
-            var result = new List<T>();
-            for (int i = 0; i < count; i++)
+            var array = new T[count];
+
+            Parallel.For(0, count, i =>
             {
-                result.Add(CreateRandomInstance());
-            }
+                array[i] = CreateRandomInstance(); // 直接赋值，无需锁
+            });
             FakeDataHelper.ResetCounters();
-            return result;
+            return array.ToList();
         }
 
         private static Action<T, object> GetOrCreateSetter(PropertyInfo property)
         {
-            return _propertySetters.GetOrAdd(property.Name, key =>
+            return _cachePropertySetters.GetOrAdd(property.Name, key =>
             {
                 if (!property.CanWrite || property.SetMethod?.IsPublic != true)
                 {
@@ -61,12 +87,10 @@ namespace IT.Tangdao.Framework.Helpers
         private static T CreateRandomInstance()
         {
             var instance = new T();  // 1. 创建新实例
-            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);// 2. 获取所有公共实例属性
+            var properties = _cachedProperties.Value;  // 2. 使用缓存的属性信息
 
             foreach (var property in properties)  // 3. 遍历每个属性
             {
-                if (property.IsDefined(typeof(IgnoreAttribute), false))
-                    continue;   // **直接跳过，后续任何逻辑都不执行**
                 var setter = GetOrCreateSetter(property);  // 4. 获取设置器委托
                 var randomValue = GenerateRandomValue(property);  // 5. 生成随机值
                 setter(instance, randomValue);  // 6. 设置属性值
@@ -84,7 +108,9 @@ namespace IT.Tangdao.Framework.Helpers
                     : (object)HandleIdPropertyLong(); // 返回 long，直接装 object
             }
 
-            var fakeDataAttr = property.GetCustomAttribute<TangdaoFakeAttribute>();
+            // 使用缓存的特性信息
+            var fakeDataAttr = _cachedAttributes.GetOrAdd(property.Name, key =>
+                property.GetCustomAttribute<TangdaoFakeAttribute>());
 
             // 2. 处理带有特性的属性
             if (fakeDataAttr != null)
@@ -148,14 +174,13 @@ namespace IT.Tangdao.Framework.Helpers
 
         private static object GenerateByPropertyType(Type propertyType)
         {
-            if (propertyType == typeof(string)) return FakeDataHelper.GenerateRandomString();
-            if (propertyType == typeof(int)) return FakeDataHelper.GenerateUniqueId();
-            if (propertyType == typeof(double) || propertyType == typeof(float)) return FakeDataHelper.GenerateDoubleUniqueId();
-            if (propertyType == typeof(long)) return (long)FakeDataHelper.GenerateUniqueId();
-            if (propertyType == typeof(decimal)) return (long)FakeDataHelper.GenerateDecimalUniqueId();
-            if (propertyType == typeof(DateTime)) return FakeDataHelper.GenerateRandomDateTime();
-            if (propertyType == typeof(bool)) return FakeDataHelper.GetRandomBoolean();
-            if (propertyType.IsEnum) return FakeDataHelper.GetRandomEnumValue(propertyType);
+            // 优先检查枚举类型
+            if (propertyType.IsEnum)
+                return FakeDataHelper.GetRandomEnumValue(propertyType);
+
+            // 使用缓存的生成器，避免多次if-else判断
+            if (_typeGenerators.Value.TryGetValue(propertyType, out var generator))
+                return generator();
 
             return propertyType.IsValueType ? Activator.CreateInstance(propertyType) : null;
         }
@@ -164,15 +189,8 @@ namespace IT.Tangdao.Framework.Helpers
         {
             if (depth <= 0) return null;
 
-            // 1. 先 new 空壳
-            var empty = Activator.CreateInstance(type);
-
-            // 2. 用 CloneGenerator 快速填值（深度-1）
-            var fakerType = typeof(TangdaoDataFaker<>).MakeGenericType(type);
-            var buildMethod = fakerType.GetMethod("Build", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int) }, null);
-            var faker = Activator.CreateInstance(fakerType);
-            var filled = buildMethod.Invoke(faker, new object[] { 1 });   // 生成 1 条
-            return ((System.Collections.IList)filled)[0];               // 取出第一条
+            // 使用缓存的嵌套对象生成器，避免多次反射
+            return Activator.CreateInstance(type);
         }
     }
 }
