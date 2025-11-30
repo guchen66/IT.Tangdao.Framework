@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Markup;
 
@@ -51,18 +52,59 @@ namespace IT.Tangdao.Framework.Helpers
         /// <summary>
         /// 通过动态委托自动生成数据
         /// </summary>
-        /// <param name="count"></param>
-        /// <returns></returns>
+        /// <param name="count">要生成的数据数量</param>
+        /// <returns>生成的数据列表</returns>
         public List<T> Build(int count)
         {
             var array = new T[count];
 
             Parallel.For(0, count, i =>
             {
-                array[i] = CreateRandomInstance(); // 直接赋值，无需锁
+                array[i] = CreateRandomInstance();
             });
-            FakeDataHelper.ResetCounters();
+            // 检查是否需要重新赋值自增ID
+            var idProperty = GetIdPropertyThatNeedsAutoIncrement();
+            if (idProperty != null)
+            {
+                // 重新初始化计数器
+                FakeDataHelper.ResetCounters();
+
+                // 为每个对象重新赋值ID，确保连续递增
+                for (int i = 0; i < array.Length; i++)
+                {
+                    var instance = array[i];
+                    var setter = GetOrCreateSetter(idProperty);
+
+                    if (idProperty.PropertyType == typeof(int))
+                    {
+                        setter(instance, FakeDataHelper.GetAutoIncrementId());
+                    }
+                    else if (idProperty.PropertyType == typeof(long))
+                    {
+                        setter(instance, (long)FakeDataHelper.GetAutoIncrementId());
+                    }
+                }
+            }
+            else
+            {
+                FakeDataHelper.ResetCounters();
+            }
+
             return array.ToList();
+        }
+
+        /// <summary>
+        /// 检查属性是否需要设置自增Id
+        /// </summary>
+        /// <param name="property">要检查的属性</param>
+        /// <returns>如果需要设置自增Id则返回true</returns>
+        private static bool ShouldSetAutoIncrementId(PropertyInfo property)
+        {
+            // 检查是否带有PrimarykeyAutoIncrement=true属性
+            var fakeAttr = _cachedAttributes.GetOrAdd(property.Name, key =>
+                property.GetCustomAttribute<TangdaoFakeAttribute>());
+
+            return fakeAttr != null && fakeAttr.PrimarykeyAutoIncrement;
         }
 
         private static Action<T, object> GetOrCreateSetter(PropertyInfo property)
@@ -100,32 +142,47 @@ namespace IT.Tangdao.Framework.Helpers
 
         private static object GenerateRandomValue(PropertyInfo property)
         {
-            // 1. 优先处理ID属性 → 零装箱分支
-            if (IsIdProperty(property))
-            {
-                return property.PropertyType == typeof(int)
-                    ? HandleIdPropertyInt()      // 返回 int，直接装 object（一次装箱不可避免）
-                    : (object)HandleIdPropertyLong(); // 返回 long，直接装 object
-            }
-
             // 使用缓存的特性信息
             var fakeDataAttr = _cachedAttributes.GetOrAdd(property.Name, key =>
                 property.GetCustomAttribute<TangdaoFakeAttribute>());
 
-            // 2. 处理带有特性的属性
+            // 1. 处理带有特性的属性
             if (fakeDataAttr != null)
             {
-                // 2.1 最高优先级：DefaultValue
+                // 1.1 最高优先级：DefaultValue
                 if (!string.IsNullOrEmpty(fakeDataAttr.DefaultValue))
                 {
                     //使用C#内置的类型转换
                     return Convert.ChangeType(fakeDataAttr.DefaultValue, property.PropertyType);
                 }
 
-                // 2.2 第二优先级：Length（仅字符串）不是 string → 当场放弃，继续走后面逻辑
+                // 1.2 第二优先级：Length（仅字符串）不是 string → 当场放弃，继续走后面逻辑
                 if (fakeDataAttr.Length > 0 && property.PropertyType == typeof(string))
                 {
                     return FakeDataHelper.GenerateRandomString(fakeDataAttr.Length);
+                }
+
+                // 1.3 处理数值类型，包括int和long
+                if (property.PropertyType == typeof(int))
+                {
+                    // 检查是否为ID属性且需要自增
+                    if (IsIdProperty(property) && ShouldSetAutoIncrementId(property))
+                    {
+                        return FakeDataHelper.GetAutoIncrementId();
+                    }
+                    // 否则使用随机数，并考虑Min和Max
+                    return FakeDataHelper.GenerateUniqueId(fakeDataAttr.Min, fakeDataAttr.Max);
+                }
+
+                if (property.PropertyType == typeof(long))
+                {
+                    // 检查是否为ID属性且需要自增
+                    if (IsIdProperty(property) && ShouldSetAutoIncrementId(property))
+                    {
+                        return (long)FakeDataHelper.GetAutoIncrementId();
+                    }
+                    // 否则使用随机数，并考虑Min和Max
+                    return (long)FakeDataHelper.GenerateUniqueId(fakeDataAttr.Min, fakeDataAttr.Max);
                 }
 
                 if ((property.PropertyType == typeof(float) || property.PropertyType == typeof(double)))
@@ -138,16 +195,30 @@ namespace IT.Tangdao.Framework.Helpers
                     return FakeDataHelper.GenerateDecimalUniqueId(fakeDataAttr.Min, fakeDataAttr.Max, fakeDataAttr.Point);
                 }
 
-                // 2.3 第三优先级：DataType
+                // 1.4 第三优先级：DataType
                 if (property.PropertyType.IsEnum)
                 {
                     return FakeDataHelper.GetRandomEnumValue(property.PropertyType);
                 }
 
-                // 2.4 模板键（用户显式指定）
+                // 1.5 模板键（用户显式指定）
                 if (!string.IsNullOrEmpty(fakeDataAttr.Template))
                     return FakeDataHelper.GetRandomTemplateValue(fakeDataAttr.Template);
             }
+
+            // 2. 处理ID属性（没有特性或特性中未指定DefaultValue的情况）
+            if (IsIdProperty(property))
+            {
+                if (ShouldSetAutoIncrementId(property))
+                {
+                    return property.PropertyType == typeof(int)
+                        ? FakeDataHelper.GetAutoIncrementId()
+                        : (object)(long)FakeDataHelper.GetAutoIncrementId();
+                }
+                // 否则使用默认的随机生成逻辑
+                return GenerateByPropertyType(property.PropertyType);
+            }
+
             // === 3. 无特性 → 自动递归生成（深度 ≤ 2）===
             if (fakeDataAttr == null)
             {
@@ -168,9 +239,15 @@ namespace IT.Tangdao.Framework.Helpers
             return property.Name.ContainsIgnoreCase("Id") && property.PropertyType.IsIntegerKey();
         }
 
-        private static int HandleIdPropertyInt() => FakeDataHelper.GetNextAutoIncrementId();
-
-        private static long HandleIdPropertyLong() => (long)FakeDataHelper.GetNextAutoIncrementId();
+        /// <summary>
+        /// 获取需要自增ID的属性
+        /// </summary>
+        /// <returns>需要自增ID的属性，如果没有则返回null</returns>
+        private static PropertyInfo GetIdPropertyThatNeedsAutoIncrement()
+        {
+            return _cachedProperties.Value.FirstOrDefault(property =>
+                IsIdProperty(property) && ShouldSetAutoIncrementId(property));
+        }
 
         private static object GenerateByPropertyType(Type propertyType)
         {

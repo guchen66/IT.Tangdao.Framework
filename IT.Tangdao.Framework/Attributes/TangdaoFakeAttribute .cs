@@ -48,6 +48,16 @@ namespace IT.Tangdao.Framework.Attributes
         /// </summary>
         public int Point { get; set; } = 4;
 
+        /// <summary>
+        /// 是否为主键自增属性
+        /// </summary>
+        /// <remarks>
+        /// 当设置为true时，该属性会自动生成连续递增的Id值
+        /// 结合IsIdProperty方法自动识别Id属性
+        /// </remarks>
+        [Description("是否为主键自增属性")]
+        public bool PrimarykeyAutoIncrement { get; set; } = false;
+
         #endregion 值类型使用
 
         /// <summary>

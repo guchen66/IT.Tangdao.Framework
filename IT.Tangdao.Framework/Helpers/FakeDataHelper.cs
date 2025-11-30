@@ -22,7 +22,9 @@ namespace IT.Tangdao.Framework.Helpers
         private static readonly string[] ChineseCities = { "北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "南京" };
 
         private static readonly string[] CommonHobbies = { "阅读", "旅行", "摄影", "烹饪", "运动", "音乐", "电影" };
+
         public static readonly string[] CommonNames = { "张三", "李四", "王五", "赵六", "钱七" };
+
         private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
         // 手机号正则（符合中国手机号规则）
@@ -240,7 +242,7 @@ namespace IT.Tangdao.Framework.Helpers
 
         public static bool GetRandomBoolean() => _random.Value.Next(2) == 1;
 
-        public static int GetNextAutoIncrementId() => _intIdCounter++;
+        public static int GetAutoIncrementId() => _intIdCounter++;
 
         public static string CurrentRandomChineseName => GetCurrentRandomChineseName();
         public static string RandomChineseName => GetRandomChineseName();

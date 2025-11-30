@@ -28,11 +28,6 @@ namespace IT.Tangdao.Framework.DaoTasks
         public TimeSpan Elapsed => _sw.Elapsed;
 
         /// <summary>
-        /// 获取格式化的任务执行时间
-        /// </summary>
-        public string Duration => _sw.Elapsed.ToString(@"hh\:mm\:ss\.fff");
-
-        /// <summary>
         /// 获取任务的当前状态
         /// </summary>
         public TaskStatus Status { get; private set; } = TaskStatus.Running;
