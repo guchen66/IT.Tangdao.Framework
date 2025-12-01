@@ -27,7 +27,7 @@ namespace IT.Tangdao.Framework.Helpers
             {
                 Encoding = encoding,
                 Indent = true, // 可选：使 XML 更具可读性
-                OmitXmlDeclaration = false // 确保包含 XML 声明
+                OmitXmlDeclaration = false, // 确保包含 XML 声明
             };
 
             using (StringWriterWithEncoding stringWriter = new StringWriterWithEncoding(encoding))

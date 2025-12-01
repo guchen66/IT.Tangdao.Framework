@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Markup;
+using IT.Tangdao.Framework.Pooling;
 
 namespace IT.Tangdao.Framework.Helpers
 {
@@ -19,7 +19,7 @@ namespace IT.Tangdao.Framework.Helpers
     /// 数据自动生成器
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TangdaoDataFaker<T> where T : new()
+    public class TangdaoDataFaker<T> where T : class, new()
     {
         //缓存属性生成setter
         private static readonly ConcurrentDictionary<string, Action<T, object>> _cachePropertySetters =
@@ -48,6 +48,9 @@ namespace IT.Tangdao.Framework.Helpers
                 { typeof(DateTime), () => FakeDataHelper.GenerateRandomDateTime() },
                 { typeof(bool), () => FakeDataHelper.GetRandomBoolean() }
             });
+
+        // 对象池，用于复用生成的对象，减少GC压力
+        private static readonly ThreadLocal<TangdaoPool<T>> _objectPool = new ThreadLocal<TangdaoPool<T>>(() => new TangdaoPool<T>());
 
         /// <summary>
         /// 通过动态委托自动生成数据
@@ -128,7 +131,8 @@ namespace IT.Tangdao.Framework.Helpers
 
         private static T CreateRandomInstance()
         {
-            var instance = new T();  // 1. 创建新实例
+            // 1、从对象池中租借一个对象，避免频繁创建新对象
+            var instance = _objectPool.Value.Rent();
             var properties = _cachedProperties.Value;  // 2. 使用缓存的属性信息
 
             foreach (var property in properties)  // 3. 遍历每个属性

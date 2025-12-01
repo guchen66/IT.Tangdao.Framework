@@ -29,7 +29,7 @@ namespace IT.Tangdao.Framework.Extensions
             // 检查是否是文件路径（包含扩展名），如果是则取其目录
             string filePath = sourcePath.Value;
             filePath.CreateFile(fileName);
-            return sourcePath;   // 继续链式调用
+            return sourcePath.Combine(fileName);   // 继续链式调用
         }
 
         /// <summary>
