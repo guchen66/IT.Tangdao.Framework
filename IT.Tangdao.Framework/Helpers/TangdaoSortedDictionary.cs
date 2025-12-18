@@ -1,6 +1,8 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Extensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +12,7 @@ namespace IT.Tangdao.Framework.Helpers
     /// <summary>
     /// 自动按键排序的字典——int、string 即插即排，后续可扩展汉字规则。
     /// </summary>
-    public class TangdaoSortedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+    public class TangdaoSortedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
     {
         // 内部用 Framework 自带的 SortedDictionary，红黑树实现，插入即排序
         private readonly SortedDictionary<TKey, TValue> _core;
@@ -46,6 +48,10 @@ namespace IT.Tangdao.Framework.Helpers
         /// <inheritdoc/>
         public bool IsReadOnly => false;
 
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => _core.Keys;
+
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _core.Values;
+
         /// <inheritdoc/>
         public void Add(TKey key, TValue value) => _core.Add(key, value);
 
@@ -77,5 +83,22 @@ namespace IT.Tangdao.Framework.Helpers
 
         /// <inheritdoc/>
         public bool Remove(KeyValuePair<TKey, TValue> kv) => Remove(kv.Key);
+
+        public void UpdateValues(List<TValue> allDatas)
+        {
+            if (allDatas == null)
+                throw new ArgumentNullException(nameof(allDatas));
+
+            if (allDatas.Count != this.Count)
+                throw new ArgumentException("数据数量与key数量不匹配", nameof(allDatas));
+
+            // 使用 Zip 组合，然后逐个更新
+            var updates = this.Keys.Zip(allDatas, (key, value) => new { Key = key, Value = value });
+
+            foreach (var item in updates)
+            {
+                this[item.Key] = item.Value;
+            }
+        }
     }
 }

@@ -26,6 +26,8 @@ IT.Tangdao以下简称唐刀，是我开发的一款适用于WPF的专属框架�
 
 任务调度器TangdaoTaskScheduler、
 
+弱引用事件TangdaoWeakEvent
+
 事件监听器、在开发中
 
 拦截器、在开发中
@@ -1271,3 +1273,36 @@ AutoWireViewAttribute：对ViewModel标注特性，自动关联View和ViewModel
 ```
 
 注册的时候，可以指定注册的模式和顺序，数字越小，最先注册
+
+#### 19、弱引用TangdaoWeakEvent
+
+###### 1、MessageReceived处理普通事件
+
+```C#
+TangdaoWeakEvent.Instance.OnMessageReceived += (sender, obj) => { };
+TangdaoWeakEvent.Instance.Publish("Open", Message);
+```
+
+
+
+###### 2、OnKeyMessageReceived 处理带Key的事件
+
+```C#
+TangdaoWeakEvent.Instance.OnKeyMessageReceived += (sender, obj) => { };
+TangdaoWeakEvent.Instance.Publish("Open", KeyMessage);
+```
+
+
+
+###### 3、OnHandlerTableReceived 处理事件列表
+
+```C#
+TangdaoWeakEvent.Instance.OnHandlerTableReceived += (sender, obj) => { };
+TangdaoWeakEvent.Instance.Publish("Open", HandlerTable);
+```
+
+
+
+
+
+ 

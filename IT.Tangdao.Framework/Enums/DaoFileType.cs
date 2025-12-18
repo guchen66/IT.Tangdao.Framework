@@ -11,7 +11,7 @@ namespace IT.Tangdao.Framework.Enums
     /// </summary>
     public enum DaoFileType
     {
-        /// <summary>未指定的文件类型。</summary>
+        /// <summary>未知的文件类型。</summary>
         None,
 
         /// <summary>纯文本文件。</summary>

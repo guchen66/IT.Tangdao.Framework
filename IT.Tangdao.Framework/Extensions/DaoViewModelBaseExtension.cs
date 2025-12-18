@@ -35,5 +35,17 @@ namespace IT.Tangdao.Framework.Extensions
         {
             return new TangdaoCommand(execute, canExecute);
         }
+
+        /// <summary>
+        /// 泛型命令快速工厂
+        /// </summary>
+        /// <param name="daoViewModelBase"></param>
+        /// <param name="execute"></param>
+        /// <param name="canExecute"></param>
+        /// <returns></returns>
+        public static ICommand Cmd<T>(this DaoViewModelBase daoViewModelBase, Action<T> execute, Func<T, bool> canExecute = null)
+        {
+            return new TangdaoCommand<T>(execute, canExecute);
+        }
     }
 }

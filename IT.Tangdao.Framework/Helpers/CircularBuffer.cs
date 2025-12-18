@@ -22,14 +22,25 @@ namespace IT.Tangdao.Framework.Helpers
             if (_data.Length == 0) throw new ArgumentException("Sequence contains no elements", nameof(source));
         }
 
+        /// <summary>
+        /// 缓冲区数量
+        /// </summary>
         public int Count => _data.Length;
 
+        /// <summary>
+        /// 下一个值
+        /// </summary>
+        /// <returns></returns>
         public T GetNext()
         {
             var i = Interlocked.Increment(ref _index) - 1;
             return _data[i % _data.Length];
         }
 
+        /// <summary>
+        /// 前一个值
+        /// </summary>
+        /// <returns></returns>
         public T GetPrevious()
         {
             var i = Interlocked.Decrement(ref _index) - 1;

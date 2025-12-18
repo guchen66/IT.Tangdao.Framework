@@ -16,13 +16,33 @@ namespace IT.Tangdao.Framework.Helpers
     public static class DirectoryHelper
     {
         /// <summary>
-        /// 获取根目录
+        /// 获取程序基目录（exe执行文件前一个目录）
         /// </summary>
         /// <returns></returns>
-        public static string SelectRootDirectory()
+        public static string GetDomainBaseDirectory()
         {
-            string rootDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
-            return rootDirectory;
+            string domainBaseDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
+            return domainBaseDirectory;
+        }
+
+        /// <summary>
+        /// 获取执行exe所在目录（包含exe）
+        /// </summary>
+        /// <returns></returns>
+        public static string GetExecuteExeDirectory()
+        {
+            string exeDirectory = Assembly.GetEntryAssembly().Location;
+            return exeDirectory;
+        }
+
+        /// <summary>
+        /// 获取当前dll所在目录
+        /// </summary>
+        /// <returns></returns>
+        public static string GetCurrentDllDirectory()
+        {
+            string dllDirectory = Assembly.GetExecutingAssembly().Location;
+            return dllDirectory;
         }
 
         /// <summary>

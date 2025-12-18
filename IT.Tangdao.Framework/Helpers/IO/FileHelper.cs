@@ -47,6 +47,27 @@ namespace IT.Tangdao.Framework.Helpers
             return path.EqualsIgnoreCase(root);
         }
 
+        /// <summary>
+        /// 获取文件后缀类型
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static DaoFileType GetExtension(string path)
+        {
+            string extension = Path.GetExtension(path).TrimStart('.');
+            if (string.IsNullOrEmpty(extension))
+            {
+                return DaoFileType.None;
+            }
+
+            // 转换为PascalCase，比如"xml" → "Xml"
+            string enumName = extension.ToFirstUpperRestLower();
+
+            return Enum.TryParse(enumName, true, out DaoFileType result)
+                ? result
+                : DaoFileType.None;
+        }
+
         #region 文件的读取
 
         public static string ReadAllText(string path)
@@ -219,6 +240,12 @@ namespace IT.Tangdao.Framework.Helpers
             }
         }
 
+        /// <summary>
+        /// 跟据文件类型返回文件.后缀
+        /// </summary>
+        /// <param name="fileType"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public static string GetExtensionFromFileType(DaoFileType fileType)
         {
             if (fileType == DaoFileType.None)

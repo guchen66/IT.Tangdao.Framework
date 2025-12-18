@@ -215,6 +215,29 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
         /// <summary>
+        /// 将字符串转换为首字母大写，其余字母小写的格式（PascalCase）
+        /// </summary>
+        /// <param name="str">要转换的字符串</param>
+        /// <returns>首字母大写，其余小写的字符串</returns>
+        public static string ToFirstUpperRestLower(this string str)
+        {
+            // 处理 null 和空字符串
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            // 处理只有一个字符的情况
+            if (str.Length == 1)
+            {
+                return str.ToUpper();
+            }
+
+            // 首字母大写，其余小写
+            return char.ToUpper(str[0]) + str.Substring(1).ToLower();
+        }
+
+        /// <summary>
         /// 链式创建BinaryWriter
         /// </summary>
         public static BinaryWriter ToBinaryWriter(this string filePath, FileMode fileMode = FileMode.Create)

@@ -83,7 +83,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         {
             _content = File.ReadAllText(path);
             _path = path;
-            _detected = t == DaoFileType.None ? FileHelper.DetectFromContent(_content) : t;
+            _detected = FileHelper.GetExtension(path);
             // ① 根 key：路径 + 格式
             var rootKey = string.Format("Content:{0}:{1}", path, _detected);
             TangdaoParameter tangdaoParameter = new TangdaoParameter();
