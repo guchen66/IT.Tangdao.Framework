@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
-using IT.Tangdao.Framework.Abstractions.Alarms;
 using IT.Tangdao.Framework.Ioc;
 
 namespace IT.Tangdao.Framework.Bootstrap
@@ -21,10 +20,6 @@ namespace IT.Tangdao.Framework.Bootstrap
 
         public override void OnInitialized(ITangdaoProvider provider)
         {
-            // 3. 把默认通知器自动挂上事件流
-            var service = provider.GetService<IAlarmService>();
-            var notifier = provider.GetService<IAlarmNotifier>();
-            service.Subscribe(notifier);
         }
     }
 }

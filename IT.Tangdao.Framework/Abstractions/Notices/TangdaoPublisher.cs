@@ -3,27 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.EventArg;
 
-namespace IT.Tangdao.Framework.Abstractions.Alarms
+namespace IT.Tangdao.Framework.Abstractions.Notices
 {
-    public sealed class AlarmPublisher : IObservable<AlarmMessage>, IDisposable
+    /// <summary>
+    /// 事件发布者
+    /// </summary>
+    public class TangdaoPublisher : ITangdaoPublisher
     {
-        private readonly List<IObserver<AlarmMessage>> _observers = new List<IObserver<AlarmMessage>>();
+        private readonly List<IObserver<MessageEventArgs>> _observers = new List<IObserver<MessageEventArgs>>();
         private readonly object _lock = new object();
 
-        public IDisposable Subscribe(IObserver<AlarmMessage> observer)
+        public IDisposable Subscribe(IObserver<MessageEventArgs> observer)
         {
             lock (_lock)
             {
+                Console.WriteLine("TangdaoPublisher调用Subscribe");
                 _observers.Add(observer);
                 return new Unsubscriber(_observers, observer, _lock);
             }
         }
 
-        public void Publish(AlarmMessage message)
+        public void Publish(MessageEventArgs message)
         {
             lock (_lock)
             {
+                Console.WriteLine("TangdaoPublisher调用Publish");
                 foreach (var obs in _observers.ToArray()) obs.OnNext(message);
             }
         }
@@ -32,6 +38,7 @@ namespace IT.Tangdao.Framework.Abstractions.Alarms
         {
             lock (_lock)
             {
+                Console.WriteLine("TangdaoPublisher调用CompleteAll");
                 foreach (var obs in _observers.ToArray()) obs.OnCompleted();
                 _observers.Clear();
             }
@@ -41,13 +48,11 @@ namespace IT.Tangdao.Framework.Abstractions.Alarms
 
         private sealed class Unsubscriber : IDisposable
         {
-            private readonly List<IObserver<AlarmMessage>> _observers;
-            private readonly IObserver<AlarmMessage> _observer;
+            private readonly List<IObserver<MessageEventArgs>> _observers;
+            private readonly IObserver<MessageEventArgs> _observer;
             private readonly object _lock;
 
-            public Unsubscriber(List<IObserver<AlarmMessage>> observers,
-                                IObserver<AlarmMessage> observer,
-                                object @lock)
+            public Unsubscriber(List<IObserver<MessageEventArgs>> observers, IObserver<MessageEventArgs> observer, object @lock)
             {
                 _observers = observers;
                 _observer = observer;

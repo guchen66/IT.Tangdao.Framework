@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
-using IT.Tangdao.Framework.Abstractions.Alarms;
 using IT.Tangdao.Framework.Ioc;
 using System.Windows;
 using IT.Tangdao.Framework.Abstractions.Contracts;

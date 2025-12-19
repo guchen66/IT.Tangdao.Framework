@@ -16,8 +16,7 @@ namespace IT.Tangdao.Framework.Providers
 
         /// <param name="keySelector">如何取出要比较的“分类字符串”</param>
         /// <param name="priority">优先级映射（值越小越靠前）</param>
-        public PrioritySortProvider(Func<T, string> keySelector,
-                                    IDictionary<string, int> priority)
+        public PrioritySortProvider(Func<T, string> keySelector, IDictionary<string, int> priority)
         {
             _keySelector = keySelector ?? throw new ArgumentNullException(nameof(keySelector));
             _priority = priority ?? throw new ArgumentNullException(nameof(priority));

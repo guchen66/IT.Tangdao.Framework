@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Commands
 {
+    /// <summary>
+    /// 委托注册表
+    /// </summary>
     public interface IHandlerTable
     {
         void Register(string key, Action action);
