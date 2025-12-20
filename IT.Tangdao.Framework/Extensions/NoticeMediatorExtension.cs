@@ -12,7 +12,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 链式入口：持有工厂，后续可继续 .Add().Add()...
         /// </summary>
-        public static FluentNoticeBuilder UseNoticeKit(this NoticeMediator mediator)
-            => new FluentNoticeBuilder(mediator, new DefaultNoticeFactory());
+        public static NoticeBuilder ChainRegister(this NoticeMediator mediator)
+            => new NoticeBuilder(mediator, mediator.Resolver);
     }
 }

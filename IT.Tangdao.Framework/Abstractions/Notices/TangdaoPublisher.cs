@@ -8,64 +8,24 @@ using IT.Tangdao.Framework.EventArg;
 namespace IT.Tangdao.Framework.Abstractions.Notices
 {
     /// <summary>
-    /// 事件发布者
+    /// 通用通知发布者实现，支持发布任意类型的通知给订阅者
     /// </summary>
-    public class TangdaoPublisher : ITangdaoPublisher
+    public class TangdaoPublisher : TangdaoPublisher<object>, ITangdaoPublisher
     {
-        private readonly List<IObserver<MessageEventArgs>> _observers = new List<IObserver<MessageEventArgs>>();
-        private readonly object _lock = new object();
+    }
 
-        public IDisposable Subscribe(IObserver<MessageEventArgs> observer)
+    /// <summary>
+    /// 空的Disposable实现
+    /// </summary>
+    internal static class Disposable
+    {
+        public static readonly IDisposable Empty = new EmptyDisposable();
+
+        private sealed class EmptyDisposable : IDisposable
         {
-            lock (_lock)
-            {
-                Console.WriteLine("TangdaoPublisher调用Subscribe");
-                _observers.Add(observer);
-                return new Unsubscriber(_observers, observer, _lock);
-            }
-        }
-
-        public void Publish(MessageEventArgs message)
-        {
-            lock (_lock)
-            {
-                Console.WriteLine("TangdaoPublisher调用Publish");
-                foreach (var obs in _observers.ToArray()) obs.OnNext(message);
-            }
-        }
-
-        public void CompleteAll()
-        {
-            lock (_lock)
-            {
-                Console.WriteLine("TangdaoPublisher调用CompleteAll");
-                foreach (var obs in _observers.ToArray()) obs.OnCompleted();
-                _observers.Clear();
-            }
-        }
-
-        public void Dispose() => CompleteAll();
-
-        private sealed class Unsubscriber : IDisposable
-        {
-            private readonly List<IObserver<MessageEventArgs>> _observers;
-            private readonly IObserver<MessageEventArgs> _observer;
-            private readonly object _lock;
-
-            public Unsubscriber(List<IObserver<MessageEventArgs>> observers, IObserver<MessageEventArgs> observer, object @lock)
-            {
-                _observers = observers;
-                _observer = observer;
-                _lock = @lock;
-            }
-
             public void Dispose()
             {
-                lock (_lock)
-                {
-                    if (_observer != null && _observers.Contains(_observer))
-                        _observers.Remove(_observer);
-                }
+                // 空实现
             }
         }
     }

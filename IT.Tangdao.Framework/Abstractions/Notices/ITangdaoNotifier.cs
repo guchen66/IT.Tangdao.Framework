@@ -8,9 +8,9 @@ using IT.Tangdao.Framework.EventArg;
 namespace IT.Tangdao.Framework.Abstractions.Notices
 {
     /// <summary>
-    /// 通知接收器实现，用于接收通用通知
+    /// 通知接收器接口，用于接收发布者发送的通用通知
     /// </summary>
-    public class TangdaoNotifier : TangdaoNotifier<object>, ITangdaoNotifier
+    public interface ITangdaoNotifier : ITangdaoNotifier<object>, IDisposable
     {
     }
 }

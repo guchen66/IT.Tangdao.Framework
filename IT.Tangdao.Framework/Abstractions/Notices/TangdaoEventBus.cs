@@ -9,10 +9,10 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
 {
     public static class TangdaoEventBus
     {
-        public static void Publish<TArgs>(TArgs args) where TArgs : TangdaoEventArgs
-            => TangdaoPublisher<TArgs>.Instance.Publish(args);
+        //public static void Publish<TArgs>(TArgs args) where TArgs : TangdaoEventArgs
+        //    => TangdaoPublisher<TArgs>.Instance.Publish(args);
 
-        public static IDisposable Subscribe<TArgs>(IObserver<TArgs> observer)
-            => TangdaoPublisher<TArgs>.Instance.Subscribe(observer);
+        //public static IDisposable Subscribe<TArgs>(IObserver<TArgs> observer)
+        //    => TangdaoPublisher<TArgs>.Instance.Subscribe(observer);
     }
 }

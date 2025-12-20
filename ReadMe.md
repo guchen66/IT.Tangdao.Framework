@@ -28,6 +28,8 @@ IT.Tangdao以下简称唐刀，是我开发的一款适用于WPF的专属框架�
 
 弱引用事件TangdaoWeakEvent
 
+观察者模式事件通知INoticeObserver
+
 事件监听器、在开发中
 
 拦截器、在开发中
@@ -1299,6 +1301,65 @@ TangdaoWeakEvent.Instance.Publish("Open", KeyMessage);
 ```C#
 TangdaoWeakEvent.Instance.OnHandlerTableReceived += (sender, obj) => { };
 TangdaoWeakEvent.Instance.Publish("Open", HandlerTable);
+```
+
+#### 20、观察者模式事件通知INoticeObserver
+
+当时有内部框架的IOC时，不需要外部委托SetResolver，当使用其他的IOC时需要通过SetResolver来解析
+
+```C#
+NoticeMediator.SetResolver(reg => Container.Get(reg.RegisterType) as INoticeObserver);
+NoticeMediator.Instance.ChainRegister().Add(typeof(LightViewModel)).Add(typeof(ElectViewModel)).Add(typeof(PressureViewModel));
+```
+
+使用场景：
+
+```C#
+ public class ElectViewModel : BaseViewModel, INoticeObserver
+ {
+     private string _tag;
+
+     public string Tag
+     {
+         get => _tag;
+         set => SetAndNotify(ref _tag, value);
+     }
+
+      public void UpdateNotice(NoticeContext context)
+      {
+         Tag = context.Tag;
+      }
+ }
+```
+
+一键通知：
+
+```C#
+ NoticeContext Context = new NoticeContext();
+ Context.CurrentTime = DateTime.Now;
+ Context.Tag = "数据改变了";
+ NoticeMediator.Instance.NotifyAll(Context);
+```
+
+单独通知：
+
+```C#
+ NoticeContext Context = new NoticeContext();
+ Context.CurrentTime = DateTime.Now;
+ Context.Tag = "单独数据改变";
+ NoticeMediator.Instance.NotifySingle("LightViewModel", Context);
+```
+
+注销通知：
+
+```C#
+ NoticeMediator.Instance.Unregister("Key");
+```
+
+注销所有通知：
+
+```C#
+NoticeMediator.Instance.Unregister();
 ```
 
 
