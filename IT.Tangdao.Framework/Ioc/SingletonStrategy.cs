@@ -14,12 +14,44 @@ namespace IT.Tangdao.Framework.Ioc
     public sealed class SingletonStrategy : ILifecycleStrategy
     {
         // 静态全局缓存，也可改成 Provider 级实例缓存，后续再换
-        private static readonly ConcurrentDictionary<Type, object> _cache = new ConcurrentDictionary<Type, object>();
+        //private static readonly ConcurrentDictionary<Type, object> _cache = new ConcurrentDictionary<Type, object>();
+
+        //public object CreateInstance(ServiceCreationContext context)
+        //{
+        //    return _cache.GetOrAdd(context.Entry.ServiceType,
+        //        _ => context.Factory.Create(context.Entry));
+        //}
+
+        // 普通单例缓存（保持原样）
+        private static readonly ConcurrentDictionary<Type, object> _cache =
+            new ConcurrentDictionary<Type, object>();
+
+        // 新增：带键单例缓存
+        private static readonly ConcurrentDictionary<string, object> _keyedCache =
+            new ConcurrentDictionary<string, object>();
 
         public object CreateInstance(ServiceCreationContext context)
         {
-            return _cache.GetOrAdd(context.Entry.ServiceType,
-                _ => context.Factory.Create(context.Entry));
+            if (context.Key == null)
+            {
+                // 普通单例：使用原有逻辑
+                return _cache.GetOrAdd(context.Entry.ServiceType,
+                    _ => context.Factory.Create(context.Entry));
+            }
+            else
+            {
+                // 带键单例：生成唯一的缓存键
+                string cacheKey = GenerateCacheKey(context.Entry.ServiceType, context.Key);
+                return _keyedCache.GetOrAdd(cacheKey,
+                    _ => context.Factory.Create(context.Entry));
+            }
+        }
+
+        private static string GenerateCacheKey(Type serviceType, object key)
+        {
+            // 使用分隔符创建唯一的字符串键
+            // 例如："ITangdaoPage||RelaPathViewModel"
+            return $"{serviceType.FullName}||{key}";
         }
     }
 }

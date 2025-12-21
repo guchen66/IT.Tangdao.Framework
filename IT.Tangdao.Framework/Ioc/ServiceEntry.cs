@@ -15,6 +15,7 @@ namespace IT.Tangdao.Framework.Ioc
         public Type ServiceType { get; }
         public Type ImplementationType { get; }
         public ILifecycleStrategy LifecycleStrategy { get; }
+        public Func<ITangdaoProvider, object> Factory { get; }
 
         public ServiceEntry(Type serviceType, Type implementationType, ILifecycleStrategy lifecycleStrategy)
         {
@@ -25,7 +26,11 @@ namespace IT.Tangdao.Framework.Ioc
                 throw new ArgumentNullException(nameof(implementationType));
             if (lifecycleStrategy == null)
                 throw new ArgumentNullException(nameof(lifecycleStrategy));
-            if (!serviceType.IsAssignableFrom(implementationType))
+
+            // 跳过类型检查的特殊情况：实现类型是工厂类型（实现了 IServiceFactory）
+            // 这种情况下，实际创建实例的是工厂，而不是 ImplementationType 本身
+            if (!typeof(IServiceFactory).IsAssignableFrom(implementationType) &&
+                !serviceType.IsAssignableFrom(implementationType))
                 throw new ArgumentException($"类型 '{implementationType}' 未实现/继承 '{serviceType}'.");
 
             ServiceType = serviceType;

@@ -32,6 +32,17 @@ namespace IT.Tangdao.Framework.Ioc
             // ② 逐个参数检查
             foreach (var param in ctor.GetParameters())
             {
+                // 跳过基本类型、字符串、Type、枚举和值类型的验证
+                // 这些类型不需要在IOC容器中注册
+                if (param.ParameterType.IsPrimitive ||
+                    param.ParameterType == typeof(string) ||
+                    param.ParameterType == typeof(Type) ||
+                    param.ParameterType.IsEnum ||
+                    param.ParameterType.IsValueType)
+                {
+                    continue; // 跳过这些类型的验证
+                }
+
                 if (_registry.GetEntry(param.ParameterType) == null)
                 {
                     throw new InvalidOperationException(

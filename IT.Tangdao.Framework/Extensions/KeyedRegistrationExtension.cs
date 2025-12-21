@@ -24,9 +24,7 @@ namespace IT.Tangdao.Framework.Extensions
 
         #region 底层统一入口
 
-        private static ITangdaoContainer AddKeyed<TService, TImpl>(ITangdaoContainer container,
-                                                                   object key,
-                                                                   ILifecycleStrategy strategy)
+        private static ITangdaoContainer AddKeyed<TService, TImpl>(ITangdaoContainer container, object key, ILifecycleStrategy strategy)
         {
             var entry = new KeyedServiceEntry(typeof(TService), typeof(TImpl), strategy, key);
             //  keyed 注册走新字典，不干扰普通注册

@@ -23,22 +23,45 @@ namespace IT.Tangdao.Framework.Ioc
 
         public object Create(IServiceEntry entry)
         {
-            // ① 选“参数最齐”的 public 构造函数
-            var ctor = entry.ImplementationType
-                            .GetConstructors()
-                            .OrderByDescending(c => c.GetParameters().Length)
-                            .FirstOrDefault()
-                      ?? throw new InvalidOperationException($"类型 {entry.ImplementationType} 无可用的公共构造函数。");
+            // ① 尝试找到无参数的公共构造函数
+            var ctor = entry.ImplementationType.GetConstructor(Type.EmptyTypes);
 
-            // ② 递归解析参数
-            var args = ctor.GetParameters()
-                           .Select(p => _provider.GetService(p.ParameterType)
-                                      ?? throw new InvalidOperationException(
-                                             $"构造函数参数 {p.ParameterType} 未注册。"))
-                           .ToArray();
+            // ② 如果没有无参数构造函数，再找参数最齐的公共构造函数
+            if (ctor == null)
+            {
+                ctor = entry.ImplementationType
+                        .GetConstructors()
+                        .OrderByDescending(c => c.GetParameters().Length)
+                        .FirstOrDefault()
+                  ?? throw new InvalidOperationException($"类型 {entry.ImplementationType} 无可用的公共构造函数。");
+            }
 
-            // ③ 创建实例
-            return ctor.Invoke(args);
+            // ③ 递归解析参数
+            var args = new List<object>();
+            foreach (var param in ctor.GetParameters())
+            {
+                // 对于基本类型和字符串，不尝试从容器解析，使用默认值
+                if (param.ParameterType.IsPrimitive || param.ParameterType == typeof(string) || param.ParameterType == typeof(Type))
+                {
+                    // 使用参数的默认值
+                    var defaultValue = param.HasDefaultValue ? param.DefaultValue : null;
+                    args.Add(defaultValue);
+                }
+                else
+                {
+                    // 对于引用类型，从容器中解析
+                    var service = _provider.GetService(param.ParameterType);
+                    if (service == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"服务 '{entry.ServiceType}' 的实现 '{entry.ImplementationType}' 依赖未注册接口 '{param.ParameterType}'.");
+                    }
+                    args.Add(service);
+                }
+            }
+
+            // ④ 创建实例
+            return ctor.Invoke(args.ToArray());
         }
     }
 }

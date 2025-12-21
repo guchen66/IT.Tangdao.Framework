@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Common;
 
 namespace IT.Tangdao.Framework.Abstractions.Notices
 {
@@ -49,7 +50,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
                 throw new InvalidOperationException(
                     $"类型 '{type.FullName}' 未实现 {nameof(INoticeObserver)} 接口，无法注册。");
 
-            var registry = new NoticeRegistry(type.Name, type);
+            var registry = new RegistrationTypeEntry (type.Name, type);
             var obs = _resolver.CreateObserver(registry);
 
             // 2. 工厂也返回 null → 抛更明确的异常
@@ -70,7 +71,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         public NoticeBuilder Add<T>() where T : INoticeObserver
         {
             var type = typeof(T);
-            var registry = new NoticeRegistry(type.Name, type);
+            var registry = new RegistrationTypeEntry (type.Name, type);
             var obs = _resolver.CreateObserver(registry);
 
             // 工厂返回 null → 抛更明确的异常

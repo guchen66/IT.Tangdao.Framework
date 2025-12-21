@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions.Navigates
+namespace IT.Tangdao.Framework.Abstractions.Navigation
 {
     public static class NavigationContext
     {

@@ -46,7 +46,7 @@ namespace IT.Tangdao.Framework
 
             // 2. 生命周期策略与 GetService 共用同一套，无差别
             return entry.LifecycleStrategy.CreateInstance(
-                new ServiceCreationContext { Entry = entry, Factory = _factory });
+                new ServiceCreationContext { Entry = entry, Factory = _factory, Key = key });
         }
 
         public T GetKeyedService<T>(object key) where T : class

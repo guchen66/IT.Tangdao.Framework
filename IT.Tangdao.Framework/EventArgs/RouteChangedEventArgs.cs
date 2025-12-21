@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.Abstractions.Navigates;
+﻿using IT.Tangdao.Framework.Abstractions.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Linq;

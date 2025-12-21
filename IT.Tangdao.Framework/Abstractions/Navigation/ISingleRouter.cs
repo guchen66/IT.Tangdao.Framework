@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions.Navigates
+namespace IT.Tangdao.Framework.Abstractions.Navigation
 {
     /// <summary>
     /// 只有简单的翻页功能，使用拦截器和传输数据请使用ITangdaoRouter

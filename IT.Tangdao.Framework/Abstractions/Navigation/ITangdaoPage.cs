@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions.Navigates
+namespace IT.Tangdao.Framework.Abstractions.Navigation
 {
     /// <summary>
     /// ITangdaoRouter配套页面

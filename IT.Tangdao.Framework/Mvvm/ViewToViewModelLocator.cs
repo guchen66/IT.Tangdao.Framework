@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Abstractions.Navigates;
+using IT.Tangdao.Framework.Abstractions.Navigation;
 using System.Reflection;
 using IT.Tangdao.Framework.Threading;
 using IT.Tangdao.Framework.Common;
