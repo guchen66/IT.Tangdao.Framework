@@ -17,6 +17,8 @@ using System.Threading;
 using IT.Tangdao.Framework.Abstractions.Contracts;
 using System.Windows.Shapes;
 using System.Windows.Markup;
+using System.Windows.Data;
+using System.Windows.Media;
 
 namespace IT.Tangdao.Framework.Mvvm
 {
@@ -100,6 +102,51 @@ namespace IT.Tangdao.Framework.Mvvm
         }
 
         /// <summary>
+        /// 递归更新所有绑定，确保ElementName绑定能正确找到DataContext
+        /// </summary>
+        private static void UpdateAllBindings(FrameworkElement element)
+        {
+            // 更新当前元素的所有绑定
+            foreach (var binding in BindingOperations.GetSourceUpdatingBindings(element))
+            {
+                binding.UpdateTarget();
+            }
+
+            // 强制更新所有绑定表达式，确保ElementName绑定能正确找到DataContext
+            LocalValueEnumerator localValues = element.GetLocalValueEnumerator();
+            while (localValues.MoveNext())
+            {
+                LocalValueEntry entry = localValues.Current;
+                if (BindingOperations.IsDataBound(element, entry.Property))
+                {
+                    BindingExpression bindingExpression = BindingOperations.GetBindingExpression(element, entry.Property);
+                    if (bindingExpression != null)
+                    {
+                        bindingExpression.UpdateTarget();
+                    }
+                    else
+                    {
+                        MultiBindingExpression multiBindingExpression = BindingOperations.GetMultiBindingExpression(element, entry.Property);
+                        if (multiBindingExpression != null)
+                        {
+                            multiBindingExpression.UpdateTarget();
+                        }
+                    }
+                }
+            }
+
+            // 递归更新所有子元素的绑定
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+            {
+                var child = VisualTreeHelper.GetChild(element, i);
+                if (child is FrameworkElement childElement)
+                {
+                    UpdateAllBindings(childElement);
+                }
+            }
+        }
+
+        /// <summary>
         /// 根据 View 类型查找对应的 ViewModel 类型
         /// </summary>
         private static Type FindViewModelType(Type viewType)
@@ -148,6 +195,7 @@ namespace IT.Tangdao.Framework.Mvvm
                 var viewType = vmType.Assembly.GetType(viewTypeName);
 
                 var factory = new FrameworkElementFactory(viewType);
+                //factory.SetBinding(FrameworkElement.DataContextProperty, new Binding());
                 factory.AddHandler(FrameworkElement.LoadedEvent, new RoutedEventHandler(OnViewLoaded));
                 var dataTemplate = new DataTemplate { DataType = vmType, VisualTree = factory };
                 Application.Current.Resources[key] = dataTemplate;

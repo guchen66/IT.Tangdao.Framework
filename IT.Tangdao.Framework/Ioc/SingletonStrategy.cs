@@ -13,15 +13,6 @@ namespace IT.Tangdao.Framework.Ioc
     /// </summary>
     public sealed class SingletonStrategy : ILifecycleStrategy
     {
-        // 静态全局缓存，也可改成 Provider 级实例缓存，后续再换
-        //private static readonly ConcurrentDictionary<Type, object> _cache = new ConcurrentDictionary<Type, object>();
-
-        //public object CreateInstance(ServiceCreationContext context)
-        //{
-        //    return _cache.GetOrAdd(context.Entry.ServiceType,
-        //        _ => context.Factory.Create(context.Entry));
-        //}
-
         // 普通单例缓存（保持原样）
         private static readonly ConcurrentDictionary<Type, object> _cache =
             new ConcurrentDictionary<Type, object>();

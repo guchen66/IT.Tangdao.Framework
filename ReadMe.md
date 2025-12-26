@@ -30,8 +30,6 @@ IT.Tangdao以下简称唐刀，是我开发的一款适用于WPF的专属框架�
 
 观察者模式事件通知INoticeObserver
 
-事件监听器、在开发中
-
 拦截器、在开发中
 
 此外还内置了常用的WPF转换器和markup扩展
@@ -271,7 +269,7 @@ cs代码：
 
 ```C#
  string foldPath = Path.Combine(IgniteInfoLocation.Cache, "LoginInfo.xml");
- var isRememberValue = _reader.Default.Read(foldPath).AsXml().SelectNode("IsRemember").Value;
+ var isRememberValue = _access.Default.Read(foldPath).AsXml().SelectNode("IsRemember").Value;
 ```
 
 支持XML的序列化和反序列化
@@ -284,7 +282,7 @@ cs代码：
 也可以使用缓存模式序列化，只要读过本地的文件，就可以使用缓存转成对象实例
 
 ```C#
-_reader.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
+_access.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
 ```
 
 
@@ -317,13 +315,13 @@ _reader.Cache.DeserializeCache<LoginDto>(foldPath.Value, DaoFileType.Xml);
 cs代码：使用SelectAppConfig ，由于读取的是WPF自带的Appconfig，不需要带路径
 
 ```C#
- readService.Default.AsConfig().SelectAppConfig(HandlerName);
+ _access.Default.Empty().AsConfig().SelectAppConfig(HandlerName);
 ```
 
 也可以直接将读取到的数据转成List或ObservableCollection
 
 ```C#
-readService.Default.AsConfig().SelectAppConfig(HandlerName).ToList(v => new TangdaoMenuItem { MenuName = v }).ToObservableCollection();
+_access.Default.Empty().AsConfig().SelectAppConfig(HandlerName).ToList(v => new TangdaoMenuItem { MenuName = v }).ToObservableCollection();
 ```
 
 
@@ -333,7 +331,7 @@ readService.Default.AsConfig().SelectAppConfig(HandlerName).ToList(v => new Tang
 对于.Framework版本
 
 ```C#
-<section name="Tangdao" type="IT.Tangdao.Framework.Common.TangdaoMenuSection,IT.Tangdao.Framework" />
+<section name="Tangdao" type="IT.Tangdao.Core.Common.TangdaoMenuSection,IT.Tangdao.Framework" />
 ```
 
 对于.NetCore版本
@@ -362,7 +360,7 @@ readService.Default.AsConfig().SelectAppConfig(HandlerName).ToList(v => new Tang
 cs代码：使用SelectCustomConfig，注意，这里需要先指定路径Read(configPath)
 
 ```C#
-var responseResult = readService.Default.Read(configPath).AsConfig().SelectCustomConfig(readTitle, section);
+var responseResult = _access.Default.Read(configPath).AsConfig().SelectCustomConfig(readTitle, section);
 ```
 
 ```C#
@@ -382,7 +380,7 @@ var responseResult = readService.Default.Read(configPath).AsConfig().SelectCusto
 ###### 6-3、对Json文件的读写
 
 ```C#
-var json = _reader.Default.Read(foldPath).AsJson(); 
+var json = _access.Default.Read(foldPath).AsJson(); 
 
 ```
 
@@ -401,7 +399,7 @@ socket_port=7181
 ```
 
 ```C#
- var result = _reader.Default.Read(foldPath).AsIni().SelectIni("socket_port");
+ var result = _access.Default.Read(foldPath).AsIni().SelectIni("socket_port");
 ```
 
 
@@ -466,16 +464,16 @@ socket_port=7181
 
 ```C#
 // 正确调用（多节点必须指定索引）
-var ip1 = _reader.Default.AsXml().SelectNode("IP").Value;
+var ip1 = _access.Default.Read("Path").AsXml().SelectNode("IP").Value;
 
-var ipAll = _reader.Default.AsXml().SelectNodes(); 
+var ipAll = _access.Default.Read("Path").AsXml().SelectNodes(); 
 
 ```
 
 优化繁琐的读取,不需要知道类的所有属性
 
 ```C#
-  var readResult = _reader.Default.SelectNodes("ProcessItem", x => new ProcessItem
+  var readResult = _access.Default.Read("Path").AsXml().SelectNodes("ProcessItem", x => new ProcessItem
   {
       Name = x.Element("Name")?.Value,
       IsFeeding = (bool)x.Element("IsFeeding"),
@@ -492,7 +490,7 @@ var ipAll = _reader.Default.AsXml().SelectNodes();
 直接通过反射+泛型
 
 ```C#
- var readResult = _reader.Default.AsXml().SelectNodes<ProcessItem>();
+ var readResult = _access.Default.Read("Path").AsXml().SelectNodes<ProcessItem>();
 ```
 
 #### 7、扩展
@@ -542,7 +540,7 @@ LoginViewModel:接收
 
 对PLC的读取进行了扩展
 
-注意：已迁移到IT.Tangdao.Core.Bridge.dll或IT.Tangdao.Framework.Bridge.dll
+注意：已迁移到IT.Tangdao.Core.Bridge.dll或IT.Tangdao.Core.Bridge.dll
 
 ```c#
   container.RegisterPlcServer(plc => 
@@ -612,7 +610,7 @@ TangdaoContext.SetTangdaoParameter<T>();
 TangdaoContext.GetTangdaoParameter<T>();
 ```
 
-###### 8-3、Socket通信，注意：此功能已迁移到IT.Tangdao.Core.Bridge.dll或IT.Tangdao.Framework.Bridge.dll
+###### 8-3、Socket通信，注意：此功能已迁移到IT.Tangdao.Core.Bridge.dll或IT.Tangdao.Core.Bridge.dll
 
 ```C#
  string connUri = "tcp://127.0.0.1:502";
@@ -842,20 +840,20 @@ XAML Code：
 
 CS Code:
 
-```
- public class PressureViewModel : BaseDeviceViewModel, IRouteComponent
+```C#
+ public class MainViewModel : BaseDeviceViewModel
  {
      public ITangdaoRouter Router { get; set; }
      public IContainer _container;
 
-     public PressureViewModel(ITangdaoRouter router, IContainer container) : base("Pressure")
+     public MainViewModel(ITangdaoRouter router) 
      {
          Router = router;
          _container = container;
          Router.RouteComponent = this;
-         Router.RegisterPage<DigitalSmartGaugeViewModel>();
-         Router.RegisterPage<DifferentialGaugeViewModel>();
-         Router.RegisterPage<VacuumGaugeViewModel>();
+         Router.RegisterPage<Test1ViewModel>();
+         Router.RegisterPage<Test2ViewModel>();
+         Router.RegisterPage<Test3ViewModel>();
          GoBackCommand = MinidaoCommand.Create(ExecuteGoBack);
          GoForwardCommand = MinidaoCommand.Create(ExecuteGoForward);
      }
@@ -873,25 +871,41 @@ CS Code:
      public ICommand GoBackCommand { get; set; }
      public ICommand GoForwardCommand { get; set; }
 
-     public void GoToDigitalSmartGaugeView()
+     public void GoToTest1View()
      {
-         Router.NavigateTo<DigitalSmartGaugeViewModel>();
+         //Router.NavigateTo<Test1ViewModel>();或者
+         Router.NavigateTo("Test1ViewModel");
      }
 
-     public void GoToVacuumGaugeView()
+     public void GoToTest2View()
      {
-         Router.NavigateTo<VacuumGaugeViewModel>();
+         //Router.NavigateTo<Test2ViewModel>();或者
+         Router.NavigateTo("Test2ViewModel");
+     }
+     public void GoToTest3View()
+     {
+         //Router.NavigateTo<Test3ViewModel>();或者
+         Router.NavigateTo("Test3ViewModel");
+     }
+   
+ }
+
+ [AutoWireView]
+ public class Test1ViewModel : DaoViewModelBase, ITangdaoPage
+ {
+     public string PageTitle => "测试1";
+
+     public bool CanNavigateAway()
+     {
+         return true;
      }
 
-     protected override void OnViewLoaded()
+     public void OnNavigatedFrom()
      {
-         base.OnViewLoaded();
      }
 
-     public ITangdaoPage ResolvePage(string route)
+     public void OnNavigatedTo(ITangdaoParameter parameter = null)
      {
-         var result = _container.Get<ITangdaoPage>(route);
-         return result;
      }
  }
 ```

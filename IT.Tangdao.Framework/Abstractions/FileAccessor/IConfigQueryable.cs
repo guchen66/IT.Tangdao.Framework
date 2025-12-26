@@ -8,7 +8,7 @@ using IT.Tangdao.Framework.Helpers;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
-    public interface IContentConfigQueryable : IContentQueryable
+    public interface IConfigQueryable
     {
         ResponseResult<TangdaoSortedDictionary<string, string>> SelectAppConfig(string section);
 

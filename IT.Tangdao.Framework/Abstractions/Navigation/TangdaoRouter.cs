@@ -18,7 +18,6 @@ using System.Runtime.Remoting;
 namespace IT.Tangdao.Framework.Abstractions.Navigation
 {
     /// <inheritdoc/>
-    /// <inheritdoc/>
     public class TangdaoRouter : ITangdaoRouter, INotifyPropertyChanged
     {
         private readonly Dictionary<string, RegistrationTypeEntry> _routeRegistry = new Dictionary<string, RegistrationTypeEntry>();
@@ -94,7 +93,6 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
 
             if (_routeRegistry.ContainsKey(routeName))
                 throw new InvalidOperationException($"Route '{routeName}' is already registered");
-
             var pageType = typeof(TPage);
             var typeEntry = new RegistrationTypeEntry(routeName, pageType);
 
@@ -147,7 +145,6 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
             var previousPage = _currentPage;
             var previousRoute = GetRouteForPage(previousPage);
 
-            // 离开当前页面
             if (previousPage != null)
             {
                 previousPage.OnNavigatedFrom();
@@ -155,7 +152,7 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
                 // 记录到后退栈
                 if (!string.IsNullOrEmpty(previousRoute))
                 {
-                    _backStack.Push(new NavigationRecord(previousRoute, previousPage.GetType(), parameters));
+                    _backStack.Push(new NavigationRecord(previousRoute, previousPage.GetType(), previousPage, parameters));
                 }
             }
 
@@ -185,14 +182,27 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
             var record = _backStack.Pop();
             var currentRoute = GetRouteForPage(_currentPage);
 
+            var currentPage = _currentPage;
+
             // 记录当前页面到前进栈
             if (!string.IsNullOrEmpty(currentRoute))
             {
-                _forwardStack.Push(new NavigationRecord(currentRoute, _currentPage.GetType(), null));
+                _forwardStack.Push(new NavigationRecord(currentRoute, currentPage.GetType(), currentPage, null));
             }
 
-            // 执行返回导航
-            NavigateTo(record.Route, record.Parameters);
+            // 离开当前页面
+            currentPage.OnNavigatedFrom();
+
+            // 使用缓存的页面实例进行导航
+            _currentPage = record.PageInstance;
+            CurrentView = ResolveViewForPage(record.PageInstance);
+
+            // 进入新页面
+            record.PageInstance.OnNavigatedTo(record.Parameters);
+
+            // 触发事件
+            RouteChanged?.Invoke(this, new RouteChangedEventArgs(currentPage, record.PageInstance, record.Parameters));
+            OnNavigationStateChanged();
         }
 
         /// <summary>
@@ -205,15 +215,27 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
 
             var record = _forwardStack.Pop();
             var currentRoute = GetRouteForPage(_currentPage);
+            var currentPage = _currentPage;
 
             // 记录当前页面到后退栈
             if (!string.IsNullOrEmpty(currentRoute))
             {
-                _backStack.Push(new NavigationRecord(currentRoute, _currentPage.GetType(), null));
+                _backStack.Push(new NavigationRecord(currentRoute, currentPage.GetType(), currentPage, null));
             }
 
-            // 执行前进导航
-            NavigateTo(record.Route, record.Parameters);
+            // 离开当前页面
+            currentPage.OnNavigatedFrom();
+
+            // 使用缓存的页面实例进行导航
+            _currentPage = record.PageInstance;
+            CurrentView = ResolveViewForPage(record.PageInstance);
+
+            // 进入新页面
+            record.PageInstance.OnNavigatedTo(record.Parameters);
+
+            // 触发事件
+            RouteChanged?.Invoke(this, new RouteChangedEventArgs(currentPage, record.PageInstance, record.Parameters));
+            OnNavigationStateChanged();
         }
 
         /// <summary>
@@ -260,11 +282,13 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
             public string Route { get; }
             public Type PageType { get; }
             public ITangdaoParameter Parameters { get; }
+            public ITangdaoPage PageInstance { get; }
 
-            public NavigationRecord(string route, Type pageType, ITangdaoParameter parameters)
+            public NavigationRecord(string route, Type pageType, ITangdaoPage pageInstance, ITangdaoParameter parameters)
             {
                 Route = route;
                 PageType = pageType;
+                PageInstance = pageInstance;
                 Parameters = parameters;
             }
         }

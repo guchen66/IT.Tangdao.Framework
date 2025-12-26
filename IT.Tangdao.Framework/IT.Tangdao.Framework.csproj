@@ -6,13 +6,13 @@
 		<Title>一个简易开发的工具类库包</Title>
 		<Authors>liuxin</Authors>
 		<Owners>liuxin</Owners>
-		<Version>4.1.0</Version>
+		<Version>4.1.2</Version>
 		<Description>一个工具类库包</Description>
 		<RepositoryUrl>https://github.com/guchen66/IT.Tangdao.Framework</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-		<AssemblyVersion>3.0.14</AssemblyVersion>
+		<AssemblyVersion>4.1.1</AssemblyVersion>
 		<Platforms>AnyCPU;ARM64;x64</Platforms>
 		<PackageProjectUrl>https://github.com/guchen66/IT.Tangdao.Framework</PackageProjectUrl>
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
@@ -150,6 +150,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>analyzers; build</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
 	</ItemGroup>

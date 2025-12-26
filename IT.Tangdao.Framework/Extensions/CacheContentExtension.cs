@@ -22,18 +22,18 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 从缓存反序列化（同步） - string 路径
         /// </summary>
-        public static T DeserializeCache<T>(this ICacheContentQueryable cache, string path, DaoFileType type = DaoFileType.None) where T : class, new()
+        public static T DeserializeCache<T>(this ICacheQueryBuilder cache, string path, DaoFileType type = DaoFileType.None) where T : class, new()
             => ResolveInternal<T>(cache, path, type);
 
         /// <summary>
         /// 从缓存反序列化（同步） - AbsolutePath 路径
         /// </summary>
-        public static T DeserializeCache<T>(this ICacheContentQueryable cache, AbsolutePath path, DaoFileType type = DaoFileType.None) where T : class, new()
+        public static T DeserializeCache<T>(this ICacheQueryBuilder cache, AbsolutePath path, DaoFileType type = DaoFileType.None) where T : class, new()
             => ResolveInternal<T>(cache, path.Value, type);
 
         #region 私有实现
 
-        private static T ResolveInternal<T>(ICacheContentQueryable cache, string fullPath, DaoFileType type) where T : class, new()
+        private static T ResolveInternal<T>(ICacheQueryBuilder cache, string fullPath, DaoFileType type) where T : class, new()
         {
             try
             {

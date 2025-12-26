@@ -12,7 +12,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
     /// 通知指令的中介者，实现单例模式
     /// 负责管理通知观察者的注册、注销和通知分发
     /// </summary>
-    public class NoticeMediator
+    public sealed class NoticeMediator
     {
         /// <summary>
         /// 懒加载单例实例

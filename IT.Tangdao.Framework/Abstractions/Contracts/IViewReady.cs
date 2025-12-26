@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.Abstractions.Contracts
 {
     /// <summary>
-    /// 对ViewModel扩展Loaded方法
+    /// 对ViewModel扩展Loaded方法和Closeed方法
     /// </summary>
     public interface IViewReady
     {

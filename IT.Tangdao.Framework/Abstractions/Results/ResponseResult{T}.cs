@@ -14,6 +14,43 @@ namespace IT.Tangdao.Framework.Abstractions.Results
     {
         public T Data { get; set; }
 
+        // 索引器支持
+        public dynamic this[int index]
+        {
+            get
+            {
+                if (!IsSuccess)
+                {
+                    throw new InvalidOperationException($"操作失败，无法访问索引: {Message}");
+                }
+
+                if (Data == null)
+                {
+                    throw new NullReferenceException("数据为空，无法访问索引");
+                }
+
+                // 处理List类型
+                if (Data is System.Collections.IList list)
+                {
+                    return list[index];
+                }
+
+                // 处理数组类型
+                var dataType = Data.GetType();
+                if (dataType.IsArray)
+                {
+                    Array array = Data as Array;
+                    if (index >= 0 && index < array.Length)
+                    {
+                        return array.GetValue(index);
+                    }
+                    throw new IndexOutOfRangeException($"索引 {index} 超出数组范围，数组长度: {array.Length}");
+                }
+
+                throw new InvalidOperationException($"类型 {Data.GetType().Name} 不支持索引访问");
+            }
+        }
+
         protected void Initialize(bool isSuccess, string message, T data = default, Exception exception = null, string value = null)
         {
             IsSuccess = isSuccess;

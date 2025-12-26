@@ -8,7 +8,7 @@ using IT.Tangdao.Framework.Configurations;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
-    public interface IContentIniQueryable
+    public interface IIniQueryable
     {
         ResponseResult<IniConfig> SelectIni(string section);
     }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Providers
+namespace IT.Tangdao.Framework.Bootstrap
 {
     internal sealed class ManualDependProvider
     {

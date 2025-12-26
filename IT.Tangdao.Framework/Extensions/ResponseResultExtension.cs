@@ -11,6 +11,286 @@ namespace IT.Tangdao.Framework.Extensions
 {
     public static class ResponseResultExtension
     {
+        #region 映射
+
+        public static List<TResult> Select<T, TResult>(this ResponseResult<List<T>> source, Func<T, TResult> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Select(selector).ToList();
+        }
+
+        public static List<T> Where<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Where(predicate).ToList();
+        }
+
+        #endregion 映射
+
+        #region Any / All
+
+        public static bool Any<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Count > 0;
+        }
+
+        public static bool Any<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Any(predicate);
+        }
+
+        public static bool All<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.All(predicate);
+        }
+
+        #endregion Any / All
+
+        #region 数量 / 聚合
+
+        public static int Count<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Count;
+        }
+
+        public static int Count<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Count(predicate);
+        }
+
+        public static T First<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.First();
+        }
+
+        public static T First<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.First(predicate);
+        }
+
+        public static T FirstOrDefault<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.FirstOrDefault();
+        }
+
+        public static T FirstOrDefault<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.FirstOrDefault(predicate);
+        }
+
+        public static T Last<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Last();
+        }
+
+        public static T Last<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Last(predicate);
+        }
+
+        public static T LastOrDefault<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.LastOrDefault();
+        }
+
+        public static T LastOrDefault<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.LastOrDefault(predicate);
+        }
+
+        public static T Single<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Single();
+        }
+
+        public static T Single<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Single(predicate);
+        }
+
+        public static T SingleOrDefault<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.SingleOrDefault();
+        }
+
+        public static T SingleOrDefault<T>(this ResponseResult<List<T>> source, Func<T, bool> predicate)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.SingleOrDefault(predicate);
+        }
+
+        #endregion 数量 / 聚合
+
+        #region 元素级
+
+        public static List<T> Take<T>(this ResponseResult<List<T>> source, int count)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Take(count).ToList();
+        }
+
+        public static List<T> Skip<T>(this ResponseResult<List<T>> source,
+            int count)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Skip(count).ToList();
+        }
+
+        public static List<T> Distinct<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Distinct().ToList();
+        }
+
+        public static List<T> OrderBy<T, TKey>(this ResponseResult<List<T>> source, Func<T, TKey> keySelector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.OrderBy(keySelector).ToList();
+        }
+
+        public static List<T> OrderByDescending<T, TKey>(this ResponseResult<List<T>> source, Func<T, TKey> keySelector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.OrderByDescending(keySelector).ToList();
+        }
+
+        public static List<T> Reverse<T>(this ResponseResult<List<T>> source)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.AsEnumerable().Reverse().ToList();
+        }
+
+        #endregion 元素级
+
+        #region 聚合
+
+        public static TResult Max<T, TResult>(this ResponseResult<List<T>> source, Func<T, TResult> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Max(selector);
+        }
+
+        public static TResult Min<T, TResult>(this ResponseResult<List<T>> source, Func<T, TResult> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Min(selector);
+        }
+
+        public static decimal Sum<T>(this ResponseResult<List<T>> source, Func<T, decimal> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Sum(selector);
+        }
+
+        public static int Sum<T>(this ResponseResult<List<T>> source, Func<T, int> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Sum(selector);
+        }
+
+        public static double Sum<T>(this ResponseResult<List<T>> source, Func<T, double> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Sum(selector);
+        }
+
+        public static float Sum<T>(this ResponseResult<List<T>> source, Func<T, float> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Sum(selector);
+        }
+
+        public static long Sum<T>(this ResponseResult<List<T>> source, Func<T, long> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Sum(selector);
+        }
+
+        public static decimal Average<T>(this ResponseResult<List<T>> source, Func<T, decimal> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Average(selector);
+        }
+
+        public static double Average<T>(this ResponseResult<List<T>> source, Func<T, double> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Average(selector);
+        }
+
+        public static float Average<T>(this ResponseResult<List<T>> source, Func<T, float> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Average(selector);
+        }
+
+        public static double Average<T>(this ResponseResult<List<T>> source, Func<T, int> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Average(selector);
+        }
+
+        public static double Average<T>(this ResponseResult<List<T>> source, Func<T, long> selector)
+        {
+            if (!source.IsSuccess || source.Data == null)
+                throw new ArgumentNullException(nameof(source));
+            return source.Data.Average(selector);
+        }
+
+        #endregion 聚合
+
         public static IEnumerable<T> ToList<T>(this ResponseResult<TangdaoSortedDictionary<string, string>> queryableResult, Func<string, T> selector)
         {
             if (queryableResult == null) TangdaoGuards.ThrowIfNull(queryableResult);

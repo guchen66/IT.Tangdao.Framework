@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -126,230 +127,34 @@ namespace IT.Tangdao.Framework.Events.Handlers
     }
 
     /// <summary>
-    /// 自定义弱事件管理器，用于管理TangdaoWeakEvent的带键消息接收事件
+    /// 自定义事件管理器
     /// </summary>
-    internal class TangdaoKeyWeekEventManager : WeakEventManager
+    public class TangdaoKeyWeekEventManager
     {
-        #region 单例模式
+        private KeyMessageEventArgs _keyMessageEventArgs;
 
-        private static TangdaoKeyWeekEventManager CurrentManager
+        public KeyMessageEventArgs KeyMessageEventArgs
         {
-            get
+            get => _keyMessageEventArgs;
+            set
             {
-                var managerType = typeof(TangdaoKeyWeekEventManager);
-                var manager = (TangdaoKeyWeekEventManager)GetCurrentManager(managerType);
-
-                if (manager == null)
-                {
-                    manager = new TangdaoKeyWeekEventManager();
-                    SetCurrentManager(managerType, manager);
-                }
-
-                return manager;
+                KeyMessageReceived.Invoke(this, value);
             }
         }
 
-        #endregion 单例模式
-
-        #region 公共方法
-
-        /// <summary>
-        /// 添加带键消息接收事件处理程序
-        /// </summary>
-        /// <param name="source">事件源</param>
-        /// <param name="handler">事件处理程序</param>
-        public static void AddHandler(TangdaoWeakEvent source, EventHandler<KeyMessageEventArgs> handler)
-        {
-            if (source == null || handler == null)
-                return;
-
-            CurrentManager.ProtectedAddHandler(source, handler);
-        }
-
-        /// <summary>
-        /// 移除带键消息接收事件处理程序
-        /// </summary>
-        /// <param name="source">事件源</param>
-        /// <param name="handler">事件处理程序</param>
-        public static void RemoveHandler(TangdaoWeakEvent source, EventHandler<KeyMessageEventArgs> handler)
-        {
-            if (source == null || handler == null)
-                return;
-
-            CurrentManager.ProtectedRemoveHandler(source, handler);
-        }
-
-        #endregion 公共方法
-
-        #region 事件处理
-
-        /// <summary>
-        /// 开始监听事件源
-        /// </summary>
-        protected override void StartListening(object source)
-        {
-            var weakEventSource = source as TangdaoWeakEvent;
-            if (weakEventSource == null)
-                return;
-
-            // 获取内部事件并订阅
-            var keyMessageReceivedEvent = typeof(TangdaoWeakEvent).GetEvent("KeyMessageReceived",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (keyMessageReceivedEvent != null)
-            {
-                // 创建事件处理程序
-                var handler = new EventHandler<KeyMessageEventArgs>(OnKeyMessageReceived);
-                // 订阅内部事件
-                keyMessageReceivedEvent.AddEventHandler(weakEventSource, handler);
-            }
-        }
-
-        /// <summary>
-        /// 停止监听事件源
-        /// </summary>
-        protected override void StopListening(object source)
-        {
-            var weakEventSource = source as TangdaoWeakEvent;
-            if (weakEventSource == null)
-                return;
-
-            // 获取内部事件并取消订阅
-            var keyMessageReceivedEvent = typeof(TangdaoWeakEvent).GetEvent("KeyMessageReceived",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (keyMessageReceivedEvent != null)
-            {
-                // 创建事件处理程序
-                var handler = new EventHandler<KeyMessageEventArgs>(OnKeyMessageReceived);
-                // 取消订阅内部事件
-                keyMessageReceivedEvent.RemoveEventHandler(weakEventSource, handler);
-            }
-        }
-
-        /// <summary>
-        /// 处理带键消息接收事件
-        /// </summary>
-        private void OnKeyMessageReceived(object sender, KeyMessageEventArgs e)
-        {
-            // 使用DeliverEvent方法传递事件给所有订阅者
-            DeliverEvent(sender, e);
-        }
-
-        #endregion 事件处理
+        public event EventHandler<KeyMessageEventArgs> KeyMessageReceived;
     }
 
     /// <summary>
     /// 自定义弱事件管理器，用于管理TangdaoWeakEvent的处理器表接收事件
     /// </summary>
-    internal class TangdaoHandlerTableWeekEventManager : WeakEventManager
+    public class TangdaoHandlerTableEventManager
     {
-        #region 单例模式
+        public static event EventHandler<MessageEventArgs> MessageReceived;
 
-        private static TangdaoHandlerTableWeekEventManager CurrentManager
+        public static void Publish(MessageEventArgs eventArgs)
         {
-            get
-            {
-                var managerType = typeof(TangdaoHandlerTableWeekEventManager);
-                var manager = (TangdaoHandlerTableWeekEventManager)GetCurrentManager(managerType);
-
-                if (manager == null)
-                {
-                    manager = new TangdaoHandlerTableWeekEventManager();
-                    SetCurrentManager(managerType, manager);
-                }
-
-                return manager;
-            }
+            MessageReceived.Invoke(null, eventArgs);
         }
-
-        #endregion 单例模式
-
-        #region 公共方法
-
-        /// <summary>
-        /// 添加处理器表接收事件处理程序
-        /// </summary>
-        /// <param name="source">事件源</param>
-        /// <param name="handler">事件处理程序</param>
-        public static void AddHandler(TangdaoWeakEvent source, EventHandler<HandlerTableEventArgs> handler)
-        {
-            if (source == null || handler == null)
-                return;
-
-            CurrentManager.ProtectedAddHandler(source, handler);
-        }
-
-        /// <summary>
-        /// 移除处理器表接收事件处理程序
-        /// </summary>
-        /// <param name="source">事件源</param>
-        /// <param name="handler">事件处理程序</param>
-        public static void RemoveHandler(TangdaoWeakEvent source, EventHandler<HandlerTableEventArgs> handler)
-        {
-            if (source == null || handler == null)
-                return;
-
-            CurrentManager.ProtectedRemoveHandler(source, handler);
-        }
-
-        #endregion 公共方法
-
-        #region 事件处理
-
-        /// <summary>
-        /// 开始监听事件源
-        /// </summary>
-        protected override void StartListening(object source)
-        {
-            var weakEventSource = source as TangdaoWeakEvent;
-            if (weakEventSource == null)
-                return;
-
-            // 获取内部事件并订阅
-            var handlerTableReceivedEvent = typeof(TangdaoWeakEvent).GetEvent("HandlerTableReceived",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (handlerTableReceivedEvent != null)
-            {
-                // 创建事件处理程序
-                var handler = new EventHandler<HandlerTableEventArgs>(OnHandlerTableReceived);
-                // 订阅内部事件
-                handlerTableReceivedEvent.AddEventHandler(weakEventSource, handler);
-            }
-        }
-
-        /// <summary>
-        /// 停止监听事件源
-        /// </summary>
-        protected override void StopListening(object source)
-        {
-            var weakEventSource = source as TangdaoWeakEvent;
-            if (weakEventSource == null)
-                return;
-
-            // 获取内部事件并取消订阅
-            var handlerTableReceivedEvent = typeof(TangdaoWeakEvent).GetEvent("HandlerTableReceived",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (handlerTableReceivedEvent != null)
-            {
-                // 创建事件处理程序
-                var handler = new EventHandler<HandlerTableEventArgs>(OnHandlerTableReceived);
-                // 取消订阅内部事件
-                handlerTableReceivedEvent.RemoveEventHandler(weakEventSource, handler);
-            }
-        }
-
-        /// <summary>
-        /// 处理处理器表接收事件
-        /// </summary>
-        private void OnHandlerTableReceived(object sender, HandlerTableEventArgs e)
-        {
-            // 使用DeliverEvent方法传递事件给所有订阅者
-            DeliverEvent(sender, e);
-        }
-
-        #endregion 事件处理
     }
 }

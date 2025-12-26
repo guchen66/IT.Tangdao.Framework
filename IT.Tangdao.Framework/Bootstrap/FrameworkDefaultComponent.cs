@@ -24,8 +24,7 @@ namespace IT.Tangdao.Framework.Bootstrap
         public void Load(ITangdaoContainer container, TangdaoComponentContext context)
         {
             //注册读写服务
-            container.AddTangdaoSingleton<IContentReader, ContentReader>();
-            container.AddTangdaoSingleton<IContentWriter, ContentWriter>();
+            container.AddTangdaoSingleton<IContentAccess, ContentAccess>();
 
             //注册读取地址服务
             container.AddTangdaoSingleton<IFileLocator, FileLocator>();
@@ -42,13 +41,12 @@ namespace IT.Tangdao.Framework.Bootstrap
 
             //注册导航服务
 
-            //container.AddTangdaoSingleton<RegistrationTypeEntry>();
-            //container.AddTangdaoSingleton<ITangdaoRouter, TangdaoRouter>();
-            //container.AddTangdaoSingletonFactory<ITangdaoRouterResolver>(provider =>
-            //{
-            //    var Resolver = provider.GetService<ITangdaoRouterResolver>();
-            //    return new TangdaoRouterResolver(entry => provider.GetService(entry.RegisterType) as ITangdaoPage);
-            //});
+            container.AddTangdaoTransientFactory<ITangdaoRouterResolver>(provider =>
+            {
+                return new TangdaoRouterResolver(entry => provider.GetService(entry.RegisterType) as ITangdaoPage);
+            });
+
+            container.AddTangdaoSingleton<ITangdaoRouter, TangdaoRouter>();
             var loader = new TangdaoConfigLoader();
             // 2. 立即 Load 并塞进容器
             container.AddTangdaoSingleton(loader.Load());

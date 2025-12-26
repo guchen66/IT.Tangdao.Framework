@@ -7,20 +7,18 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     public interface IContentWritable
     {
         /// <summary>
-        /// 写入内容
+        /// 写入的内容
         /// </summary>
-        void Write(string path, string content, DaoFileType daoFileType = DaoFileType.None);
+        string Content { get; set; }
 
         /// <summary>
-        /// 异步写入内容
+        /// 写入的地址
         /// </summary>
-        Task<ResponseResult> WriteAsync(string path, string content, DaoFileType daoFileType = DaoFileType.None);
+        string WritePath { get; }
 
         /// <summary>
-        /// 序列化对象并写入
+        /// 文件类型
         /// </summary>
-        void WriteObject<T>(string path, T obj);
-
-        // IContentWritable this[object writeObject] { get; }
+        DaoFileType DetectedType { get; }
     }
 }

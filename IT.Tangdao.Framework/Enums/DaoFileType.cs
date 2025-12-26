@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.Enums
 {
     /// <summary>
-    /// 读取内容的文件类型枚举。
+    /// 内容的文件类型枚举。
     /// </summary>
     public enum DaoFileType
     {

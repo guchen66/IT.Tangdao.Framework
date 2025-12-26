@@ -1,5 +1,5 @@
-﻿using IT.Tangdao.Framework.Ioc;
-using IT.Tangdao.Framework.Providers;
+﻿using IT.Tangdao.Framework.Bootstrap;
+using IT.Tangdao.Framework.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Linq;

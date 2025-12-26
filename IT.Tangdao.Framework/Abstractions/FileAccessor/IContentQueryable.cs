@@ -12,24 +12,29 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     /// </summary>
     public interface IContentQueryable
     {
+        /// <summary>
+        /// 读取的内容
+        /// </summary>
         string Content { get; }
 
-        IContentXmlQueryable AsXml();
+        /// <summary>
+        /// 读取的路径
+        /// </summary>
+        string ReadPath { get; }
 
-        IContentJsonQueryable AsJson();
+        /// <summary>
+        /// 文件后缀
+        /// </summary>
+        DaoFileType DetectedType { get; }
 
-        IContentConfigQueryable AsConfig();
+        IXmlQueryable AsXml();
 
-        IContentIniQueryable AsIni();
+        IJsonQueryable AsJson();
 
-        IContentQueryable Read(string path, DaoFileType t = DaoFileType.None);
+        IConfigQueryable AsConfig();
 
-        IContentQueryable Read(AbsolutePath path, DaoFileType t = DaoFileType.None);
+        IIniQueryable AsIni();
 
-        IContentQueryable Auto();          // 自动探测
-
-        IContentQueryable this[int index] { get; }
-
-        IContentQueryable this[string readObject] { get; }
+        IContentQueryable Auto(); // 自动探测
     }
 }
