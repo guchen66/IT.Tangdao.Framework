@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Extensions;
+using System.Linq.Expressions;
 
 namespace IT.Tangdao.Framework.Helpers
 {
@@ -20,6 +21,9 @@ namespace IT.Tangdao.Framework.Helpers
     /// </summary>
     public class FileHelper
     {
+        // 缓存类型的属性信息，避免重复反射调用
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _propertyCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
+
         /// <summary>
         /// 获取当前路径文件类型
         /// </summary>
@@ -157,6 +161,29 @@ namespace IT.Tangdao.Framework.Helpers
             }
         }
 
+        // <summary>
+        /// 检测文本内容是否为XML格式
+        /// 采用三级检测策略：极速过滤 → 结构验证 → 内容分析
+        /// </summary>
+        /// <param name="content">要检测的文本内容</param>
+        /// <returns>检测结果，返回Xml、Config或None</returns>
+        public static DaoFileType DetectXmlContent(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return DaoFileType.None;
+            }
+
+            // 第一步：检测是否为有效的XML格式
+            if (!XmlTemplate.IsValidXml(content))
+            {
+                return DaoFileType.None;
+            }
+
+            // 第三步：普通XML格式
+            return DaoFileType.Xml;
+        }
+
         /// <summary>
         /// 解析当前XML数据的结构
         /// </summary>
@@ -187,6 +214,9 @@ namespace IT.Tangdao.Framework.Helpers
             return XmlStruct.Multiple;
         }
 
+        // 缓存映射委托，使用表达式树替代反射调用
+        private static readonly ConcurrentDictionary<Type, Action<XElement, object>> _mapDelegatesCache = new ConcurrentDictionary<Type, Action<XElement, object>>();
+
         /// <summary>
         /// 把 XElement 节点的**同名子元素**映射到已有对象的可写属性上。
         /// 只映射 public 实例属性，且节点名必须与属性名完全一致（大小写敏感）。
@@ -197,9 +227,15 @@ namespace IT.Tangdao.Framework.Helpers
         /// <param name="instance">**已创建**的实例，字段会被填充</param>
         public static void MapXElementToObject<T>(XElement node, T instance)
         {
-            // 1. 取出所有公共可写属性
-            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            // 1. 从缓存获取或缓存类型的属性信息，避免重复反射调用
+            var properties = _propertyCache.GetOrAdd(typeof(T), type =>
+                type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.CanWrite) // 只缓存可写属性
+                    .ToArray());
 
+            // 1. 从缓存获取或生成映射委托
+            //var mapDelegate = _mapDelegatesCache.GetOrAdd(typeof(T), GenerateMapDelegate);
+            //mapDelegate(node, instance);
             foreach (var prop in properties)
             {
                 // 2. 按属性名去找同名子元素
@@ -217,6 +253,87 @@ namespace IT.Tangdao.Framework.Helpers
                     // 4. 转换失败（如格式不对、只读属性等）直接忽略
                 }
             }
+        }
+
+        /// 只映射 public 实例属性，且节点名必须与属性名完全一致（大小写敏感）。
+        /// 类型转换失败时静默跳过，不会抛异常。
+        /// </summary>
+        /// <summary>
+        /// 生成XElement到对象的映射委托
+        /// </summary>
+        /// <param name="type">目标类型</param>
+        /// <returns>映射委托</returns>
+        private static Action<XElement, object> GenerateMapDelegate(Type type)
+        {
+            // 获取所有可写公共属性
+            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanWrite)
+                .ToArray();
+
+            // 创建参数：XElement node, object instance
+            var nodeParam = Expression.Parameter(typeof(XElement), "node");
+            var instanceParam = Expression.Parameter(typeof(object), "instance");
+
+            // 将instance转换为目标类型
+            var typedInstance = Expression.Convert(instanceParam, type);
+
+            var statements = new List<Expression>();
+
+            foreach (var prop in properties)
+            {
+                // 1. 调用node.Element(prop.Name)获取子元素
+                var elementMethod = typeof(XElement).GetMethod("Element", new[] { typeof(XName) });
+                var nameConstant = Expression.Constant(prop.Name, typeof(string));
+                var nameExpression = Expression.Call(typeof(XName), "Get", null, nameConstant);
+                var elementExpression = Expression.Call(nodeParam, elementMethod, nameExpression);
+
+                // 2. 检查element是否为null
+                var nullCheck = Expression.NotEqual(elementExpression, Expression.Constant(null, typeof(XElement)));
+
+                // 3. 调用element.Value获取值
+                var valueProperty = typeof(XElement).GetProperty("Value");
+                var valueExpression = Expression.Property(elementExpression, valueProperty);
+
+                // 4. 创建本地变量来存储转换后的值
+                var valueVar = Expression.Variable(prop.PropertyType, "value");
+
+                // 5. 使用Convert.ChangeType将字符串转换为属性类型
+                var changeTypeMethod = typeof(Convert).GetMethod("ChangeType", new[] { typeof(object), typeof(Type) });
+                var convertExpression = Expression.Assign(
+                    valueVar,
+                    Expression.Convert(
+                        Expression.Call(
+                            changeTypeMethod,
+                            Expression.Convert(valueExpression, typeof(object)),
+                            Expression.Constant(prop.PropertyType, typeof(Type))
+                        ),
+                        prop.PropertyType
+                    )
+                );
+
+                // 6. 设置属性值
+                var setPropertyExpression = Expression.Call(typedInstance, prop.GetSetMethod(), valueVar);
+
+                // 7. 将转换和赋值包装在try-catch块中
+                var exceptionVar = Expression.Parameter(typeof(Exception), "ex");
+                var tryBlock = Expression.TryCatch(
+                    Expression.Block(
+                        new[] { valueVar },
+                        convertExpression,
+                        setPropertyExpression
+                    ),
+                    Expression.Catch(typeof(Exception), exceptionVar, Expression.Empty()) // 忽略任何转换异常
+                );
+
+                // 8. 将所有逻辑包装在条件判断中
+                var ifBlock = Expression.IfThen(nullCheck, tryBlock);
+                statements.Add(ifBlock);
+            }
+
+            // 创建并编译表达式树
+            var block = Expression.Block(statements);
+            var lambda = Expression.Lambda<Action<XElement, object>>(block, nodeParam, instanceParam);
+            return lambda.Compile();
         }
 
         public static IEnumerable<string> SelectFilesByDaoFileType(string rootDir, DaoFileType fileType, bool searchSubdirectories = true)

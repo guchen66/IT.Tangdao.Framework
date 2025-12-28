@@ -14,6 +14,8 @@ namespace IT.Tangdao.Framework.Abstractions.Results
     {
         public T Data { get; set; }
 
+        T IResponseResult<T>.Data => Data;  // 显式实现，接口调用只能读
+
         // 索引器支持
         public dynamic this[int index]
         {
@@ -51,7 +53,7 @@ namespace IT.Tangdao.Framework.Abstractions.Results
             }
         }
 
-        protected void Initialize(bool isSuccess, string message, T data = default, Exception exception = null, string value = null)
+        protected internal void Initialize(bool isSuccess, string message, T data = default, Exception exception = null, string value = null)
         {
             IsSuccess = isSuccess;
             Message = message;
@@ -63,24 +65,16 @@ namespace IT.Tangdao.Framework.Abstractions.Results
         // 快速创建方法
         public static ResponseResult<T> Success(T data, string message = "操作成功", string value = null)
         {
-            return new ResponseResult<T>
-            {
-                IsSuccess = true,
-                Message = message,
-                Data = data,
-                Value = value
-            };
+            var result = new ResponseResult<T>();
+            result.Initialize(true, message, data, null, value);
+            return result;
         }
 
         public new static ResponseResult<T> Failure(string message, Exception exception = null, string value = null)
         {
-            return new ResponseResult<T>
-            {
-                IsSuccess = false,
-                Message = message,
-                Exception = exception,
-                Value = value
-            };
+            var result = new ResponseResult<T>();
+            result.Initialize(false, message, default, exception, value);
+            return result;
         }
 
         public new static ResponseResult<T> FromException(Exception ex, string operationType = null)

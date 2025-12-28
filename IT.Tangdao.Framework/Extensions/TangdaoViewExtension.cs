@@ -77,8 +77,8 @@ namespace IT.Tangdao.Framework.Extensions
 
         /// <summary>
         /// 从ViewModel打开一个子窗体
-        /// 并且将数据传递过去，这次不借助ITangdaoWindow
-        /// 子类不需要实现ITangdaoWindow，通过owner传递
+        /// 并且将数据传递过去，
+        /// 子类通过owner传递
         /// name是子窗体数据的名称
         /// </summary>
         /// <typeparam name="TWindow"></typeparam>

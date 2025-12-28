@@ -8,10 +8,10 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     {
         ResponseResult SelectValue(string key);
 
-        ResponseResult<List<dynamic>> SelectKeys();
+        ResponseResult<IEnumerable<dynamic>> SelectKeys();
 
-        ResponseResult<List<dynamic>> SelectValues();
+        ResponseResult<IEnumerable<dynamic>> SelectValues();
 
-        ResponseResult<List<T>> SelectObjects<T>() where T : new();
+        ResponseResult<IEnumerable<T>> SelectObjects<T>() where T : new();
     }
 }

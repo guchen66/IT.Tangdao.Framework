@@ -48,14 +48,8 @@ namespace IT.Tangdao.Framework.Abstractions.Results
         // 转换为泛型版本
         public ResponseResult<T> ToGenericResult<T>(T data = default)
         {
-            var result = new ResponseResult<T>
-            {
-                IsSuccess = this.IsSuccess,
-                Message = this.Message,
-                Exception = this.Exception,
-                Value = this.Value,
-                Data = data
-            };
+            var result = new ResponseResult<T>();
+            result.Initialize(this.IsSuccess, this.Message, data, this.Exception, this.Value);
             return result;
         }
     }

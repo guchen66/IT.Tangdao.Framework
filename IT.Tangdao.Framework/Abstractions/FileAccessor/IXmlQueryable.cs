@@ -25,8 +25,8 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     {
         ResponseResult SelectNode(string node);
 
-        ResponseResult<List<dynamic>> SelectNodes();
+        ResponseResult<IEnumerable<dynamic>> SelectNodes();
 
-        ResponseResult<List<T>> SelectNodes<T>() where T : new();
+        ResponseResult<IEnumerable<T>> SelectNodes<T>() where T : new();
     }
 }

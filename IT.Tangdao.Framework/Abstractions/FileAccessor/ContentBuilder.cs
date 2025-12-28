@@ -47,9 +47,6 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             TangdaoParameter tangdaoParameter = new TangdaoParameter();
             tangdaoParameter.Add(rootKey, content);    //缓存内容
             TangdaoContext.SetTangdaoParameter(rootKey, tangdaoParameter);
-
-            // 创建 ContentQueryable 实例并返回
-            // 注意：ContentQueryable 内部会处理路径和类型检测
             return new ContentQueryable { Content = content, ReadPath = path, DetectedType = detectedType };
         }
 
@@ -65,7 +62,6 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             tangdaoParameter.Add(rootKey, content);    //缓存内容
             TangdaoContext.SetTangdaoParameter(rootKey, tangdaoParameter);
 
-            // 创建 ContentQueryable 实例并返回
             // 注意：ContentQueryable 内部会处理路径和类型检测
             return new ContentQueryable { Content = content, ReadPath = path.Value, DetectedType = detectedType };
         }

@@ -18,49 +18,12 @@ using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Paths;
 using System.Xml;
 using IT.Tangdao.Framework.Configurations;
+using System.Reflection;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     internal sealed class ContentQueryable : IContentQueryable, IXmlQueryable, IJsonQueryable, IConfigQueryable, IIniQueryable
     {
-        #region--索引器--
-
-        //public int ReadIndex
-        //{
-        //    get => _readIndex;
-        //    set => _readIndex = value;
-        //}
-
-        //private int _readIndex = -1;
-
-        //public IContentQueryable this[int readIndex]
-        //{
-        //    get
-        //    {
-        //        _readIndex = readIndex;
-        //        return this;
-        //    }
-        //}
-
-        //public string ReadObject
-        //{
-        //    get => _readObject;
-        //    set => _readObject = value;
-        //}
-
-        //private string _readObject;
-
-        //public IContentQueryable this[string readObject]
-        //{
-        //    get
-        //    {
-        //        _readObject = readObject;
-        //        return this;
-        //    }
-        //}
-
-        #endregion
-
         private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(ContentQueryable));
         private string _content = string.Empty;
 
@@ -155,6 +118,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                         return ResponseResult.Success(value: singleElement.Value);
 
                     case XmlStruct.Multiple:
+                        var directElement = root.Element(node);
+                        if (directElement != null)
+                        {
+                            return ResponseResult.Success(value: directElement.Value);
+                        }
                         return ResponseResult.Failure("存在多个节点，请使用SelectNodes方法", new XmlException($"存在多个节点，请指定索引，目标节点: {node}"));
 
                     default:
@@ -172,14 +140,14 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// </summary>
         /// <param name="uriPath"></param>
         /// <returns></returns>
-        public ResponseResult<List<dynamic>> SelectNodes()
+        public ResponseResult<IEnumerable<dynamic>> SelectNodes()
         {
             string uriPath = ReadPath;
             XElement xElement = uriPath.LoadFromFile().Root;
             IEnumerable<XElement> xElements = xElement.Descendants();
             if (xElements == null)
             {
-                return ResponseResult<List<dynamic>>.Failure($"Element '{uriPath}' not found.");
+                return ResponseResult<IEnumerable<dynamic>>.Failure($"Element '{uriPath}' not found.");
             }
 
             // 将XElement转换为匿名对象，避免直接暴露XElement
@@ -199,7 +167,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                 } as dynamic;
             }).ToList();
 
-            return ResponseResult<List<dynamic>>.Success(resultList);
+            return ResponseResult<IEnumerable<dynamic>>.Success(resultList);
         }
 
         /// <summary>
@@ -207,12 +175,12 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public ResponseResult<List<T>> SelectNodes<T>() where T : new()
+        public ResponseResult<IEnumerable<T>> SelectNodes<T>() where T : new()
         {
             try
             {
                 if (_content == null)
-                    return ResponseResult<List<T>>.Failure("读取失败");
+                    return ResponseResult<IEnumerable<T>>.Failure("读取失败");
 
                 var doc = XDocument.Parse(_content);
                 var result = new List<T>();
@@ -224,11 +192,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                     result.Add(instance);
                 }
 
-                return ResponseResult<List<T>>.Success(result);
+                return ResponseResult<IEnumerable<T>>.Success(result);
             }
             catch (Exception ex)
             {
-                return ResponseResult<List<T>>.FromException(ex, $"解析失败: {ex.Message}");
+                return ResponseResult<IEnumerable<T>>.FromException(ex, $"解析失败: {ex.Message}");
             }
         }
 
@@ -236,11 +204,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         #region-- 读取Json数据 --
 
-        public ResponseResult<List<dynamic>> SelectKeys()
+        public ResponseResult<IEnumerable<dynamic>> SelectKeys()
         {
             if (_content == null)
             {
-                return ResponseResult<List<dynamic>>.Failure($"读取失败");
+                return ResponseResult<IEnumerable<dynamic>>.Failure($"读取失败");
             }
             List<dynamic> keys = new List<dynamic>();
 
@@ -291,19 +259,19 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                 }
 
                 GetKeys(jsonToken);
-                return ResponseResult<List<dynamic>>.Success(keys);
+                return ResponseResult<IEnumerable<dynamic>>.Success(keys);
             }
             catch (Exception ex)
             {
-                return ResponseResult<List<dynamic>>.FromException(ex, "解析JSON失败");
+                return ResponseResult<IEnumerable<dynamic>>.FromException(ex, "解析JSON失败");
             }
         }
 
-        public ResponseResult<List<dynamic>> SelectValues()
+        public ResponseResult<IEnumerable<dynamic>> SelectValues()
         {
             if (_content == null)
             {
-                return ResponseResult<List<dynamic>>.Failure($"读取失败");
+                return ResponseResult<IEnumerable<dynamic>>.Failure($"读取失败");
             }
             List<dynamic> values = new List<dynamic>();
 
@@ -360,11 +328,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                 }
 
                 GetValues(jsonToken);
-                return ResponseResult<List<dynamic>>.Success(values);
+                return ResponseResult<IEnumerable<dynamic>>.Success(values);
             }
             catch (Exception ex)
             {
-                return ResponseResult<List<dynamic>>.FromException(ex, "解析JSON失败");
+                return ResponseResult<IEnumerable<dynamic>>.FromException(ex, "解析JSON失败");
             }
         }
 
@@ -430,11 +398,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             }
         }
 
-        public ResponseResult<List<T>> SelectObjects<T>() where T : new()
+        public ResponseResult<IEnumerable<T>> SelectObjects<T>() where T : new()
         {
             if (_content == null)
             {
-                return ResponseResult<List<T>>.Failure($"读取失败");
+                return ResponseResult<IEnumerable<T>>.Failure($"读取失败");
             }
 
             try
@@ -457,14 +425,14 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                 else
                 {
                     // 处理其他类型，返回失败
-                    return ResponseResult<List<T>>.Failure("JSON格式不支持对象映射");
+                    return ResponseResult<IEnumerable<T>>.Failure("JSON格式不支持对象映射");
                 }
 
-                return ResponseResult<List<T>>.Success(resultList);
+                return ResponseResult<IEnumerable<T>>.Success(resultList);
             }
             catch (Exception ex)
             {
-                return ResponseResult<List<T>>.FromException(ex, "JSON对象映射失败");
+                return ResponseResult<IEnumerable<T>>.FromException(ex, "JSON对象映射失败");
             }
         }
 
