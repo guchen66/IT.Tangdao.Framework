@@ -12,7 +12,7 @@ namespace IT.Tangdao.Framework.Helpers
     /// <summary>
     /// 自动按键排序的字典——int、string 即插即排，后续可扩展汉字规则。
     /// </summary>
-    public class TangdaoSortedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+    public class TangdaoSortedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable
     {
         // 内部用 Framework 自带的 SortedDictionary，红黑树实现，插入即排序
         private readonly SortedDictionary<TKey, TValue> _core;

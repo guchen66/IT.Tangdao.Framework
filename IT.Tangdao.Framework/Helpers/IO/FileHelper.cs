@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Extensions;
 using System.Linq.Expressions;
+using System.ComponentModel;
 
 namespace IT.Tangdao.Framework.Helpers
 {
@@ -21,9 +22,6 @@ namespace IT.Tangdao.Framework.Helpers
     /// </summary>
     public class FileHelper
     {
-        // 缓存类型的属性信息，避免重复反射调用
-        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _propertyCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
-
         /// <summary>
         /// 获取当前路径文件类型
         /// </summary>
@@ -161,7 +159,7 @@ namespace IT.Tangdao.Framework.Helpers
             }
         }
 
-        // <summary>
+        /// <summary>
         /// 检测文本内容是否为XML格式
         /// 采用三级检测策略：极速过滤 → 结构验证 → 内容分析
         /// </summary>
@@ -214,45 +212,99 @@ namespace IT.Tangdao.Framework.Helpers
             return XmlStruct.Multiple;
         }
 
-        // 缓存映射委托，使用表达式树替代反射调用
-        private static readonly ConcurrentDictionary<Type, Action<XElement, object>> _mapDelegatesCache = new ConcurrentDictionary<Type, Action<XElement, object>>();
+        private static readonly ConcurrentDictionary<Type, PropertyDescriptorCollection> _propertyDescriptorCache = new ConcurrentDictionary<Type, PropertyDescriptorCollection>();
 
         /// <summary>
         /// 把 XElement 节点的**同名子元素**映射到已有对象的可写属性上。
         /// 只映射 public 实例属性，且节点名必须与属性名完全一致（大小写敏感）。
         /// 类型转换失败时静默跳过，不会抛异常。
+        /// TypeDescriptor 把“反射”转成“查表 + 委托”，一次缓存永久复用。
+        /// TypeConverter 把“通用转换”转成“专用高效解析”，无装箱拆箱。
+        /// PropertyDescriptor 把“反射赋值”转成“委托调用”，JIT 可内联。
         /// </summary>
         /// <typeparam name="T">目标类型</typeparam>
         /// <param name="node">XML 节点</param>
         /// <param name="instance">**已创建**的实例，字段会被填充</param>
         public static void MapXElementToObject<T>(XElement node, T instance)
         {
-            // 1. 从缓存获取或缓存类型的属性信息，避免重复反射调用
-            var properties = _propertyCache.GetOrAdd(typeof(T), type =>
-                type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(p => p.CanWrite) // 只缓存可写属性
-                    .ToArray());
+            var properties = _propertyDescriptorCache.GetOrAdd(
+                typeof(T),
+                type => TypeDescriptor.GetProperties(type));
 
-            // 1. 从缓存获取或生成映射委托
-            //var mapDelegate = _mapDelegatesCache.GetOrAdd(typeof(T), GenerateMapDelegate);
-            //mapDelegate(node, instance);
-            foreach (var prop in properties)
+            foreach (PropertyDescriptor prop in properties)
             {
-                // 2. 按属性名去找同名子元素
-                var element = node.Element(prop.Name);
-                if (element == null) continue;          // 没有对应节点就跳过
-
-                try
+                if (!prop.IsReadOnly)
                 {
-                    // 3. 把字符串值转成属性类型，再反射赋值
-                    object value = Convert.ChangeType(element.Value, prop.PropertyType);
-                    prop.SetValue(instance, value);
-                }
-                catch
-                {
-                    // 4. 转换失败（如格式不对、只读属性等）直接忽略
+                    var element = node.Element(prop.Name);
+                    if (element != null)
+                    {
+                        try
+                        {
+                            // TypeDescriptor可以进行类型转换
+                            var value = prop.Converter.ConvertFromString(element.Value);
+                            prop.SetValue(instance, value);
+                        }
+                        catch
+                        {
+                            // 忽略转换错误
+                        }
+                    }
                 }
             }
+        }
+
+        private static Action<XElement, object> CreateMapper<T>()
+        {
+            var type = typeof(T);
+            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanWrite)
+                .ToArray();
+
+            if (properties.Length == 0)
+                return (node, instance) => { }; // 空委托
+
+            // 为每个属性创建赋值表达式
+            var parameterNode = Expression.Parameter(typeof(XElement), "node");
+            var parameterInstance = Expression.Parameter(typeof(object), "instance");
+            var typedInstance = Expression.Convert(parameterInstance, type);
+
+            var expressions = new List<Expression>();
+
+            foreach (var prop in properties)
+            {
+                // 获取元素值：node.Element(prop.Name)?.Value
+                var elementCall = Expression.Call(
+                    parameterNode,
+                    typeof(XElement).GetMethod("Element", new[] { typeof(string) }),
+                    Expression.Constant(prop.Name));
+
+                var valueProperty = Expression.Property(elementCall, nameof(XElement.Value));
+                var elementHasValue = Expression.NotEqual(elementCall, Expression.Constant(null));
+                var elementValue = Expression.Condition(
+                    elementHasValue,
+                    valueProperty,
+                    Expression.Constant(string.Empty));
+
+                // 转换为目标类型
+                var changeTypeCall = Expression.Call(
+                    typeof(Convert).GetMethod("ChangeType", new[] { typeof(object), typeof(Type) }),
+                    elementValue,
+                    Expression.Constant(prop.PropertyType));
+
+                var convertedValue = Expression.Convert(changeTypeCall, prop.PropertyType);
+
+                // 设置属性值
+                var setProperty = Expression.Assign(
+                    Expression.Property(typedInstance, prop),
+                    convertedValue);
+
+                expressions.Add(setProperty);
+            }
+
+            var body = Expression.Block(expressions);
+            var lambda = Expression.Lambda<Action<XElement, object>>(body, parameterNode, parameterInstance);
+
+            return lambda.Compile(); // 编译成委托，执行速度快
         }
 
         /// 只映射 public 实例属性，且节点名必须与属性名完全一致（大小写敏感）。

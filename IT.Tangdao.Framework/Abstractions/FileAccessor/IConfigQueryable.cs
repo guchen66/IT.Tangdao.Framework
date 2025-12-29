@@ -10,12 +10,12 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
     public interface IConfigQueryable
     {
-        ResponseResult<TangdaoSortedDictionary<string, string>> SelectAppConfig(string section);
+        ResponseResult<TangdaoSortedDictionary<string, string>> SelectAppSection(string section);
 
-        ResponseResult SelectAppConfig<T>(string section) where T : class, new();
+        ResponseResult SelectAppSection<T>(string section) where T : class, new();
 
         ResponseResult SelectConfigByJsonConvert<T>(string section) where T : class, new();
 
-        ResponseResult<Dictionary<string, string>> SelectCustomConfig(string configName, string section);
+        ResponseResult<Dictionary<string, string>> SelectSection(string section);
     }
 }

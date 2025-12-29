@@ -446,14 +446,14 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// 使用了struct后，如果传递数据的扩展方法，需要加上ref
         /// </summary>
         /// <param name="section"></param>
-        public ResponseResult<TangdaoSortedDictionary<string, string>> SelectAppConfig(string section)
+        public ResponseResult<TangdaoSortedDictionary<string, string>> SelectAppSection(string section)
         {
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
             TangdaoSortedDictionary<string, string> dict = idict.Cast<DictionaryEntry>().ToTangdaoSortedDictionary();
             return ResponseResult<TangdaoSortedDictionary<string, string>>.Success(dict);
         }
 
-        public ResponseResult SelectAppConfig<T>(string section) where T : class, new()
+        public ResponseResult SelectAppSection<T>(string section) where T : class, new()
         {
             IDictionary idict = (IDictionary)ConfigurationManager.GetSection(section);
 
@@ -482,7 +482,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// 读取自定义的config文件
         /// </summary>
         /// <param name="menuList"></param>
-        public ResponseResult<Dictionary<string, string>> SelectCustomConfig(string configName, string section)
+        public ResponseResult<Dictionary<string, string>> SelectSection(string section)
         {
             if (ReadPath == null)
             {
