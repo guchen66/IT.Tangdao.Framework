@@ -9,7 +9,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// <summary>
         /// 写入的内容
         /// </summary>
-        string Content { get; set; }
+        string Content { get; }
 
         /// <summary>
         /// 写入的地址
@@ -20,5 +20,15 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// 文件类型
         /// </summary>
         DaoFileType DetectedType { get; }
+
+        IXmlSerializer AsXml();
+
+        IJsonSerializer AsJson();
+
+        IConfigSerializer AsConfig();
+
+        IIniSerializer AsIni();
+
+        IContentWritable Auto();
     }
 }

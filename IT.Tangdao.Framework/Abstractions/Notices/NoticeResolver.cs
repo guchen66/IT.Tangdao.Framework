@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using IT.Tangdao.Framework.Events;
 using IT.Tangdao.Framework.Ioc;
 using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Common;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
 namespace IT.Tangdao.Framework.Abstractions.Notices
 {
@@ -35,7 +35,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// <param name="noticeRegistry">通知注册表，包含观察者类型信息</param>
         /// <returns>创建的通知观察者实例，如果创建失败则返回null</returns>
         /// <exception cref="ArgumentNullException">当noticeRegistry为null时抛出</exception>
-        public INoticeObserver CreateObserver(RegistrationTypeEntry  noticeRegistry)
+        public INoticeObserver CreateObserver(IRegistrationTypeEntry noticeRegistry)
         {
             if (noticeRegistry == null) throw new ArgumentNullException(nameof(noticeRegistry));
 

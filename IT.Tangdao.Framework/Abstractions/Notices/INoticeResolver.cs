@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using IT.Tangdao.Framework.Common;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
 namespace IT.Tangdao.Framework.Abstractions.Notices
 {
@@ -19,7 +19,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// </summary>
         /// <param name="noticeRegistry">通知注册表，包含观察者类型信息</param>
         /// <returns>创建的通知观察者实例</returns>
-        INoticeObserver CreateObserver(RegistrationTypeEntry  noticeRegistry);
+        INoticeObserver CreateObserver(IRegistrationTypeEntry noticeRegistry);
 
         /// <summary>
         /// 清除观察者实例缓存

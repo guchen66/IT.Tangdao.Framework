@@ -12,11 +12,12 @@ namespace IT.Tangdao.Framework.Commands
         private readonly Action _execute;
         private readonly Func<bool> _canExecute;
 
-        public TangdaoCommand(Action execute,Func<bool> canExecute=null)
+        public TangdaoCommand(Action execute, Func<bool> canExecute = null)
         {
-            this._execute = execute;
-            this._canExecute = canExecute;
+            _execute = execute;
+            _canExecute = canExecute;
         }
+
         public event EventHandler CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }

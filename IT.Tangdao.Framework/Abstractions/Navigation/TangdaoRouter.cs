@@ -11,16 +11,17 @@ using System.Threading.Tasks;
 using System.Windows;
 using IT.Tangdao.Framework.Mvvm;
 using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Abstractions.Notices;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 using IT.Tangdao.Framework.Common;
 using System.Runtime.Remoting;
+using System.Collections.Specialized;
 
 namespace IT.Tangdao.Framework.Abstractions.Navigation
 {
     /// <inheritdoc/>
     public class TangdaoRouter : ITangdaoRouter, INotifyPropertyChanged
     {
-        private readonly Dictionary<string, RegistrationTypeEntry> _routeRegistry = new Dictionary<string, RegistrationTypeEntry>();
+        private readonly Dictionary<string, IRegistrationTypeEntry> _routeRegistry = new Dictionary<string, IRegistrationTypeEntry>();
         private readonly Dictionary<Type, string> _reverseRouteMap = new Dictionary<Type, string>();  // 反向映射：类型 -> 路由名
         private readonly Stack<NavigationRecord> _backStack = new Stack<NavigationRecord>();
         private readonly Stack<NavigationRecord> _forwardStack = new Stack<NavigationRecord>();
@@ -135,6 +136,27 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
                 throw new InvalidOperationException($"Failed to resolve page for route '{routeName}'");
 
             PerformNavigation(newPage, routeName, parameters);
+        }
+
+        /// <summary>
+        /// 尝试导航到某界面，失败不抛异常返回null
+        /// </summary>
+        /// <param name="routeName"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public bool TryNavigateTo(string routeName, ITangdaoParameter parameters = null)
+        {
+            if (string.IsNullOrWhiteSpace(routeName)) return false;
+
+            // 用空对象模式：找不到就返回 NullTypeEntry
+            if (!_routeRegistry.TryGetValue(routeName, out var entry))
+                entry = NullTypeEntry.Instance;   // 关键：不抛
+
+            var page = _routeResolver.ResolvePage(entry);
+            if (page == null) return false;       // 解析失败也返回 false
+
+            PerformNavigation(page, routeName, parameters);
+            return true;
         }
 
         /// <summary>
@@ -272,6 +294,17 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        /// <inheritdoc/>
+        public void LoadFirstPage()
+        {
+            if (_routeRegistry.Count == 0)
+                throw new InvalidOperationException("No pages have been registered");
+
+            // 获取第一个注册的路由名称
+            var firstRoute = _routeRegistry.Keys.First();
+            NavigateTo(firstRoute);
         }
 
         /// <summary>

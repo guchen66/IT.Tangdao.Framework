@@ -14,8 +14,6 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         ResponseResult SelectAppSection<T>(string section) where T : class, new();
 
-        ResponseResult SelectConfigByJsonConvert<T>(string section) where T : class, new();
-
-        ResponseResult<Dictionary<string, string>> SelectSection(string section);
+        ResponseResult<IDictionary<string, string>> SelectSection(string section);
     }
 }

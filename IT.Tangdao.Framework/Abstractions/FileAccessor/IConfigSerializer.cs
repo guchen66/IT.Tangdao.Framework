@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Enums
+namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
-    public enum RegisterMode
+    public interface IConfigSerializer
     {
-        Transient,
-        Singleton,
-        Scoped
     }
 }

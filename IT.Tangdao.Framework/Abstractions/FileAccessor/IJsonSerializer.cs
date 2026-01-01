@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Enums
+namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
-    public enum RegisterMode
+    public interface IJsonSerializer
     {
-        Transient,
-        Singleton,
-        Scoped
+        void ToJson<T>(T obj);
     }
 }

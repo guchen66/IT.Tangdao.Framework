@@ -307,7 +307,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <param name="selector"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static IEnumerable<T> ToList<T>(this IResponseResult<TangdaoSortedDictionary<string, string>> source, Func<KeyValuePair<string, string>, T> selector)
+        public static IEnumerable<T> ToList<T>(this IResponseResult<IDictionary<string, string>> source, Func<KeyValuePair<string, string>, T> selector)
         {
             TangdaoGuards.ThrowIfNull(source);
             TangdaoGuards.ThrowIfNull(selector);

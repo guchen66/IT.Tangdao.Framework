@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Common;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
 namespace IT.Tangdao.Framework.Abstractions.Notices
 {
@@ -63,7 +64,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// 服务解析器委托，用于创建通知观察者实例
         /// 委托形状：给我 RegistrationTypeEntry ，我还你实例
         /// </summary>
-        internal static Func<RegistrationTypeEntry, INoticeObserver> ServiceResolver { get; private set; }
+        internal static Func<IRegistrationTypeEntry, INoticeObserver> ServiceResolver { get; private set; }
             = reg => DefaultResolve(reg);
 
         /// <summary>
@@ -71,7 +72,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// </summary>
         /// <param name="reg">通知注册表，包含观察者类型信息</param>
         /// <returns>创建的通知观察者实例，如果创建失败则返回null</returns>
-        private static INoticeObserver DefaultResolve(RegistrationTypeEntry reg)
+        private static INoticeObserver DefaultResolve(IRegistrationTypeEntry reg)
             => TangdaoApplication.Provider.GetService(reg.RegisterType) as INoticeObserver;
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// </summary>
         /// <param name="resolver">自定义的服务解析器委托</param>
         /// <exception cref="ArgumentNullException">当resolver为null时抛出</exception>
-        public static void SetResolver(Func<RegistrationTypeEntry, INoticeObserver> resolver)
+        public static void SetResolver(Func<IRegistrationTypeEntry, INoticeObserver> resolver)
         {
             if (resolver == null) throw new ArgumentNullException(nameof(resolver));
             lock (_staticLock)

@@ -39,6 +39,11 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
         void NavigateTo(string route, ITangdaoParameter parameters = null);
 
         /// <summary>
+        /// 尝试导航；找不到路由时不抛异常，返回 false。
+        /// </summary>
+        bool TryNavigateTo(string routeName, ITangdaoParameter parameters = null);
+
+        /// <summary>
         /// 导航历史操作
         /// </summary>
         void GoBack();
@@ -70,5 +75,10 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
         /// <typeparam name="T">页面类型</typeparam>
         /// <param name="routeName">路由名称</param>
         void RegisterPage<T>(string routeName) where T : class, ITangdaoPage;
+
+        /// <summary>
+        /// 加载第一个注册界面
+        /// </summary>
+        void LoadFirstPage();
     }
 }

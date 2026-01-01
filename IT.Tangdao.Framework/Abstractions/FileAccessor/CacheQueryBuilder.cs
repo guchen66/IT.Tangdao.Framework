@@ -81,5 +81,10 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         {
             throw new NotImplementedException();
         }
+
+        public IContentWritable Write<T>(string path, T writeObject, DaoFileType daoFileType = DaoFileType.None)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

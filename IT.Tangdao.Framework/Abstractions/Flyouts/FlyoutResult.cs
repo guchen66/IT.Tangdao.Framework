@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions.FileAccessor
+namespace IT.Tangdao.Framework.Abstractions.Flyouts
 {
-    internal interface IBatchContentQueryable
+    public class FlyoutResult
     {
     }
 }
