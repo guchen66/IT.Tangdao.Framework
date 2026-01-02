@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
 namespace IT.Tangdao.Framework.Common
 {
@@ -14,16 +15,6 @@ namespace IT.Tangdao.Framework.Common
     /// </summary>
     public static class TangdaoContext
     {
-        /// <summary>
-        /// 存储字符串
-        /// </summary>
-        private static readonly ConcurrentDictionary<string, string> _localValues = new ConcurrentDictionary<string, string>();
-
-        /// <summary>
-        /// 存储方法
-        /// </summary>
-        private static readonly ConcurrentDictionary<string, Delegate> _actions = new ConcurrentDictionary<string, Delegate>();
-
         /// <summary>
         /// 存储参数
         /// </summary>
@@ -49,71 +40,102 @@ namespace IT.Tangdao.Framework.Common
         /// </summary>
         private static readonly ConcurrentDictionary<string, object> _keyedInstances = new ConcurrentDictionary<string, object>();
 
+        /// <summary>
+        /// 设置全局参数
+        /// </summary>
+        /// <param name="name">参数名称</param>
+        /// <param name="parameter">参数实例</param>
         public static void SetTangdaoParameter(string name, ITangdaoParameter parameter)
         {
             _parameter[name] = parameter;
         }
 
+        /// <summary>
+        /// 获取全局参数
+        /// </summary>
+        /// <param name="name">参数名称</param>
+        /// <returns>参数实例，如果不存在则返回null</returns>
         public static ITangdaoParameter GetTangdaoParameter(string name)
         {
             _parameter.TryGetValue(name, out var value);
             return value;
         }
 
-        [Obsolete("请迁移到 ITangdaoParameter 接口，本方法将在 v5.0 删除。")]
-        public static void SetLocalValue(string name, string value)
+        /// <summary>
+        /// 创建并存储包含RegistrationTypeEntry的参数实例
+        /// </summary>
+        /// <param name="name">参数名称</param>
+        /// <param name="registrationTypeEntry">类型注册信息</param>
+        /// <returns>创建的参数实例</returns>
+        public static ITangdaoParameter CreateAndSetParameterWithTypeEntry(string name, IRegistrationTypeEntry registrationTypeEntry)
         {
-            _localValues[name] = value;
+            var parameter = new TangdaoParameter();
+            parameter.Add("RegistrationTypeEntry", registrationTypeEntry);
+            _parameter[name] = parameter;
+            return parameter;
         }
 
-        [Obsolete("请迁移到 ITangdaoParameter 接口，本方法将在 v5.0 删除。")]
-        public static string GetLocalValue(string name)
+        /// <summary>
+        /// 从参数实例中获取RegistrationTypeEntry
+        /// </summary>
+        /// <param name="name">参数名称</param>
+        /// <returns>类型注册信息，如果不存在则返回null</returns>
+        public static IRegistrationTypeEntry GetRegistrationTypeEntryFromParameter(string name)
         {
-            _localValues.TryGetValue(name, out var value);
-            return value;
-        }
-
-        [Obsolete("请迁移到 ITangdaoParameter 接口，本方法将在 v5.0 删除。")]
-        public static void SetLocalAction(string name, Action action)
-        {
-            _actions[name] = action;
-        }
-
-        [Obsolete("请迁移到 ITangdaoParameter 接口，本方法将在 v5.0 删除。")]
-        public static void GetLocalAction(string name)
-        {
-            if (_actions.TryGetValue(name, out var action))
+            if (_parameter.TryGetValue(name, out var parameter))
             {
-                // 确保存储的是Action类型
-                if (action is Action)
-                {
-                    (action as Action)?.Invoke();
-                }
+                return parameter.Get<IRegistrationTypeEntry>("RegistrationTypeEntry");
             }
+            return null;
         }
 
+        /// <summary>
+        /// 设置类型的注册上下文
+        /// </summary>
+        /// <typeparam name="TService">服务类型</typeparam>
+        /// <param name="context">注册上下文</param>
         public static void SetContext<TService>(RegisterContext context)
         {
             _contexts[typeof(TService)] = context;
         }
 
+        /// <summary>
+        /// 获取类型的注册上下文
+        /// </summary>
+        /// <typeparam name="TService">服务类型</typeparam>
+        /// <returns>注册上下文，如果不存在则返回null</returns>
         public static RegisterContext GetContext<TService>()
         {
             _contexts.TryGetValue(typeof(TService), out var context);
             return context;
         }
 
+        /// <summary>
+        /// 获取类型的注册上下文
+        /// </summary>
+        /// <param name="type">服务类型</param>
+        /// <returns>注册上下文，如果不存在则返回null</returns>
         public static RegisterContext GetContext(Type type)
         {
             _contexts.TryGetValue(type, out var context);
             return context;
         }
 
+        /// <summary>
+        /// 设置类型的单例实例
+        /// </summary>
+        /// <typeparam name="TService">服务类型</typeparam>
+        /// <param name="instance">实例对象</param>
         public static void SetInstance<TService>(TService instance)
         {
             _instances[typeof(TService)] = new Lazy<object>(() => instance);   // 立即返回已知的实例
         }
 
+        /// <summary>
+        /// 获取类型的单例实例
+        /// </summary>
+        /// <typeparam name="TService">服务类型</typeparam>
+        /// <returns>实例对象，如果不存在则返回default</returns>
         public static TService GetInstance<TService>()
         {
             return _instances.TryGetValue(typeof(TService), out var lazy)
@@ -124,6 +146,8 @@ namespace IT.Tangdao.Framework.Common
         /// <summary>
         /// 设置带键实例（与类型无关，纯 key-value）
         /// </summary>
+        /// <param name="key">实例键</param>
+        /// <param name="instance">实例对象</param>
         public static void SetInstance(string key, object instance)
         {
             _keyedInstances[key] = instance;
@@ -132,6 +156,9 @@ namespace IT.Tangdao.Framework.Common
         /// <summary>
         /// 按 key 获取实例；找不到返回 default(T)
         /// </summary>
+        /// <typeparam name="T">实例类型</typeparam>
+        /// <param name="key">实例键</param>
+        /// <returns>实例对象，如果不存在则返回default</returns>
         public static T GetInstance<T>(string key) where T : class
         {
             _keyedInstances.TryGetValue(key, out var hit);
@@ -152,6 +179,7 @@ namespace IT.Tangdao.Framework.Common
         /// 获取指定类型的单例实例。如果尚未创建，则使用注册的工厂方法创建。
         /// </summary>
         /// <typeparam name="TService">服务类型。</typeparam>
+        /// <param name="provider">ITangdaoProvider 实例。</param>
         /// <returns>TService 的单例实例。</returns>
         public static TService GetInstanceFactory<TService>(ITangdaoProvider provider) where TService : class
         {

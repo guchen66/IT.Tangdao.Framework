@@ -17,6 +17,9 @@ namespace IT.Tangdao.Framework.Abstractions
         // 存储命令
         private readonly ConcurrentDictionary<string, Delegate> _commands = new ConcurrentDictionary<string, Delegate>();
 
+        // 默认类型注册信息的键名
+        private const string DefaultRegistrationTypeEntryKey = "RegistrationTypeEntry";
+
         // 添加参数
         public void Add<T>(string key, T value)
         {
@@ -86,6 +89,55 @@ namespace IT.Tangdao.Framework.Abstractions
             {
                 throw new InvalidOperationException($"Command '{key}' 未找到或类型无效.");
             }
+        }
+
+        // 添加类型注册信息（使用默认键名）
+        /// <summary>
+        /// 添加类型注册信息（使用默认键名）
+        /// </summary>
+        /// <param name="registrationTypeEntry">类型注册信息</param>
+        /// <remarks>
+        /// 注意：如果多次调用此方法，会覆盖之前添加的类型注册信息
+        /// 如果需要添加多个类型注册信息，请使用带自定义键名的重载方法
+        /// </remarks>
+        public void AddRegistrationTypeEntry(IRegistrationTypeEntry registrationTypeEntry)
+        {
+            AddRegistrationTypeEntry(DefaultRegistrationTypeEntryKey, registrationTypeEntry);
+        }
+
+        /// <summary>
+        /// 添加类型注册信息（使用自定义键名）
+        /// </summary>
+        /// <param name="key">自定义键名，用于标识不同的类型注册信息</param>
+        /// <param name="registrationTypeEntry">类型注册信息</param>
+        /// <remarks>
+        /// 使用自定义键名可以在同一个TangdaoParameter实例中存储多个类型注册信息
+        /// 适用于需要传输多个不同类型注册信息的场景
+        /// </remarks>
+        public void AddRegistrationTypeEntry(string key, IRegistrationTypeEntry registrationTypeEntry)
+        {
+            Add(key, registrationTypeEntry);
+        }
+
+        // 获取类型注册信息（使用默认键名）
+        /// <summary>
+        /// 获取类型注册信息（使用默认键名）
+        /// </summary>
+        /// <returns>类型注册信息，如果不存在则返回null</returns>
+        public IRegistrationTypeEntry GetRegistrationTypeEntry()
+        {
+            return GetRegistrationTypeEntry(DefaultRegistrationTypeEntryKey);
+        }
+
+        // 获取类型注册信息（使用自定义键名）
+        /// <summary>
+        /// 获取类型注册信息（使用自定义键名）
+        /// </summary>
+        /// <param name="key">自定义键名</param>
+        /// <returns>类型注册信息，如果不存在则返回null</returns>
+        public IRegistrationTypeEntry GetRegistrationTypeEntry(string key)
+        {
+            return Get<IRegistrationTypeEntry>(key);
         }
     }
 }

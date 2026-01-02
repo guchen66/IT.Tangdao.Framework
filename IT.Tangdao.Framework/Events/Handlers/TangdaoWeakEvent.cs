@@ -63,7 +63,7 @@ namespace IT.Tangdao.Framework.Events
             }, TaskThreadType.UI);
         }
 
-        public void Publish(string key, IHandlerTable handlerTable)
+        public void Publish(string key, IActionTable handlerTable)
         {
             var args = new HandlerTableEventArgs(key, handlerTable);
             TangdaoTaskScheduler.Execute(dao =>

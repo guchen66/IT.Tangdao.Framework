@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 
-namespace IT.Tangdao.Framework.Common
+namespace IT.Tangdao.Framework.Helpers
 {
     /// <summary>
     /// 临时文件的创建与移除

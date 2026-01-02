@@ -9,10 +9,10 @@ namespace IT.Tangdao.Framework.EventArg
 {
     public sealed class HandlerTableEventArgs : TangdaoEventArgs
     {
-        public IHandlerTable HandlerTable { get; set; }
+        public IActionTable HandlerTable { get; set; }
         public string Key { get; set; }
 
-        public HandlerTableEventArgs(string key, IHandlerTable handlerTable)
+        public HandlerTableEventArgs(string key, IActionTable handlerTable)
         {
             Key = key;
             HandlerTable = handlerTable;

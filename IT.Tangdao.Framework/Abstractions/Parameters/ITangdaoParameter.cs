@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
 namespace IT.Tangdao.Framework.Abstractions
 {
@@ -31,5 +32,17 @@ namespace IT.Tangdao.Framework.Abstractions
 
         // 执行带参数、有返回值的命令
         TResult ExecuteCommand<T, TResult>(string key, T parameter);
+
+        // 添加类型注册信息（使用默认键名）
+        void AddRegistrationTypeEntry(IRegistrationTypeEntry registrationTypeEntry);
+
+        // 添加类型注册信息（使用自定义键名）
+        void AddRegistrationTypeEntry(string key, IRegistrationTypeEntry registrationTypeEntry);
+
+        // 获取类型注册信息（使用默认键名）
+        IRegistrationTypeEntry GetRegistrationTypeEntry();
+
+        // 获取类型注册信息（使用自定义键名）
+        IRegistrationTypeEntry GetRegistrationTypeEntry(string key);
     }
 }

@@ -4,7 +4,7 @@ IT.Tangdao以下简称唐刀，是我开发的一款适用于WPF的专属框架�
 
 事件聚合器IDaoEventAggregator、
 
-内容读写器IContentReader、IContentWriter、
+内容读写器IContentAccess
 
 路径优化类TangdaoPath、
 
@@ -27,6 +27,12 @@ IT.Tangdao以下简称唐刀，是我开发的一款适用于WPF的专属框架�
 任务调度器TangdaoTaskScheduler、
 
 弱引用事件TangdaoWeakEvent
+
+委托表传输机制IActionTable
+
+命令和异步命令TangdaoCommand，TangdaoAsyncCommand
+
+快速静态命令MinidaoCommand
 
 观察者模式事件通知INoticeObserver
 
