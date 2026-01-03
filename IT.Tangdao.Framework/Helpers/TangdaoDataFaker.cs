@@ -50,7 +50,7 @@ namespace IT.Tangdao.Framework.Helpers
             });
 
         // 对象池，用于复用生成的对象，减少GC压力
-        private static readonly ThreadLocal<TangdaoPool<T>> _objectPool = new ThreadLocal<TangdaoPool<T>>(() => new TangdaoPool<T>());
+        private static readonly ThreadLocal<TangdaoObjectPool<T>> _objectPool = new ThreadLocal<TangdaoObjectPool<T>>(() => new TangdaoObjectPool<T>());
 
         /// <summary>
         /// 通过动态委托自动生成数据

@@ -92,8 +92,9 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
             if (string.IsNullOrWhiteSpace(routeName))
                 throw new ArgumentException("Route name cannot be null or empty", nameof(routeName));
 
-            if (_routeRegistry.ContainsKey(routeName))
-                throw new InvalidOperationException($"Route '{routeName}' is already registered");
+            // 幂等：已存在就直接返回，不再注册
+            if (_routeRegistry.TryGetValue(routeName, out _)) return;
+
             var pageType = typeof(TPage);
             var typeEntry = new RegistrationTypeEntry(routeName, pageType);
 

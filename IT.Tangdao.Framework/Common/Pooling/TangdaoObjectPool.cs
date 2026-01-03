@@ -13,7 +13,7 @@ namespace IT.Tangdao.Framework.Pooling
     /// 泛型对象池类，T 必须是引用类型
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TangdaoPool<T> where T : class
+    public class TangdaoObjectPool<T> where T : class
     {
         // 线程安全的对象容器，使用 ConcurrentBag 来支持多线程并发访问
         private readonly ConcurrentBag<T> _pool = new ConcurrentBag<T>();
@@ -25,7 +25,7 @@ namespace IT.Tangdao.Framework.Pooling
         private readonly PropertyInfo[] _writableProperties;
 
         // 构造函数
-        public TangdaoPool()
+        public TangdaoObjectPool()
         {
             // 使用 FormatterServices.GetUninitializedObject 创建对象
             // 这个方法会创建对象但不调用构造函数，性能较好

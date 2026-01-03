@@ -1329,8 +1329,24 @@ TangdaoWeakEvent.Instance.Publish("Open", HandlerTable);
 
 ```C#
 NoticeMediator.SetResolver(reg => Container.Get(reg.RegisterType) as INoticeObserver);
-NoticeMediator.Instance.ChainRegister().Add(typeof(LightViewModel)).Add(typeof(ElectViewModel)).Add(typeof(PressureViewModel));
+
 ```
+
+注册的不同写法:
+
+1、
+
+```C#
+NoticeMediator.Instance.ChainRegister(typeof(LightViewModel), typeof(ElectViewModel), typeof(PressureViewModel));
+```
+
+2、
+
+````C#
+NoticeMediator.Instance.ChainRegister().Add(typeof(LightViewModel)).Add(typeof(ElectViewModel)).Add(typeof(PressureViewModel));
+````
+
+
 
 使用场景：
 
@@ -1382,7 +1398,55 @@ NoticeMediator.Instance.ChainRegister().Add(typeof(LightViewModel)).Add(typeof(E
 NoticeMediator.Instance.Unregister();
 ```
 
+#### 21、委托表传输机制IActionTable
 
+1、使用时需要保持单例唯一性，这里跟据你使用的IOC决定注册
+
+````
+ container.AddTangdaoSingleton<IActionTable, ActionTable>();
+````
+
+2、带参数使用
+
+```C#
+ VM1:
+ public void TestWindow()
+ {
+     _actionTable.Register("Open", x =>
+     {
+         if (x.Result == ActionStatus.Success)
+         {
+             MessageBox.Show("成功返回");
+         }
+     });
+ }
+ VM2:
+ public void Open()
+ {
+     ActionResult result = new ActionResult();
+     result.Result = ActionStatus.Success;
+     _handlerTable.GetResultHandler("Open").Invoke(result);
+ }
+
+```
+
+3、不带参数使用
+
+```C#
+ VM1:
+ public void TestWindow()
+ {
+     _actionTable.Register("Open", () =>
+     {
+         
+     });
+ }
+ VM2:
+ public void Open()
+ {
+     _handlerTable.GetHandler("Open").Invoke();
+ }
+```
 
 
 

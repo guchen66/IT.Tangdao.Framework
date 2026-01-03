@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
 namespace IT.Tangdao.Framework.Commands
 {
@@ -20,7 +21,7 @@ namespace IT.Tangdao.Framework.Commands
         /// <remarks>
         /// 如果key已存在，则替换为新的action
         /// </remarks>
-        void Register(string key, Action action);
+        void Register(string key, Action action, TaskPriority priority = TaskPriority.Normal);
 
         /// <summary>
         /// 注册一个带ActionResult参数的命令处理程序
@@ -30,7 +31,7 @@ namespace IT.Tangdao.Framework.Commands
         /// <remarks>
         /// 如果key已存在，则替换为新的action
         /// </remarks>
-        void Register(string key, Action<ActionResult> action);
+        void Register(string key, Action<ActionResult> action, TaskPriority priority = TaskPriority.Normal);
 
         /// <summary>
         /// 根据命令键获取无参数的命令处理程序
@@ -73,5 +74,11 @@ namespace IT.Tangdao.Framework.Commands
         /// <param name="key">命令的唯一标识符</param>
         /// <returns>如果已注册则返回true，否则返回false</returns>
         bool IsResultHandlerRegistered(string key);
+
+        /// <summary>
+        /// 获取快照信息
+        /// </summary>
+        /// <returns></returns>
+        IReadOnlyDictionary<string, IActionInfo> GetActionInfo();
     }
 }
