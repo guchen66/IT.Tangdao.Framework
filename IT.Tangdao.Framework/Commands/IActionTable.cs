@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Contracts;
+using IT.Tangdao.Framework.EventArg;
 
 namespace IT.Tangdao.Framework.Commands
 {
@@ -13,6 +14,11 @@ namespace IT.Tangdao.Framework.Commands
     /// </summary>
     public interface IActionTable
     {
+        /// <summary>
+        /// 当命令注册或移除时触发的事件
+        /// </summary>
+        event EventHandler<ActionTableEventArgs> ActionChanged;
+
         /// <summary>
         /// 注册一个无参数的命令处理程序
         /// </summary>
@@ -74,6 +80,19 @@ namespace IT.Tangdao.Framework.Commands
         /// <param name="key">命令的唯一标识符</param>
         /// <returns>如果已注册则返回true，否则返回false</returns>
         bool IsResultHandlerRegistered(string key);
+
+        /// <summary>
+        /// 执行指定键的无参数命令处理程序
+        /// </summary>
+        /// <param name="key">命令的唯一标识符</param>
+        void Execute(string key);
+
+        /// <summary>
+        /// 执行指定键的带ActionResult参数的命令处理程序
+        /// </summary>
+        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="result">传递给命令处理程序的ActionResult实例</param>
+        void Execute(string key, ActionResult result);
 
         /// <summary>
         /// 获取快照信息

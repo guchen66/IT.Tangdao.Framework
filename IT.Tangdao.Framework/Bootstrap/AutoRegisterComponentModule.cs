@@ -17,6 +17,7 @@ using System.Reflection;
 using IT.Tangdao.Framework.Threading;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Mvvm;
+using System.Runtime.CompilerServices;
 
 namespace IT.Tangdao.Framework.Bootstrap
 {

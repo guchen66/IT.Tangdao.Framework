@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Abstractions.Contracts;
+using IT.Tangdao.Framework.EventArg;
 
 namespace IT.Tangdao.Framework.Commands
 {
@@ -19,6 +20,22 @@ namespace IT.Tangdao.Framework.Commands
         /// 存储无参数委托的并发字典
         /// </summary>
         private readonly ConcurrentDictionary<string, ActionEntry> _map = new ConcurrentDictionary<string, ActionEntry>();
+
+        /// <summary>
+        /// 当命令注册或移除时触发的事件
+        /// </summary>
+        public event EventHandler<ActionTableEventArgs> ActionChanged;
+
+        /// <summary>
+        /// 触发ActionChanged事件
+        /// </summary>
+        /// <param name="eventType">事件类型</param>
+        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="priority">命令优先级</param>
+        private void OnActionChanged(ActionTableEventType eventType, string key, TaskPriority priority)
+        {
+            ActionChanged?.Invoke(this, new ActionTableEventArgs(eventType, key, priority));
+        }
 
         /// <summary>
         /// 注册一个无参数的命令处理程序
@@ -61,6 +78,9 @@ namespace IT.Tangdao.Framework.Commands
                 /* 高优先级覆盖低优先级 → 允许 */
                 return commandEntry;
             });
+
+            // 触发注册事件
+            OnActionChanged(ActionTableEventType.Registered, key, commandEntry.Priority);
         }
 
         /// <summary>
@@ -90,7 +110,16 @@ namespace IT.Tangdao.Framework.Commands
         /// <returns>如果成功移除则返回true，否则返回false</returns>
         public bool UnregisterHandler(string key)
         {
-            return _map.TryGetValue(key, out var e) && e.Action != null && _map.TryRemove(key, out _);
+            if (_map.TryGetValue(key, out var e) && e.Action != null)
+            {
+                if (_map.TryRemove(key, out _))
+                {
+                    // 触发移除事件
+                    OnActionChanged(ActionTableEventType.Unregistered, key, e.Priority);
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -100,7 +129,16 @@ namespace IT.Tangdao.Framework.Commands
         /// <returns>如果成功移除则返回true，否则返回false</returns>
         public bool UnregisterResultHandler(string key)
         {
-            return _map.TryGetValue(key, out var e) && e.ActionResult != null && _map.TryRemove(key, out _);
+            if (_map.TryGetValue(key, out var e) && e.ActionResult != null)
+            {
+                if (_map.TryRemove(key, out _))
+                {
+                    // 触发移除事件
+                    OnActionChanged(ActionTableEventType.Unregistered, key, e.Priority);
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -130,6 +168,45 @@ namespace IT.Tangdao.Framework.Commands
         public IReadOnlyDictionary<string, IActionInfo> GetActionInfo()
         {
             return _map.ToDictionary(kv => kv.Key, kv => (IActionInfo)kv.Value);
+        }
+
+        /// <summary>
+        /// 执行指定键的无参数命令处理程序
+        /// </summary>
+        /// <param name="key">命令的唯一标识符</param>
+        public void Execute(string key)
+        {
+            if (_map.TryGetValue(key, out var entry) && entry.Action != null)
+            {
+                // 触发执行前事件
+                OnActionChanged(ActionTableEventType.Executing, key, entry.Priority);
+
+                // 执行命令
+                entry.Action.Invoke();
+
+                // 触发执行后事件
+                OnActionChanged(ActionTableEventType.Executed, key, entry.Priority);
+            }
+        }
+
+        /// <summary>
+        /// 执行指定键的带ActionResult参数的命令处理程序
+        /// </summary>
+        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="result">传递给命令处理程序的ActionResult实例</param>
+        public void Execute(string key, ActionResult result)
+        {
+            if (_map.TryGetValue(key, out var entry) && entry.ActionResult != null)
+            {
+                // 触发执行前事件
+                OnActionChanged(ActionTableEventType.Executing, key, entry.Priority);
+
+                // 执行命令
+                entry.ActionResult.Invoke(result);
+
+                // 触发执行后事件
+                OnActionChanged(ActionTableEventType.Executed, key, entry.Priority);
+            }
         }
 
         /// <summary>

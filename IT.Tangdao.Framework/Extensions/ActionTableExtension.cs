@@ -17,7 +17,7 @@ namespace IT.Tangdao.Framework.Extensions
     /// 支持无参数和带ActionResult参数的命令处理程序
     /// 允许指定任务执行的线程亲和性
     /// </remarks>
-    public static class HandlerTableExtension
+    public static class ActionTableExtension
     {
         /// <summary>
         /// 异步执行指定键的无参数命令处理程序
@@ -33,7 +33,7 @@ namespace IT.Tangdao.Framework.Extensions
         {
             TangdaoTaskScheduler.Execute(_ =>
             {
-                table.GetHandler(key)?.Invoke();
+                table.Execute(key);
             }, affinity);
         }
 
@@ -52,7 +52,7 @@ namespace IT.Tangdao.Framework.Extensions
         {
             TangdaoTaskScheduler.Execute(_ =>
             {
-                table.GetResultHandler(key)?.Invoke(handlerResult);
+                table.Execute(key);
             }, affinity);
         }
     }

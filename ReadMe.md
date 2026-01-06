@@ -28,7 +28,7 @@ IT.Tangdao以下简称唐刀，是我开发的一款适用于WPF的专属框架�
 
 弱引用事件TangdaoWeakEvent
 
-委托表传输机制IActionTable
+委托表传输机制IActionTable，复合委托表CompositeActionTable
 
 命令和异步命令TangdaoCommand，TangdaoAsyncCommand
 
