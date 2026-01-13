@@ -68,7 +68,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <param name="root"></param>
         /// <param name="pattern"></param>
         /// <returns></returns>
-        public static IReadOnlyList<AbsolutePath> EnumerateFiles(this AbsolutePath root, string pattern)
+        public static IEnumerable<AbsolutePath> EnumerateFiles(this AbsolutePath root, string pattern)
         {
             return Directory.EnumerateFiles(root.Value, pattern)
                 .Select(p => new AbsolutePath(p))

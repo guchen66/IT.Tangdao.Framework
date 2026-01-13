@@ -99,6 +99,9 @@ namespace IT.Tangdao.Framework.Paths
         /// </summary>
         public string FileName => Path.GetFileName(_path);
 
+        /// <summary>
+        /// 目录名称或文件名称无后缀
+        /// </summary>
         public string FileNameWithoutExtension => Path.GetFileNameWithoutExtension(_path);
 
         /// <summary>

@@ -14,7 +14,7 @@ namespace IT.Tangdao.Framework.Helpers
     public sealed class CircularBuffer<T>
     {
         private readonly T[] _data;
-        private int _index = 0;
+        private int _index = -1;
 
         public CircularBuffer(IEnumerable<T> source)
         {
@@ -33,8 +33,10 @@ namespace IT.Tangdao.Framework.Helpers
         /// <returns></returns>
         public T GetNext()
         {
-            var i = Interlocked.Increment(ref _index) - 1;
-            return _data[i % _data.Length];
+            int i = Interlocked.Increment(ref _index);
+            // 正确的取模计算：确保结果为正
+            int actualIndex = (i % _data.Length + _data.Length) % _data.Length;
+            return _data[actualIndex];
         }
 
         /// <summary>
@@ -43,8 +45,26 @@ namespace IT.Tangdao.Framework.Helpers
         /// <returns></returns>
         public T GetPrevious()
         {
-            var i = Interlocked.Decrement(ref _index) - 1;
-            return _data[(i + _data.Length) % _data.Length];
+            int i = Interlocked.Decrement(ref _index);
+            // 正确的取模计算：确保结果为正
+            int actualIndex = (i % _data.Length + _data.Length) % _data.Length;
+            return _data[actualIndex];
+        }
+
+        /// <summary>
+        /// 跟据条件获取元素
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public T GetItem(Func<T, bool> predicate)
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+
+            return _data.FirstOrDefault(predicate);
         }
 
         public T Next => GetNext();
