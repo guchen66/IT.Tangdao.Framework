@@ -15,13 +15,13 @@ namespace IT.Tangdao.Framework.Markup
     /// <summary>
     /// 对Combobox进行定制列表
     /// </summary>
-    public class OptionListExtension : MarkupExtension
+    public class OptionItemsSourceExtension : MarkupExtension
     {
         // 1. 外部可注入的注册表
         public static IDictionary<string, IEnumerable> OptionsPool { get; } = new ConcurrentDictionary<string, IEnumerable>();
 
         // 2. 默认集合（Key = "Default"）
-        static OptionListExtension()
+        static OptionItemsSourceExtension()
         {
             OptionsPool["Default"] = new[] { TangdaoNameDesc.Key };
         }

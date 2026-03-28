@@ -16,6 +16,16 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
     public class FileMonitor : IFileMonitor, IDisposable
     {
         /// <summary>
+        /// 是否存在正在监控的Id
+        /// </summary>
+        private bool _hasActiveId;
+
+        /// <summary>
+        /// 拥有进程的句柄
+        /// </summary>
+        private bool _hasActiveHandle;
+
+        /// <summary>
         /// 线程安全的字典，存储目录路径和对应的文件监控器
         /// </summary>
         private readonly ConcurrentDictionary<string, FileSystemWatcher> _watchers;
@@ -34,6 +44,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// 当XML文件发生变化时触发的事件
         /// </summary>
         public event EventHandler<DaoFileChangedEventArgs> FileChanged;
+
+        /// <summary>
+        /// 正在监控的信息
+        /// </summary>
+        private FileMonitorInfo _fileMonitorInfo;
 
         /// <summary>
         /// 文件监控配置
@@ -58,11 +73,17 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
+        private FileMonitor(FileMonitorInfo fileMonitorInfo)
+        {
+            _fileMonitorInfo = fileMonitorInfo;
+        }
+
         /// <summary>
         /// 开始监控
         /// </summary>
         public void StartMonitoring()
         {
+            StopMonitoring();
             StartMonitoring(_config);
         }
 
@@ -423,8 +444,15 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             return _status;
         }
 
+        /// <summary>
+        /// 停止监控
+        /// </summary>
         public void StopMonitoring()
         {
+            if (IsAssociated)
+            {
+                StopMonitoringToExit();
+            }
             foreach (var watcher in _watchers.Values)
             {
                 watcher.EnableRaisingEvents = false;
@@ -434,6 +462,15 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             _fileStates.Clear();
             _lastEventTimes.Clear();
             _status = MonitorStatus.Stopped;
+        }
+
+        private bool IsAssociated
+        {
+            get => _hasActiveId || _hasActiveHandle;
+        }
+
+        private static void StopMonitoringToExit()
+        {
         }
 
         public void Dispose()

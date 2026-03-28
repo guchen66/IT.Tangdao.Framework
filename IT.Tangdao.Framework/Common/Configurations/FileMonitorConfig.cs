@@ -23,6 +23,11 @@ namespace IT.Tangdao.Framework.Configurations
         public bool IncludeSubdirectories { get; set; } = true;
 
         /// <summary>
+        /// 要监控的单个文件类型
+        /// </summary>
+        public DaoFileType MonitorFileType { get; set; }
+
+        /// <summary>
         /// 要监控的文件类型列表
         /// </summary>
         public List<DaoFileType> MonitorFileTypes { get; set; } = new List<DaoFileType>();

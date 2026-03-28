@@ -15,6 +15,7 @@ namespace IT.Tangdao.Framework.Helpers
     {
         private readonly T[] _data;
         private int _index = -1;
+        private volatile int _first = 1;  // 1=未初始化，0=已初始化
 
         public CircularBuffer(IEnumerable<T> source)
         {
@@ -33,8 +34,13 @@ namespace IT.Tangdao.Framework.Helpers
         /// <returns></returns>
         public T GetNext()
         {
+            if (Interlocked.CompareExchange(ref _first, 0, 1) == 1)
+            {
+                // 仅第一个线程进入
+                _index = 0;
+                return _data[0];
+            }
             int i = Interlocked.Increment(ref _index);
-            // 正确的取模计算：确保结果为正
             int actualIndex = (i % _data.Length + _data.Length) % _data.Length;
             return _data[actualIndex];
         }
@@ -45,8 +51,12 @@ namespace IT.Tangdao.Framework.Helpers
         /// <returns></returns>
         public T GetPrevious()
         {
+            if (Interlocked.CompareExchange(ref _first, 0, 1) == 1)
+            {
+                _index = _data.Length - 1;
+                return _data[_index];
+            }
             int i = Interlocked.Decrement(ref _index);
-            // 正确的取模计算：确保结果为正
             int actualIndex = (i % _data.Length + _data.Length) % _data.Length;
             return _data[actualIndex];
         }
@@ -56,12 +66,11 @@ namespace IT.Tangdao.Framework.Helpers
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
         public T GetItem(Func<T, bool> predicate)
         {
             if (predicate == null)
             {
-                throw new ArgumentNullException(nameof(predicate));
+                TangdaoGuards.ThrowIfNull(nameof(predicate));
             }
 
             return _data.FirstOrDefault(predicate);
