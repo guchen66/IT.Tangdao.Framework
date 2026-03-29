@@ -22,25 +22,29 @@ namespace IT.Tangdao.Framework.Commands
         private readonly ConcurrentDictionary<string, ActionEntry> _map = new ConcurrentDictionary<string, ActionEntry>();
 
         /// <summary>
-        /// 当命令注册或移除时触发的事件
+        /// 注册委托时发生的事件
         /// </summary>
-        public event EventHandler<ActionTableEventArgs> ActionChanged;
+        public event EventHandler<ActionTableEventArgs> Registered;
 
         /// <summary>
-        /// 触发ActionChanged事件
+        /// 移除委托时发生的事件
         /// </summary>
-        /// <param name="eventType">事件类型</param>
-        /// <param name="key">命令的唯一标识符</param>
-        /// <param name="priority">命令优先级</param>
-        private void OnActionChanged(ActionTableEventType eventType, string key, TaskPriority priority)
-        {
-            ActionChanged?.Invoke(this, new ActionTableEventArgs(eventType, key, priority));
-        }
+        public event EventHandler<ActionTableEventArgs> Unregistered;
 
         /// <summary>
-        /// 注册一个无参数的命令处理程序
+        /// 委托执行时发生的事件
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        public event EventHandler<ActionTableEventArgs> Executing;
+
+        /// <summary>
+        /// 微弱执行后发生的事件
+        /// </summary>
+        public event EventHandler<ActionTableEventArgs> Executed;
+
+        /// <summary>
+        /// 注册一个无参数的委托处理程序
+        /// </summary>
+        /// <param name="key">委托的唯一标识符</param>
         /// <param name="action">要注册的无参数委托</param>
         public void Register(string key, Action action, TaskPriority priority = TaskPriority.Normal)
         {
@@ -51,9 +55,9 @@ namespace IT.Tangdao.Framework.Commands
         }
 
         /// <summary>
-        /// 注册一个带ActionResult参数的命令处理程序
+        /// 注册一个带ActionResult参数的委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="key">委托的唯一标识符</param>
         /// <param name="action">要注册的带ActionResult参数的委托</param>
         public void Register(string key, Action<ActionResult> action, TaskPriority priority = TaskPriority.Normal)
         {
@@ -80,13 +84,13 @@ namespace IT.Tangdao.Framework.Commands
             });
 
             // 触发注册事件
-            OnActionChanged(ActionTableEventType.Registered, key, commandEntry.Priority);
+            OnRegisterChanged(ActionTableEventType.Registered, key, commandEntry.Priority);
         }
 
         /// <summary>
-        /// 根据命令键获取无参数的命令处理程序
+        /// 根据委托键获取无参数的委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="key">委托的唯一标识符</param>
         /// <returns>如果找到匹配的处理程序则返回该委托，否则返回null</returns>
         public Action GetHandler(string key)
         {
@@ -94,9 +98,9 @@ namespace IT.Tangdao.Framework.Commands
         }
 
         /// <summary>
-        /// 根据命令键获取带ActionResult参数的命令处理程序
+        /// 根据委托键获取带ActionResult参数的委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="key">委托的唯一标识符</param>
         /// <returns>如果找到匹配的处理程序则返回该委托，否则返回null</returns>
         public Action<ActionResult> GetResultHandler(string key)
         {
@@ -104,9 +108,9 @@ namespace IT.Tangdao.Framework.Commands
         }
 
         /// <summary>
-        /// 移除指定键的无参数命令处理程序
+        /// 移除指定键的无参数委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="key">委托的唯一标识符</param>
         /// <returns>如果成功移除则返回true，否则返回false</returns>
         public bool UnregisterHandler(string key)
         {
@@ -115,7 +119,7 @@ namespace IT.Tangdao.Framework.Commands
                 if (_map.TryRemove(key, out _))
                 {
                     // 触发移除事件
-                    OnActionChanged(ActionTableEventType.Unregistered, key, e.Priority);
+                    OnUnregisterChanged(ActionTableEventType.Unregistered, key, e.Priority);
                     return true;
                 }
             }
@@ -123,9 +127,9 @@ namespace IT.Tangdao.Framework.Commands
         }
 
         /// <summary>
-        /// 移除指定键的带ActionResult参数的命令处理程序
+        /// 移除指定键的带ActionResult参数的委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="key">委托的唯一标识符</param>
         /// <returns>如果成功移除则返回true，否则返回false</returns>
         public bool UnregisterResultHandler(string key)
         {
@@ -134,7 +138,7 @@ namespace IT.Tangdao.Framework.Commands
                 if (_map.TryRemove(key, out _))
                 {
                     // 触发移除事件
-                    OnActionChanged(ActionTableEventType.Unregistered, key, e.Priority);
+                    OnUnregisterChanged(ActionTableEventType.Unregistered, key, e.Priority);
                     return true;
                 }
             }
@@ -142,9 +146,9 @@ namespace IT.Tangdao.Framework.Commands
         }
 
         /// <summary>
-        /// 检查是否已注册指定键的无参数命令处理程序
+        /// 检查是否已注册指定键的无参数委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="key">委托的唯一标识符</param>
         /// <returns>如果已注册则返回true，否则返回false</returns>
         public bool IsHandlerRegistered(string key)
         {
@@ -152,9 +156,9 @@ namespace IT.Tangdao.Framework.Commands
         }
 
         /// <summary>
-        /// 检查是否已注册指定键的带ActionResult参数的命令处理程序
+        /// 检查是否已注册指定键的带ActionResult参数的委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="key">委托的唯一标识符</param>
         /// <returns>如果已注册则返回true，否则返回false</returns>
         public bool IsResultHandlerRegistered(string key)
         {
@@ -165,76 +169,119 @@ namespace IT.Tangdao.Framework.Commands
         /// 获取快照信息
         /// </summary>
         /// <returns></returns>
-        public IReadOnlyDictionary<string, IActionInfo> GetActionInfo()
+        IReadOnlyDictionary<string, IActionInfo> IActionTable.GetActionInfo()
         {
             return _map.ToDictionary(kv => kv.Key, kv => (IActionInfo)kv.Value);
         }
 
         /// <summary>
-        /// 执行指定键的无参数命令处理程序
+        /// 执行指定键的无参数委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
+        /// <param name="key">委托的唯一标识符</param>
         public void Execute(string key)
         {
             if (_map.TryGetValue(key, out var entry) && entry.Action != null)
             {
                 // 触发执行前事件
-                OnActionChanged(ActionTableEventType.Executing, key, entry.Priority);
+                OnExecutingChanged(ActionTableEventType.Executing, key, entry.Priority);
 
-                // 执行命令
+                // 执行委托
                 entry.Action.Invoke();
 
                 // 触发执行后事件
-                OnActionChanged(ActionTableEventType.Executed, key, entry.Priority);
+                OnExecutedChanged(ActionTableEventType.Executed, key, entry.Priority);
             }
         }
 
         /// <summary>
-        /// 执行指定键的带ActionResult参数的命令处理程序
+        /// 执行指定键的带ActionResult参数的委托处理程序
         /// </summary>
-        /// <param name="key">命令的唯一标识符</param>
-        /// <param name="result">传递给命令处理程序的ActionResult实例</param>
+        /// <param name="key">委托的唯一标识符</param>
+        /// <param name="result">传递给委托处理程序的ActionResult实例</param>
         public void Execute(string key, ActionResult result)
         {
             if (_map.TryGetValue(key, out var entry) && entry.ActionResult != null)
             {
                 // 触发执行前事件
-                OnActionChanged(ActionTableEventType.Executing, key, entry.Priority);
+                OnExecutingChanged(ActionTableEventType.Executing, key, entry.Priority);
 
-                // 执行命令
+                // 执行委托
                 entry.ActionResult.Invoke(result);
 
                 // 触发执行后事件
-                OnActionChanged(ActionTableEventType.Executed, key, entry.Priority);
+                OnExecutedChanged(ActionTableEventType.Executed, key, entry.Priority);
             }
         }
 
         /// <summary>
-        /// 命令条目，包含委托和优先级信息
+        /// 触发注册委托事件
+        /// </summary>
+        /// <param name="eventType">事件类型</param>
+        /// <param name="key">委托的唯一标识符</param>
+        /// <param name="priority">委托优先级</param>
+        private void OnRegisterChanged(ActionTableEventType eventType, string key, TaskPriority priority)
+        {
+            Registered?.Invoke(this, new ActionTableEventArgs(eventType, key, priority));
+        }
+
+        /// <summary>
+        /// 触发移除委托事件
+        /// </summary>
+        /// <param name="eventType">事件类型</param>
+        /// <param name="key">委托的唯一标识符</param>
+        /// <param name="priority">委托优先级</param>
+        private void OnUnregisterChanged(ActionTableEventType eventType, string key, TaskPriority priority)
+        {
+            Unregistered?.Invoke(this, new ActionTableEventArgs(eventType, key, priority));
+        }
+
+        /// <summary>
+        /// 触发执行委托事件
+        /// </summary>
+        /// <param name="eventType">事件类型</param>
+        /// <param name="key">委托的唯一标识符</param>
+        /// <param name="priority">委托优先级</param>
+        private void OnExecutingChanged(ActionTableEventType eventType, string key, TaskPriority priority)
+        {
+            Executing?.Invoke(this, new ActionTableEventArgs(eventType, key, priority));
+        }
+
+        /// <summary>
+        /// 触发注册事件
+        /// </summary>
+        /// <param name="eventType">事件类型</param>
+        /// <param name="key">委托的唯一标识符</param>
+        /// <param name="priority">委托优先级</param>
+        private void OnExecutedChanged(ActionTableEventType eventType, string key, TaskPriority priority)
+        {
+            Executed?.Invoke(this, new ActionTableEventArgs(eventType, key, priority));
+        }
+
+        /// <summary>
+        /// 委托条目，包含委托和优先级信息
         /// </summary>
         private class ActionEntry : IActionInfo
         {
             /// <summary>
-            /// 命令委托
+            /// 委托委托
             /// </summary>
             public Action Action { get; }
 
             /// <summary>
-            /// 命令委托
+            /// 委托委托
             /// </summary>
             public Action<ActionResult> ActionResult { get; }
 
             /// <summary>
-            /// 命令优先级
+            /// 委托优先级
             /// </summary>
             public TaskPriority Priority { get; }
 
             /// <summary>
             /// 构造函数
             /// </summary>
-            /// <param name="action">命令委托</param>
-            /// <param name="priority">命令优先级</param>
-            /// <param name="sender">发送者信息</param>
+            /// <param name="action">委托委托</param>
+            /// <param name="priority">委托优先级</param>
             public ActionEntry(Action action, TaskPriority priority)
             {
                 Action = action;

@@ -92,7 +92,7 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
         /// </summary>
         /// <param name="logItem">日志项</param>
         /// <returns>格式化后的日志行</returns>
-        private string FormatLogLine(LogItem logItem)
+        private static string FormatLogLine(LogItem logItem)
         {
             string message = $"{logItem.Message}{Environment.NewLine}";
             if (logItem.Exception != null)

@@ -77,7 +77,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <param name="type"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static TypeParents Parents(this Type type)
+        public static TypeMetadata Parents(this Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
 
@@ -88,7 +88,7 @@ namespace IT.Tangdao.Framework.Extensions
                             .OrderBy(i => i.Name)        // 给个稳定序
                             .ToList();
 
-            return new TypeParents(baseType, allIfs);
+            return new TypeMetadata(baseType, allIfs);
         }
 
         /// <summary>

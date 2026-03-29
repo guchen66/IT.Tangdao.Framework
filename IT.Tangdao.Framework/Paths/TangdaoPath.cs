@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Ambient;
 
 namespace IT.Tangdao.Framework.Paths
 {
@@ -42,14 +43,14 @@ namespace IT.Tangdao.Framework.Paths
         public AbsolutePath GetThisFilePath([CallerFilePath] string filePath = null)
         {
             // 为每个文件路径创建唯一缓存键，避免不同文件共享同一缓存
-            return _cache.GetOrAdd($"__file_{filePath}", _ => new AbsolutePath(filePath));
+            return _cache.GetOrAdd($"{AmbientKeys.File}{filePath}", _ => new AbsolutePath(filePath));
         }
 
         /// <summary>
         /// 解决方案根目录（带缓存）
         /// </summary>
         /// <returns>解决方案根目录的绝对路径</returns>
-        public AbsolutePath GetSolutionDirectory() => _cache.GetOrAdd("__sln", _ => InternalGetSolutionDirectory());
+        public AbsolutePath GetSolutionDirectory() => _cache.GetOrAdd($"{AmbientKeys.Solution}", _ => InternalGetSolutionDirectory());
 
         /// <summary>
         /// 内部获取解决方案目录的方法
@@ -67,7 +68,7 @@ namespace IT.Tangdao.Framework.Paths
         /// <returns>当前工作目录的绝对路径</returns>
         public AbsolutePath GetCurrentDirectory()
             // 缓存当前工作目录，避免频繁调用 Directory.GetCurrentDirectory()
-            => _cache.GetOrAdd("__current", _ => new AbsolutePath(Directory.GetCurrentDirectory()));
+            => _cache.GetOrAdd($"{AmbientKeys.Current}", _ => new AbsolutePath(Directory.GetCurrentDirectory()));
 
         /// <summary>
         /// 临时目录（带缓存）
@@ -75,7 +76,7 @@ namespace IT.Tangdao.Framework.Paths
         /// <returns>系统临时目录的绝对路径</returns>
         public AbsolutePath GetTempDirectory()
             // 缓存临时目录，避免频繁调用 Path.GetTempPath()
-            => _cache.GetOrAdd("__temp", _ => new AbsolutePath(Path.GetTempPath()));
+            => _cache.GetOrAdd($"{AmbientKeys.Temp}", _ => new AbsolutePath(Path.GetTempPath()));
 
         /// <summary>
         /// 环境变量目录（可 CI）
@@ -162,13 +163,11 @@ namespace IT.Tangdao.Framework.Paths
         public AbsolutePath GetDateDirectory(string basePath = null)
         {
             // 使用当前日期和基础路径生成唯一缓存键
-            var cacheKey = string.IsNullOrEmpty(basePath) ? "__date_dir" : $"__date_dir_{basePath}";
+            var cacheKey = string.IsNullOrEmpty(basePath) ? $"{AmbientKeys.DateDirectory}" : $"{AmbientKeys.DateDirectory}_${basePath}";
 
             return _cache.GetOrAdd(cacheKey, _ =>
             {
-                var baseDir = string.IsNullOrEmpty(basePath)
-                    ? GetCurrentDirectory()
-                    : new AbsolutePath(basePath);
+                var baseDir = string.IsNullOrEmpty(basePath) ? GetCurrentDirectory() : new AbsolutePath(basePath);
 
                 DateTime now = DateTime.Now;
                 return baseDir
@@ -185,12 +184,12 @@ namespace IT.Tangdao.Framework.Paths
         /// <param name="fileSuffix">文件名后缀</param>
         /// <param name="extension">文件扩展名，默认为 xlsx</param>
         /// <returns>基于日期的文件路径</returns>
-        public AbsolutePath GetDateFilePath(string basePath = null, string fileSuffix = "", string extension = "xlsx")
+        public AbsolutePath GetDateFilePath(string basePath = null, string fileSuffix = "", string extension = "txt")
         {
             // 使用当前日期、基础路径、文件后缀和扩展名生成唯一缓存键
             var cacheKey = string.IsNullOrEmpty(basePath)
-                ? $"__date_file_{fileSuffix}_{extension}"
-                : $"__date_file_{basePath}_{fileSuffix}_{extension}";
+                ? $"{AmbientKeys.DateFile}{fileSuffix}_{extension}"
+                : $"{AmbientKeys.DateFile}_{basePath}_{fileSuffix}_{extension}";
 
             return _cache.GetOrAdd(cacheKey, _ =>
             {
