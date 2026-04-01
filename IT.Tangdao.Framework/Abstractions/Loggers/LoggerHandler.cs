@@ -67,7 +67,7 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
             // 根据输出方式输出日志
             if (logItem.OutputType.HasFlag(LogOutputType.File))
             {
-                var file = Path.Combine(LogPathConfig.Root, "Tangdao.log");
+                var file = Path.Combine(LogEnsureConfig.Root, "Tangdao.log");
                 var writer = GetWriter(file);
                 await writer.WriteAsync(logLine);
             }

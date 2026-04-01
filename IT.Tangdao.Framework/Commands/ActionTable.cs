@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Abstractions.Contracts;
-using IT.Tangdao.Framework.EventArg;
+using IT.Tangdao.Framework.Events;
 
 namespace IT.Tangdao.Framework.Commands
 {

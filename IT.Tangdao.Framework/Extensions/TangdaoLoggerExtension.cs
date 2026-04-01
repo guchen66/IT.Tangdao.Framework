@@ -33,7 +33,7 @@ namespace IT.Tangdao.Framework.Extensions
 
             try
             {
-                var root = LogPathConfig.Root;
+                var root = LogEnsureConfig.Root;
                 var dir = string.IsNullOrEmpty(category) ? root : Path.Combine(root, category);
                 Directory.CreateDirectory(dir);
 

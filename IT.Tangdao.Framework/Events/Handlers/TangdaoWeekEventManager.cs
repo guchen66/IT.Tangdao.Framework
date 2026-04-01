@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using IT.Tangdao.Framework.EventArg;
+using IT.Tangdao.Framework.Events;
 
 namespace IT.Tangdao.Framework.Events.Handlers
 {

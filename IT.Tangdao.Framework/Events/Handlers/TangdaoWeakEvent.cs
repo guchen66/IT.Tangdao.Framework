@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.EventArg;
+﻿using IT.Tangdao.Framework.Events;
 using System.Windows;
 using System;
 using IT.Tangdao.Framework.DaoTasks;

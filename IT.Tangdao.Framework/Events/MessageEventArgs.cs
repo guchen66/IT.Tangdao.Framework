@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IT.Tangdao.Framework.Events
+{
+    public class MessageEventArgs : TangdaoEventArgs
+    {
+        public string Message { get; set; }
+
+        public MessageEventArgs(string message)
+        {
+            Message = message;
+        }
+    }
+}

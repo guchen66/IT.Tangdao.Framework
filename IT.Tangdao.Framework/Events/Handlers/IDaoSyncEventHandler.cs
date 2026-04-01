@@ -9,7 +9,7 @@ namespace IT.Tangdao.Framework.Events
     /// <summary>
     /// 同步事件处理程序接口
     /// </summary>
-    public interface IDaoSyncEventHandler<in TEvent> where TEvent : DaoEventBase
+    public interface IDaoSyncEventHandler<in TEvent> where TEvent : EventBase
     {
         void Handle(TEvent @event);
     }

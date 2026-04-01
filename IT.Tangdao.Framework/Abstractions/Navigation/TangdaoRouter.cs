@@ -1,6 +1,6 @@
 ﻿using IT.Tangdao.Framework.Events;
 using IT.Tangdao.Framework.Ioc;
-using IT.Tangdao.Framework.EventArg;
+using IT.Tangdao.Framework.Events;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

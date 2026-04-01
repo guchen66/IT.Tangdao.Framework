@@ -1,6 +1,6 @@
 ﻿using IT.Tangdao.Framework.Configurations;
 using IT.Tangdao.Framework.Enums;
-using IT.Tangdao.Framework.EventArg;
+using IT.Tangdao.Framework.Events;
 using IT.Tangdao.Framework.Helpers;
 using System;
 using System.Collections.Concurrent;

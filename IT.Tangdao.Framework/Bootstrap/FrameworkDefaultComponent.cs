@@ -37,7 +37,7 @@ namespace IT.Tangdao.Framework.Bootstrap
             container.AddTangdaoSingleton<IActionTable, ActionTable>();
 
             //注册事件聚合器
-            container.AddTangdaoSingleton<IDaoEventAggregator, DaoEventAggregator>();
+            container.AddTangdaoSingleton<IEventAggregator, EventAggregator>();
 
             //注册导航服务
 

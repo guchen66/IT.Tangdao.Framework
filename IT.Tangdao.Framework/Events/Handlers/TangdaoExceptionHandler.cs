@@ -87,7 +87,7 @@ namespace IT.Tangdao.Framework.Events
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        Process.Start(LogPathConfig.Root);
+                        Process.Start(LogEnsureConfig.Root);
                     }
 
                     break;

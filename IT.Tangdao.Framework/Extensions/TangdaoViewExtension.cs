@@ -84,7 +84,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <typeparam name="TWindow"></typeparam>
         /// <param name="viewModel"></param>
         /// <returns></returns>
-        public static object RunChildWindowCallBackListAsync<TWindow>(this DaoViewModelBase viewModel, string name, Action<TWindow> action) where TWindow : Window, new()
+        public static object RunChildWindowCallBackListAsync<TWindow>(this ViewModelBase viewModel, string name, Action<TWindow> action) where TWindow : Window, new()
         {
             //获取当前窗体 正在活动的窗体
             var activeWindow1 = Application.Current.MainWindow;
