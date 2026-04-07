@@ -14,6 +14,14 @@ namespace IT.Tangdao.Framework.Templates
         /// <summary>
         /// 日志格式
         /// </summary>
-        public string LoggerFormat { get; set; }
+        public LogContent LoggerFormat { get; set; }
+
+        public enum LogContent
+        {
+            None = 0,
+            Xml,
+            Json,
+            Txt
+        }
     }
 }

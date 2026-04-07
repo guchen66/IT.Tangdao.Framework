@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Abstractions.Contracts;
+using IT.Tangdao.Framework.Ioc;
 
 namespace IT.Tangdao.Framework.Abstractions.Notices
 {
@@ -19,11 +20,6 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// 懒加载单例实例
         /// </summary>
         private static readonly Lazy<NoticeMediator> _instance = new Lazy<NoticeMediator>(() => new NoticeMediator());
-
-        /// <summary>
-        /// 日志记录器，用于记录通知系统的运行情况
-        /// </summary>
-        private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(NoticeMediator));
 
         /// <summary>
         /// 获取通知中介者的单例实例
@@ -73,7 +69,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// <param name="reg">通知注册表，包含观察者类型信息</param>
         /// <returns>创建的通知观察者实例，如果创建失败则返回null</returns>
         private static INoticeObserver DefaultResolve(IRegistrationTypeEntry reg)
-            => TangdaoApplication.Provider.GetService(reg.RegisterType) as INoticeObserver;
+            => ServiceLocator.Default.GetService(reg.RegisterType) as INoticeObserver;
 
         /// <summary>
         /// 设置服务解析器，用于自定义观察者实例的创建逻辑
@@ -81,7 +77,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// </summary>
         /// <param name="resolver">自定义的服务解析器委托</param>
         /// <exception cref="ArgumentNullException">当resolver为null时抛出</exception>
-        public static void SetResolver(Func<IRegistrationTypeEntry, INoticeObserver> resolver)
+        public void SetResolver(Func<IRegistrationTypeEntry, INoticeObserver> resolver)
         {
             if (resolver == null) throw new ArgumentNullException(nameof(resolver));
             lock (_staticLock)
@@ -123,14 +119,12 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
                 if (isNew)
                 {
                     _observers.Add(observer);
-                    Logger.Debug($"注册了新的通知观察者: {observer.GetType().FullName}，当前观察者数量: {_observers.Count}");
                 }
 
                 // 更新Key到观察者的映射
                 if (!string.IsNullOrWhiteSpace(key))
                 {
                     _keyToObserverMap[key] = observer;
-                    Logger.Debug($"更新观察者映射: Key='{key}' -> Observer='{observer.GetType().FullName}'");
                 }
             }
         }
@@ -158,7 +152,6 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
 
                     // 清理NoticeResolver中的缓存
                     Resolver.RemoveFromCache(observer.GetType());
-                    Logger.Debug($"成功注销观察者: {observer.GetType().FullName}，当前观察者数量: {_observers.Count}");
                 }
             }
         }
@@ -181,7 +174,6 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
 
                     // 清理NoticeResolver中的缓存
                     Resolver.RemoveFromCache(observer.GetType());
-                    Logger.Debug($"成功通过Key注销观察者: {key} ({observer.GetType().FullName})，当前观察者数量: {_observers.Count}");
                 }
             }
         }
@@ -204,8 +196,6 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
                     _keyToObserverMap.Clear();
                     // 清空NoticeResolver中的缓存
                     Resolver.ClearCache();
-
-                    Logger.Debug($"成功注销所有观察者，共注销 {count} 个观察者");
                 }
             }
         }
@@ -258,7 +248,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// <param name="observer">要通知的观察者实例</param>
         /// <param name="context">通知上下文，包含通知的相关信息</param>
         /// <exception cref="ArgumentNullException">当observer或context为null时抛出</exception>
-        public static void NotifySingle(INoticeObserver observer, NoticeContext context)
+        public void NotifySingle(INoticeObserver observer, NoticeContext context)
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));
             if (context == null) throw new ArgumentNullException(nameof(context));

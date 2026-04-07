@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Abstractions.Contracts;
 using IT.Tangdao.Framework.Common;
+using IT.Tangdao.Framework.Ioc;
 
 namespace IT.Tangdao.Framework.Abstractions.Navigation
 {
@@ -48,7 +49,7 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
             // 默认实现：尝试使用内置IOC容器解析
             try
             {
-                return TangdaoApplication.Provider.GetKeyedService<ITangdaoPage>(route.Key);
+                return ServiceLocator.Default.GetKeyedService<ITangdaoPage>(route.Key);
             }
             catch (Exception)
             {
@@ -66,7 +67,7 @@ namespace IT.Tangdao.Framework.Abstractions.Navigation
         {
             try
             {
-                return TangdaoApplication.Provider.GetService<TPage>();
+                return ServiceLocator.Default.GetService<TPage>();
             }
             catch (Exception)
             {

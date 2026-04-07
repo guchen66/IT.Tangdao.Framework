@@ -24,8 +24,8 @@ namespace IT.Tangdao.Framework.Configurations
         public TangdaoLogInterval LogInterval { get; set; }
 
         /// <summary>
-        /// 日志模板
+        /// 日志格式
         /// </summary>
-        public TangdaoLogTemplate Template { get; set; }
+        public LogFormat LogFormat { get; set; }
     }
 }

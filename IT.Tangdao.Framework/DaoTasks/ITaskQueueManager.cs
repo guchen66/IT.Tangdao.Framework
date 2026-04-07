@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Enums;
+using IT.Tangdao.Framework.Abstractions.Results;
 
 namespace IT.Tangdao.Framework.DaoTasks
 {
     /// <summary>
     /// 增强的任务服务接口
     /// </summary>
-    public interface ITaskQueueManager : ITaskQueue
+    public interface ITaskQueueManager : IDisposable
     {
         /// <summary>
         /// 添加任务
@@ -43,6 +44,12 @@ namespace IT.Tangdao.Framework.DaoTasks
         /// </summary>
         /// <returns>任务列表</returns>
         List<ITaskItem> GetAllTasks();
+
+        /// <summary>
+        /// 空的任务
+        /// </summary>
+        /// <returns></returns>
+        Task Empty();
 
         /// <summary>
         /// 获取任务数量

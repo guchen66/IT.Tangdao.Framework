@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Configurations;
 using IT.Tangdao.Framework.Enums;
 
 namespace IT.Tangdao.Framework.Abstractions.Loggers
@@ -52,43 +54,43 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
 
         protected TangdaoLogger(Type type) => _type = type;
 
-        public void Fatal(string message, Exception e = null)
+        public void Fatal(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Fatal)
             {
-                EnqueueLog(LoggerLevel.Fatal, message, e);
+                EnqueueLog(LoggerLevel.Fatal, message, e, caller, file, line);
             }
         }
 
-        public void Error(string message, Exception e = null)
+        public void Error(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Error)
             {
-                EnqueueLog(LoggerLevel.Error, message, e);
+                EnqueueLog(LoggerLevel.Error, message, e, caller, file, line);
             }
         }
 
-        public void Warning(string message, Exception e = null)
+        public void Warning(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Warning)
             {
-                EnqueueLog(LoggerLevel.Warning, message, e);
+                EnqueueLog(LoggerLevel.Warning, message, e, caller, file, line);
             }
         }
 
-        public void Info(string message, Exception e = null)
+        public void Info(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Info)
             {
-                EnqueueLog(LoggerLevel.Info, message, e);
+                EnqueueLog(LoggerLevel.Info, message, e, caller, file, line);
             }
         }
 
-        public void Debug(string message, Exception e = null)
+        public void Debug(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Debug)
             {
-                EnqueueLog(LoggerLevel.Debug, message, e);
+                EnqueueLog(LoggerLevel.Debug, message, e, caller, file, line);
             }
         }
 
@@ -98,11 +100,11 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
         /// <param name="message">日志消息</param>
         /// <param name="e">异常信息</param>
         /// <returns>异步任务</returns>
-        public Task FatalAsync(string message, Exception e = null)
+        public Task FatalAsync(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Fatal)
             {
-                EnqueueLog(LoggerLevel.Fatal, message, e);
+                EnqueueLog(LoggerLevel.Fatal, message, e, caller, file, line);
             }
             return Task.CompletedTask;
         }
@@ -113,11 +115,11 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
         /// <param name="message">日志消息</param>
         /// <param name="e">异常信息</param>
         /// <returns>异步任务</returns>
-        public Task ErrorAsync(string message, Exception e = null)
+        public Task ErrorAsync(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Error)
             {
-                EnqueueLog(LoggerLevel.Error, message, e);
+                EnqueueLog(LoggerLevel.Error, message, e, caller, file, line);
             }
             return Task.CompletedTask;
         }
@@ -128,11 +130,11 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
         /// <param name="message">日志消息</param>
         /// <param name="e">异常信息</param>
         /// <returns>异步任务</returns>
-        public Task WarningAsync(string message, Exception e = null)
+        public Task WarningAsync(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Warning)
             {
-                EnqueueLog(LoggerLevel.Warning, message, e);
+                EnqueueLog(LoggerLevel.Warning, message, e, caller, file, line);
             }
             return Task.CompletedTask;
         }
@@ -143,11 +145,11 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
         /// <param name="message">日志消息</param>
         /// <param name="e">异常信息</param>
         /// <returns>异步任务</returns>
-        public Task InfoAsync(string message, Exception e = null)
+        public Task InfoAsync(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Info)
             {
-                EnqueueLog(LoggerLevel.Info, message, e);
+                EnqueueLog(LoggerLevel.Info, message, e, caller, file, line);
             }
             return Task.CompletedTask;
         }
@@ -158,11 +160,11 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
         /// <param name="message">日志消息</param>
         /// <param name="e">异常信息</param>
         /// <returns>异步任务</returns>
-        public Task DebugAsync(string message, Exception e = null)
+        public Task DebugAsync(string message, Exception e = null, [CallerMemberName] string caller = null, [CallerFilePath] string file = null, [CallerLineNumber] int line = 0)
         {
             if (LoggerLevel <= LoggerLevel.Debug)
             {
-                EnqueueLog(LoggerLevel.Debug, message, e);
+                EnqueueLog(LoggerLevel.Debug, message, e, caller, file, line);
             }
             return Task.CompletedTask;
         }
@@ -173,15 +175,24 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
         /// <param name="level">日志级别</param>
         /// <param name="message">日志消息</param>
         /// <param name="e">异常信息</param>
-        private void EnqueueLog(LoggerLevel level, string message, Exception e)
+        /// <param name="caller">调用方法</param>
+        /// <param name="file">文件路径</param>
+        /// <param name="line">行号</param>
+        private void EnqueueLog(LoggerLevel level, string message, Exception e, string caller = null, string file = null, int line = 0)
         {
-            var logItem = new LoggerHandler.LogItem
+            var logItem = new LogItem
             {
                 Level = level,
                 Message = message,
                 Exception = e,
+                ExceptionMessage = e?.Message,
+                ExceptionStackTrace = e?.StackTrace,
                 Type = _type,
-                OutputType = OutputType
+                TypeName = _type.FullName,
+                OutputType = OutputType,
+                Caller = caller,
+                File = file != null ? System.IO.Path.GetFileName(file) : null,
+                Line = line
             };
             LoggerHandler.EnqueueLog(logItem);
         }

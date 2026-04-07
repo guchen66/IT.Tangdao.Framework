@@ -184,7 +184,7 @@ Provider.GetService<T>();
 ###### 4-3、服务定位器
 
 ```C#
-TangdaoApplication.Provider.GetService(viewModel);
+ServiceLocator.Default.GetService(viewModel);
 ```
 
 #### 5、插件式注册
@@ -640,13 +640,55 @@ TangdaoContext.GetTangdaoParameter<T>();
  Logger.WriteLocal($"注册成功");
 ```
 
+会在桌面生成Tangdaos目录的日志
+
 也可以自定义配置日志的路径：
 
 下面代码放在启动项即可
 
 ```C#
- LogPathConfig.SetRoot($@"{IgniteInfoLocation.Logger}");
+ LogEntry logEntry = new LogEntry()
+ {
+     SaveDir = ConfigurationManager.AppSettings["LoggerPath"],
+     LogFormat = LogFormat.Json
+ };
+ LogEnsureConfig.Load(logEntry);
 ```
+
+现在日志有三种格式，txt文本，xml文本和json文本
+
+主要的设计模式及其应用：
+
+###### 1. 静态工厂模式
+- 应用 ： TangdaoLogger.Get<TType>() 方法
+- 作用 ：通过类型获取对应的日志记录器实例，简化了日志记录器的创建过程
+###### 2. 单例模式
+- 应用 ： TangdaoLogger 类使用 ConcurrentDictionary 缓存每个类型的日志记录器实例
+- 作用 ：确保每个类型只有一个日志记录器实例，减少内存占用
+###### 3. 策略模式
+- 应用 ： LogHelper.SaveLogToFile 方法根据不同的日志格式采用不同的保存策略
+- 作用 ：支持多种日志格式（XML、JSON、文本），易于扩展新的格式
+###### 4. 生产者-消费者模式
+- 应用 ： LoggerHandler 使用 BlockingCollection 来处理日志
+- 作用 ：实现了日志的异步处理，提高了应用性能
+###### 5. 扩展方法模式
+- 应用 ： TangdaoLoggerExtension 提供了 WriteLocal 扩展方法
+- 作用 ：为 ITangdaoLogger 接口添加了额外的功能，而不需要修改接口定义
+###### 6. 配置模式
+- 应用 ：使用 LogEnsureConfig 来加载和管理日志配置
+- 作用 ：集中管理日志配置，提供了统一的配置接口
+###### 7. 命令模式
+- 应用 ： LogItem 类封装了日志的所有信息
+- 作用 ：将日志信息封装成一个对象，便于在系统中传递和处理
+###### 8. 依赖注入模式
+- 应用 ： TangdaoLogger.LoggerFactory 属性
+- 作用 ：允许用户自定义日志记录器的创建方式，提高了系统的灵活性
+###### 9. 枚举策略模式
+- 应用 ：使用 LogFormat 枚举代替字符串常量
+- 作用 ：提高了类型安全性，避免了字符串拼写错误
+###### 10. 序列化模式
+- 应用 ：使用 TangdaoXmlSerializer 和 JsonConvert 进行序列化
+- 作用 ：支持不同格式的日志输出，便于日志的存储和分析
 
 #### 10、自动生成器
 

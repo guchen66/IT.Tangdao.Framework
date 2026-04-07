@@ -10,7 +10,7 @@ namespace IT.Tangdao.Framework.Extensions
     public static class NoticeMediatorExtension
     {
         /// <summary>
-        /// 链式入口：持有工厂，后续可继续 .Add().Add()...
+        /// 广播通知链式注册
         /// </summary>
         public static NoticeBuilder ChainRegister(this NoticeMediator mediator)
             => new NoticeBuilder(mediator, mediator.Resolver);

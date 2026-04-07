@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Configurations;
+using IT.Tangdao.Framework.Helpers;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -25,6 +26,8 @@ namespace IT.Tangdao.Framework.Extensions
         /// </summary>
         private static readonly ConcurrentDictionary<string, object> _fileLocks = new ConcurrentDictionary<string, object>();
 
+        internal static List<LogEntry> configs = new List<LogEntry>();
+
         public static void WriteLocal(this ITangdaoLogger logger, string message, string category = null, [CallerMemberName] string caller = null,
             [CallerFilePath] string file = null,
             [CallerLineNumber] int line = 0)
@@ -33,22 +36,34 @@ namespace IT.Tangdao.Framework.Extensions
 
             try
             {
-                var root = LogEnsureConfig.Root;
+                var root = LogHelper.GetLogRoot();
                 var dir = string.IsNullOrEmpty(category) ? root : Path.Combine(root, category);
                 Directory.CreateDirectory(dir);
 
-                var fileName = $"{DateTime.Now:yyyyMMdd}.log";
+                var extension = LogHelper.GetLogExtension();
+                var fileName = $"{DateTime.Now:yyyyMMdd}{extension}";
                 var filePath = Path.Combine(dir, fileName);
 
-                var logLine = $"ThreadId:{Environment.CurrentManagedThreadId} {DateTime.Now:HH:mm:ss.fff}  [{caller}]  ({Path.GetFileName(file)}:{line})  " +
-                             $"{logger.GetType().FullName}  {message}{Environment.NewLine}";
+                // 创建日志项
+                var logItem = new LogItem
+                {
+                    Time = DateTime.Now,
+                    ThreadId = Environment.CurrentManagedThreadId,
+                    Level = IT.Tangdao.Framework.Enums.LoggerLevel.Info,
+                    Type = logger.GetType(),
+                    Caller = caller,
+                    File = Path.GetFileName(file),
+                    Line = line,
+                    Message = message
+                };
 
                 // 获取或创建针对该文件路径的锁
                 var fileLock = _fileLocks.GetOrAdd(filePath, path => new object());
 
                 lock (fileLock)
                 {
-                    File.AppendAllText(filePath, logLine);
+                    // 使用LogHelper保存日志
+                    LogHelper.SaveLogToFile(logItem, filePath);
                 }
             }
             catch (Exception ex)

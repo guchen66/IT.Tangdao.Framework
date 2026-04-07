@@ -183,7 +183,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// </summary>
         private static class ProviderHolder
         {
-            internal static ITangdaoProvider Provider => TangdaoApplication.Provider;
+            internal static ITangdaoProvider Provider => ServiceLocator.Default;
         }
 
         #endregion 私有工厂实现

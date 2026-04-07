@@ -6,19 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Templates;
 using IT.Tangdao.Framework.Enums;
+using IT.Tangdao.Framework.Extensions;
+using Newtonsoft.Json;
 
 namespace IT.Tangdao.Framework.Configurations
 {
     /// <summary>
     /// 日志配置确保类
     /// </summary>
+    /// <summary>
+    /// 日志配置确保类
+    /// </summary>
     public static class LogEnsureConfig
     {
-        private static string _savePath;
-        private static TangdaoLogInterval _logInterval;
-        private static TangdaoLogTemplate _logTemplate;
-        private static readonly object _lock = new object();
-
         /// <summary>
         /// 加载日志配置
         /// </summary>
@@ -28,53 +28,19 @@ namespace IT.Tangdao.Framework.Configurations
             if (logEntry == null)
                 throw new ArgumentNullException(nameof(logEntry));
 
-            lock (_lock)
-            {
-                if (!string.IsNullOrWhiteSpace(logEntry.SaveDir))
-                {
-                    _ = Directory.CreateDirectory(logEntry.SaveDir);
-                    _savePath = logEntry.SaveDir;
-                }
-
-                _logInterval = logEntry.LogInterval;
-                _logTemplate = logEntry.Template;
-            }
+            TangdaoLoggerExtension.configs.Add(logEntry);
         }
 
         /// <summary>
-        /// 获取日志根目录
+        /// 加载多个日志配置
         /// </summary>
-        public static string Root
+        /// <param name="logEntries">日志配置项列表</param>
+        public static void Load(List<LogEntry> logEntries)
         {
-            get
-            {
-                if (_savePath == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_savePath == null)
-                            _savePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "TangdaoLogs");
-                        _ = Directory.CreateDirectory(_savePath);
-                    }
-                }
-                return _savePath;
-            }
-        }
+            if (logEntries == null)
+                throw new ArgumentNullException(nameof(logEntries));
 
-        /// <summary>
-        /// 获取日志间隔
-        /// </summary>
-        public static TangdaoLogInterval LogInterval
-        {
-            get { return _logInterval; }
-        }
-
-        /// <summary>
-        /// 获取日志模板
-        /// </summary>
-        public static TangdaoLogTemplate LogTemplate
-        {
-            get { return _logTemplate; }
+            TangdaoLoggerExtension.configs.AddRange(logEntries);
         }
     }
 }
