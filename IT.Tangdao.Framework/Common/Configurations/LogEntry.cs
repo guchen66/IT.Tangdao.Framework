@@ -27,5 +27,10 @@ namespace IT.Tangdao.Framework.Configurations
         /// 日志格式
         /// </summary>
         public LogFormat LogFormat { get; set; }
+
+        /// <summary>
+        /// 开启日期目录
+        /// </summary>
+        public bool UseDatePath { get; set; }
     }
 }

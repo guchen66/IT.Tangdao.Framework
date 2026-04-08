@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Configurations;
-using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Extensions;
 using Newtonsoft.Json;
+using IT.Tangdao.Framework.Enums;
 
 namespace IT.Tangdao.Framework.Helpers
 {
@@ -75,7 +75,7 @@ namespace IT.Tangdao.Framework.Helpers
             if (extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
             {
                 // 保存为XML格式
-                TangdaoXmlSerializer.SerializeXMLToFile(logItem, filePath);
+                SaveAsXml(logItem, filePath);
             }
             else if (extension.Equals(".json", StringComparison.OrdinalIgnoreCase))
             {
@@ -90,12 +90,71 @@ namespace IT.Tangdao.Framework.Helpers
         }
 
         /// <summary>
-        /// 以JSON格式保存日志
+        /// 以XML格式保存日志（追加模式）
+        /// </summary>
+        private static void SaveAsXml(LogItem logItem, string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                // 文件不存在，创建包含单个日志项的列表
+                var logItems = new List<LogItem> { logItem };
+                TangdaoXmlSerializer.SerializeXMLToFile(logItems, filePath);
+            }
+            else
+            {
+                // 文件存在，需要追加
+                try
+                {
+                    // 读取现有内容并反序列化为列表
+                    string existingXml = File.ReadAllText(filePath);
+                    var logItems = TangdaoXmlSerializer.Deserialize<List<LogItem>>(existingXml) ?? new List<LogItem>();
+
+                    // 添加新的日志项
+                    logItems.Add(logItem);
+
+                    // 序列化回文件
+                    TangdaoXmlSerializer.SerializeXMLToFile(logItems, filePath);
+                }
+                catch (Exception)
+                {
+                    // 如果出错，创建新的列表
+                    var logItems = new List<LogItem> { logItem };
+                    TangdaoXmlSerializer.SerializeXMLToFile(logItems, filePath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 以JSON格式保存日志（追加模式）
+        /// </summary>
+        // <summary>
+        /// 以JSON格式保存日志（追加模式）
         /// </summary>
         private static void SaveAsJson(LogItem logItem, string filePath)
         {
-            string json = JsonConvert.SerializeObject(logItem, Formatting.Indented);
-            File.WriteAllText(filePath, json);
+            if (!File.Exists(filePath))
+            {
+                // 文件不存在，创建包含单个日志项的数组
+                var logItems = new List<LogItem> { logItem };
+                TangdaoJsonFileHelper.SaveJsonData(logItems, filePath);
+            }
+            else
+            {
+                // 文件存在，读取现有数组并添加新项
+                try
+                {
+                    string existingJson = File.ReadAllText(filePath);
+                    var logItems = JsonConvert.DeserializeObject<List<LogItem>>(existingJson) ?? new List<LogItem>();
+                    logItems.Add(logItem);
+                    TangdaoJsonFileHelper.SaveJsonData(logItems, filePath);
+                }
+                catch (Exception)
+                {
+                    // 如果出错，创建新的数组
+                    var logItems = new List<LogItem> { logItem };
+                    TangdaoJsonFileHelper.SaveJsonData(logItems, filePath);
+                }
+            }
         }
 
         /// <summary>

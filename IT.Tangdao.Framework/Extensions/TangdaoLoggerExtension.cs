@@ -11,6 +11,7 @@ using IT.Tangdao.Framework.Abstractions;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Configurations;
 using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Paths;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -37,12 +38,30 @@ namespace IT.Tangdao.Framework.Extensions
             try
             {
                 var root = LogHelper.GetLogRoot();
-                var dir = string.IsNullOrEmpty(category) ? root : Path.Combine(root, category);
-                Directory.CreateDirectory(dir);
+                string filePath;
 
-                var extension = LogHelper.GetLogExtension();
-                var fileName = $"{DateTime.Now:yyyyMMdd}{extension}";
-                var filePath = Path.Combine(dir, fileName);
+                // 检查是否使用日期路径
+                var config = LogHelper.GetConfigList().LastOrDefault();
+                if (config != null && config.UseDatePath)
+                {
+                    // 使用日期路径
+                    var extension = LogHelper.GetLogExtension();
+                    var extensionWithoutDot = extension.TrimStart('.');
+                    var basePath = string.IsNullOrEmpty(category) ? root : Path.Combine(root, category);
+                    var fileName = $"{DateTime.Now.ToString("yyMMdd")}_Local.{extensionWithoutDot}";
+                    var datePath = TangdaoPath.Instance.DateFrom(basePath).BuildFile(fileName);
+                    filePath = datePath.Value;
+                }
+                else
+                {
+                    // 使用普通路径
+                    var dir = string.IsNullOrEmpty(category) ? root : Path.Combine(root, category);
+                    Directory.CreateDirectory(dir);
+
+                    var extension = LogHelper.GetLogExtension();
+                    var fileName = $"{DateTime.Now:yyyyMMdd}{extension}";
+                    filePath = Path.Combine(dir, fileName);
+                }
 
                 // 创建日志项
                 var logItem = new LogItem
@@ -51,6 +70,7 @@ namespace IT.Tangdao.Framework.Extensions
                     ThreadId = Environment.CurrentManagedThreadId,
                     Level = IT.Tangdao.Framework.Enums.LoggerLevel.Info,
                     Type = logger.GetType(),
+                    TypeName = logger.GetType().FullName,
                     Caller = caller,
                     File = Path.GetFileName(file),
                     Line = line,

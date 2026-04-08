@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Configurations;
 using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Paths;
 
 namespace IT.Tangdao.Framework.Abstractions.Loggers
 {
@@ -77,9 +79,24 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
             {
                 var root = LogHelper.GetLogRoot();
                 var extension = LogHelper.GetLogExtension();
-                var fileName = $"Tangdao{extension}";
-                var filePath = Path.Combine(root, fileName);
+                string filePath;
 
+                // 检查是否使用日期路径
+                var config = LogHelper.GetConfigList().LastOrDefault();
+                if (config != null && config.UseDatePath)
+                {
+                    // 使用日期路径
+                    var extensionWithoutDot = extension.TrimStart('.');
+                    var fileName = $"{DateTime.Now.ToString("yyMMdd")}_Tangdao.{extensionWithoutDot}";
+                    var datePath = TangdaoPath.Instance.DateFrom(root).BuildFile(fileName);
+                    filePath = datePath.Value;
+                }
+                else
+                {
+                    // 使用普通路径
+                    var fileName = $"Tangdao{extension}";
+                    filePath = Path.Combine(root, fileName);
+                }
                 // 使用LogHelper保存日志
                 LogHelper.SaveLogToFile(logItem, filePath);
             }
