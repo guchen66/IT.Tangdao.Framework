@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IT.Tangdao.Framework.Abstractions.Notices
+namespace IT.Tangdao.Framework.Abstractions.Messaging
 {
     /// <summary>
     /// 泛型通知发布者实现，支持发布特定类型的通知给订阅者

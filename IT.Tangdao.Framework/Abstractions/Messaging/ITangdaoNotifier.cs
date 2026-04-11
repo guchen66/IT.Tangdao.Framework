@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Events;
 
-namespace IT.Tangdao.Framework.Abstractions.Notices
+namespace IT.Tangdao.Framework.Abstractions.Messaging
 {
     /// <summary>
-    /// 通知发布者接口，用于发布通用通知给订阅者
+    /// 通知接收器接口，用于接收发布者发送的通用通知
     /// </summary>
-    public interface ITangdaoPublisher : ITangdaoPublisher<object>, IDisposable
+    public interface ITangdaoNotifier : ITangdaoNotifier<object>, IDisposable
     {
     }
 }

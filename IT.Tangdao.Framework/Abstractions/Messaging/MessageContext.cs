@@ -4,20 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Enums;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
-namespace IT.Tangdao.Framework.Abstractions.Notices
+namespace IT.Tangdao.Framework.Abstractions.Messaging
 {
     /// <summary>
     /// 通知上下文，包含通知的相关信息
     /// 用于在通知中介者和观察者之间传递数据
     /// </summary>
-    public sealed class NoticeContext
+    public sealed class MessageContext : IMessageContext
     {
-        /// <summary>
-        /// 通知标签，用于标识通知的类型或来源
-        /// </summary>
-        public string Tag { get; set; }
-
         /// <summary>
         /// 当前通知状态
         /// </summary>
@@ -49,6 +45,11 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         public object Sender { get; set; }
 
         /// <summary>
+        /// 通知标签，用于标识通知的类型或来源
+        /// </summary>
+        public IRegistrationTypeEntry RegistrationTypeEntry { get; set; }
+
+        /// <summary>
         /// 通知的优先级
         /// </summary>
         public TaskPriority Priority { get; set; } = TaskPriority.Normal;
@@ -56,7 +57,7 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// <summary>
         /// 初始化通知上下文实例
         /// </summary>
-        public NoticeContext()
+        public MessageContext()
         {
             CurrentTime = DateTime.Now;
         }
@@ -64,11 +65,9 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// <summary>
         /// 初始化通知上下文实例
         /// </summary>
-        /// <param name="tag">通知标签，用于标识通知的类型或来源</param>
         /// <param name="currentState">当前通知状态</param>
-        public NoticeContext(string tag, bool currentState)
+        public MessageContext(bool currentState)
         {
-            Tag = tag;
             CurrentState = currentState;
             CurrentTime = DateTime.Now;
         }
@@ -76,12 +75,10 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// <summary>
         /// 初始化通知上下文实例
         /// </summary>
-        /// <param name="tag">通知标签</param>
         /// <param name="currentState">当前状态</param>
         /// <param name="message">通知消息</param>
-        public NoticeContext(string tag, bool currentState, string message)
+        public MessageContext(bool currentState, string message)
         {
-            Tag = tag;
             CurrentState = currentState;
             CurrentTime = DateTime.Now;
             Message = message;
@@ -90,13 +87,11 @@ namespace IT.Tangdao.Framework.Abstractions.Notices
         /// <summary>
         /// 初始化通知上下文实例
         /// </summary>
-        /// <param name="tag">通知标签</param>
         /// <param name="currentState">当前状态</param>
         /// <param name="message">通知消息</param>
         /// <param name="data">额外数据</param>
-        public NoticeContext(string tag, bool currentState, string message, object data)
+        public MessageContext(bool currentState, string message, object data)
         {
-            Tag = tag;
             CurrentState = currentState;
             CurrentTime = DateTime.Now;
             Message = message;
