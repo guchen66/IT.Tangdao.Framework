@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Events;
-using IT.Tangdao.Framework.Events;
 
 namespace IT.Tangdao.Framework.Helpers
 {

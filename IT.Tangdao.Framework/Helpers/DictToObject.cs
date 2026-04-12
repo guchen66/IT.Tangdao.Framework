@@ -44,7 +44,7 @@ namespace IT.Tangdao.Framework.Helpers
 
             // 2. 全局表里有
             if (TypeParser.Table.TryGetValue(targetType, out var parser))
-                return parser(input);
+                return parser(input, null);
 
             // 3. 类型自带 TypeConverter
             var tc = TypeDescriptor.GetConverter(targetType);

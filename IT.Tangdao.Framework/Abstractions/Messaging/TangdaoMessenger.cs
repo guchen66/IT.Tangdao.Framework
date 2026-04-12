@@ -220,7 +220,7 @@ namespace IT.Tangdao.Framework.Abstractions.Messaging
         /// 向所有注册的观察者发送消息
         /// </summary>
         /// <param name="context">消息上下文，包含消息的相关信息</param>
-        public void NotifyAllObservers(MessageContext context)
+        public void NotifyObservers(MessageContext context)
         {
             InternalNotifyObservers(context);
         }
@@ -266,6 +266,64 @@ namespace IT.Tangdao.Framework.Abstractions.Messaging
                 MessageEventArgs messageEventArgs = new MessageEventArgs(context);
                 observer.MessageIntercepted?.Invoke(observer, messageEventArgs);
                 observer.UpdateMessage(context);
+            }
+        }
+
+        /// <summary>
+        /// 根据条件筛选第一个匹配的观察者并发送消息
+        /// </summary>
+        /// <param name="predicate">筛选观察者的条件委托</param>
+        /// <param name="context">消息上下文，包含消息的相关信息</param>
+        /// <exception cref="ArgumentNullException">当predicate或context为null时抛出</exception>
+        public void NotifyFirstObserver(Func<IMessageObserver, bool> predicate, MessageContext context)
+        {
+            if (predicate == null) TangdaoGuards.ThrowIfNull(nameof(predicate));
+            if (context == null) TangdaoGuards.ThrowIfNull(nameof(context));
+
+            List<IMessageObserver> observersCopy;
+            lock (_lock)
+            {
+                observersCopy = new List<IMessageObserver>(_observers);
+            }
+
+            var targetObserver = observersCopy.FirstOrDefault(predicate); // 锁外执行
+            if (targetObserver != null)
+            {
+                if (targetObserver.IsReceive)
+                {
+                    MessageEventArgs messageEventArgs = new MessageEventArgs(context);
+                    targetObserver.MessageIntercepted?.Invoke(targetObserver, messageEventArgs);
+                    targetObserver.UpdateMessage(context);
+                }
+            }
+            // 如果找不到匹配的观察者，静默处理（与NotifyObserverByKey保持一致）
+        }
+
+        /// <summary>
+        /// 根据条件筛选所有匹配的观察者并发送消息
+        /// </summary>
+        /// <param name="predicate">筛选观察者的条件委托</param>
+        /// <param name="context">消息上下文，包含消息的相关信息</param>
+        public void NotifyObservers(Func<IMessageObserver, bool> predicate, MessageContext context)
+        {
+            if (predicate == null) TangdaoGuards.ThrowIfNull(nameof(predicate));
+            if (context == null) TangdaoGuards.ThrowIfNull(nameof(context));
+
+            List<IMessageObserver> observersCopy;
+            lock (_lock)
+            {
+                observersCopy = new List<IMessageObserver>(_observers);
+            }
+
+            // 直接遍历快照，不额外创建过滤后的列表
+            foreach (var observer in observersCopy)
+            {
+                if (predicate(observer) && observer.IsReceive)
+                {
+                    MessageEventArgs messageEventArgs = new MessageEventArgs(context);
+                    observer.MessageIntercepted?.Invoke(observer, messageEventArgs);
+                    observer.UpdateMessage(context);
+                }
             }
         }
 

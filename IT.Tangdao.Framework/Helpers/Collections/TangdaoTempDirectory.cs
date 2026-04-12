@@ -21,8 +21,6 @@ namespace IT.Tangdao.Framework.Helpers
         public TangdaoTempDirectory(string tempDirectoryPath)
         {
             Path = tempDirectoryPath;
-
-            // Clean up the path, in order to make sure the folder is empty.
             DeleteFileSystemEntry(Path);
 
             Directory.CreateDirectory(Path);
