@@ -22,6 +22,17 @@ namespace IT.Tangdao.Framework.Extensions
         }
 
         /// <summary>
+        /// 根据AbsolutePath创建文件,注意每次都是新的文件
+        /// </summary>
+        public static AbsolutePath CreateNewFile(this AbsolutePath sourcePath, string fileName = null)
+        {
+            // 检查是否是文件路径（包含扩展名），如果是则取其目录
+            string filePath = sourcePath.Value;
+            filePath.CreateNewFile(fileName);
+            return sourcePath.Combine(fileName);   // 继续链式调用
+        }
+
+        /// <summary>
         /// 根据AbsolutePath创建文件（如果不存在）
         /// </summary>
         public static AbsolutePath CreateFile(this AbsolutePath sourcePath, string fileName = null)

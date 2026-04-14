@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.Threading
 {
     /// <summary>
-    /// 线程本地存储 + 异步上下文双兼容，0 字典查找路径
+    /// 专为UI线程开发的简单传输链路
+    /// 禁止UI-Task，Task-Task传输
     /// 支持值类型零 GC，引用类型 CallContext 回落
     /// </summary>
-    public class AmbientContext
+    public class UIAmbientContext
     {
         /* ---------- FastTLS：值类型专用，0 字典 ---------- */
 

@@ -144,28 +144,6 @@ namespace IT.Tangdao.Framework.Abstractions.Loggers
         }
 
         /// <summary>
-        /// 获取文件写入器
-        /// </summary>
-        /// <param name="filePath">文件路径</param>
-        /// <returns>文件写入器</returns>
-        private StreamWriter GetWriter(string filePath)
-        {
-            return _fileWriters.GetOrAdd(filePath, fp =>
-            {
-                // 确保目录存在
-                var directory = Path.GetDirectoryName(fp);
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-                return new StreamWriter(fp, append: true, encoding: Encoding.UTF8, bufferSize: 4096)
-                {
-                    AutoFlush = true   // 每条日志立即落盘，进程崩溃也不丢
-                };
-            });
-        }
-
-        /// <summary>
         /// 释放资源
         /// </summary>
         public void Dispose()

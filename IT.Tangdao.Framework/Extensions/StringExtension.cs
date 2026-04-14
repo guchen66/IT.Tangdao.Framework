@@ -321,7 +321,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 创建空文件（如果文件已存在则清空内容）
         /// </summary>
-        public static string CreateFile(this string filePath, string fileName = null)
+        public static string CreateNewFile(this string filePath, string fileName = null)
         {
             // 智能组合路径
             string fullPath = string.IsNullOrEmpty(fileName)
@@ -333,6 +333,30 @@ namespace IT.Tangdao.Framework.Extensions
             using (File.Create(fullPath))
             {
                 // 文件会被创建并立即关闭
+            }
+
+            return fullPath; // 返回最终的文件路径
+        }
+
+        /// <summary>
+        /// 创建文件
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static string CreateFile(this string filePath, string fileName = null)
+        {
+            // 智能组合路径
+            string fullPath = string.IsNullOrEmpty(fileName)
+                ? filePath  // filePath 已经是完整文件路径
+                : Path.Combine(filePath, fileName);  // filePath 是目录，fileName 是文件名
+
+            fullPath.CreateParentDirectory(); // 确保目录存在
+
+            // 不使用 File.Create，改用 OpenOrCreate 模式
+            using (File.Open(fullPath, FileMode.OpenOrCreate))
+            {
+                // 文件不存在时创建，存在时打开（不会覆盖）
             }
 
             return fullPath; // 返回最终的文件路径
