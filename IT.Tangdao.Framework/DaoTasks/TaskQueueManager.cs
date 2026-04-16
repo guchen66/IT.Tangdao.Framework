@@ -11,34 +11,32 @@ using System.Collections.Concurrent;
 
 namespace IT.Tangdao.Framework.DaoTasks
 {
+    /// <summary>
+    /// 任务队列管理器
+    /// 负责任务的添加、取消、查询等队列管理操作
+    /// 遵循单一职责原则，仅关注任务队列的管理
+    /// </summary>
     public class TaskQueueManager : ITaskQueueManager
     {
-        private static readonly ConcurrentDictionary<Guid, TaskItem> _taskDict = new ConcurrentDictionary<Guid, TaskItem>();
-        private static readonly TangdaoTaskHandler _taskHandler = new TangdaoTaskHandler();
+        /// <summary>
+        /// 任务字典，用于快速查找任务
+        /// </summary>
+        private readonly Dictionary<Guid, TaskItem> _taskDict = new Dictionary<Guid, TaskItem>();
 
         /// <summary>
-        /// 暂停任务处理
+        /// 任务队列，按优先级排序
         /// </summary>
-        public void Pause()
-        {
-            _taskHandler.Pause();
-        }
+        private readonly List<TaskItem> _taskQueue = new List<TaskItem>();
 
         /// <summary>
-        /// 恢复任务处理
+        /// 线程安全锁
         /// </summary>
-        public void Resume()
-        {
-            _taskHandler.Resume();
-        }
+        private readonly object _lock = new object();
 
         /// <summary>
-        /// 停止任务处理
+        /// 是否已释放
         /// </summary>
-        public void Stop()
-        {
-            _taskHandler.Stop();
-        }
+        private bool _isDisposed = false;
 
         /// <summary>
         /// 添加任务
@@ -56,8 +54,20 @@ namespace IT.Tangdao.Framework.DaoTasks
                 throw new ArgumentNullException(nameof(action));
 
             var taskItem = new TaskItem(name, priority, action);
-            _taskDict.TryAdd(taskItem.Id, taskItem);
-            _taskHandler.EnqueueTask(taskItem);
+
+            lock (_lock)
+            {
+                _taskDict.Add(taskItem.Id, taskItem);
+
+                int insertIndex = 0;
+                foreach (var item in _taskQueue)
+                {
+                    if (item.Priority < taskItem.Priority)
+                        break;
+                    insertIndex++;
+                }
+                _taskQueue.Insert(insertIndex, taskItem);
+            }
 
             return taskItem.Id;
         }
@@ -77,7 +87,6 @@ namespace IT.Tangdao.Framework.DaoTasks
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
 
-            // UI任务包装，确保在UI线程执行
             Func<CancellationToken, Task<object>> uiAction = async (token) =>
             {
                 return await TangdaoTaskScheduler.ExecuteAsync(async (task) =>
@@ -96,16 +105,19 @@ namespace IT.Tangdao.Framework.DaoTasks
         /// <returns>是否取消成功</returns>
         public bool CancelTask(Guid taskId)
         {
-            if (_taskDict.TryGetValue(taskId, out var taskItem))
+            lock (_lock)
             {
-                // 只能取消未开始的任务
-                if (taskItem.Status == TaskStatus.Created)
+                if (_taskDict.TryGetValue(taskId, out var taskItem))
                 {
-                    // 从字典中移除
-                    _taskDict.TryRemove(taskId, out _);
-                    // 标记为取消状态
-                    taskItem.Status = TaskStatus.Canceled;
-                    return true;
+                    if (taskItem.Status == TaskStatus.Created)
+                    {
+                        _taskDict.Remove(taskId);
+                        _taskQueue.RemoveAll(t => t.Id == taskId);
+                        taskItem.Status = TaskStatus.Canceled;
+                        taskItem.CompletedTime = DateTime.Now;
+                        taskItem.TCS.TrySetResult(taskItem);
+                        return true;
+                    }
                 }
             }
             return false;
@@ -117,7 +129,10 @@ namespace IT.Tangdao.Framework.DaoTasks
         /// <returns>任务列表</returns>
         public List<ITaskItem> GetAllTasks()
         {
-            return _taskDict.Values.ToList<ITaskItem>();
+            lock (_lock)
+            {
+                return _taskDict.Values.Cast<ITaskItem>().ToList();
+            }
         }
 
         /// <summary>
@@ -126,7 +141,10 @@ namespace IT.Tangdao.Framework.DaoTasks
         /// <returns>任务数量</returns>
         public int GetTaskCount()
         {
-            return _taskDict.Count;
+            lock (_lock)
+            {
+                return _taskDict.Count;
+            }
         }
 
         /// <summary>
@@ -139,11 +157,70 @@ namespace IT.Tangdao.Framework.DaoTasks
         }
 
         /// <summary>
+        /// 出队一个任务（内部方法）
+        /// </summary>
+        /// <returns>任务项，如果队列为空则返回null</returns>
+        internal TaskItem Dequeue()
+        {
+            lock (_lock)
+            {
+                if (_taskQueue.Count == 0)
+                    return null;
+
+                var taskItem = _taskQueue[0];
+                _taskQueue.RemoveAt(0);
+                return taskItem;
+            }
+        }
+
+        /// <summary>
+        /// 检查队列是否为空（内部方法）
+        /// </summary>
+        /// <returns>是否为空</returns>
+        internal bool IsEmpty()
+        {
+            lock (_lock)
+            {
+                return _taskQueue.Count == 0;
+            }
+        }
+
+        /// <summary>
+        /// 根据ID获取任务（内部方法）
+        /// </summary>
+        /// <param name="taskId">任务ID</param>
+        /// <returns>任务项</returns>
+        internal TaskItem GetTask(Guid taskId)
+        {
+            lock (_lock)
+            {
+                _taskDict.TryGetValue(taskId, out var taskItem);
+                return taskItem;
+            }
+        }
+
+        /// <summary>
         /// 释放资源
         /// </summary>
         public void Dispose()
         {
-            _taskHandler.Dispose();
+            if (!_isDisposed)
+            {
+                _isDisposed = true;
+                lock (_lock)
+                {
+                    foreach (var task in _taskDict.Values)
+                    {
+                        if (task.Status == TaskStatus.Created)
+                        {
+                            task.Status = TaskStatus.Canceled;
+                            task.CompletedTime = DateTime.Now;
+                        }
+                    }
+                    _taskDict.Clear();
+                    _taskQueue.Clear();
+                }
+            }
         }
     }
 }

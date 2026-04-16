@@ -26,6 +26,10 @@ UI线程直接传输类UIAmbientContext、
 
 任务调度器TangdaoTaskScheduler、
 
+异步任务流ITangdaoQueueManager
+
+异步任务控制器ITangdaoController
+
 弱引用事件TangdaoWeakEvent
 
 委托表传输机制IActionTable，复合委托表CompositeActionTable

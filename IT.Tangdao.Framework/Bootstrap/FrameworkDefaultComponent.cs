@@ -42,6 +42,10 @@ namespace IT.Tangdao.Framework.Bootstrap
 
             //注册异步任务流
             container.AddTangdaoSingleton<ITaskQueueManager, TaskQueueManager>();
+
+            //注册异步任务器
+            container.AddTangdaoSingleton<ITaskController, TaskController>();
+
             //注册导航服务
             container.AddTangdaoTransientFactory<ITangdaoRouterResolver>(provider =>
             {

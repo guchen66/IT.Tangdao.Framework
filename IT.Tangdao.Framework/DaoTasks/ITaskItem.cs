@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Enums;
+using IT.Tangdao.Framework.Abstractions.Results;
 
 namespace IT.Tangdao.Framework.DaoTasks
 {
@@ -50,11 +51,11 @@ namespace IT.Tangdao.Framework.DaoTasks
         /// <summary>
         /// 任务执行结果
         /// </summary>
-        object Result { get; }
+        IResponseResult<ITaskItem> Result { get; }
 
         /// <summary>
-        /// 任务异常信息
+        /// 回调一个任务
         /// </summary>
-        Exception Exception { get; }
+        TaskCompletionSource<ITaskItem> TCS { get; }
     }
 }
