@@ -4,6 +4,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
+using System.Windows.Data;
+using System.Windows.Threading;
 
 namespace IT.Tangdao.Framework.Helpers
 {
@@ -80,7 +83,7 @@ namespace IT.Tangdao.Framework.Helpers
             }
 
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(
-                NotifyCollectionChangedAction.Add, list));
+                NotifyCollectionChangedAction.Reset, list));
             OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
             OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
         }

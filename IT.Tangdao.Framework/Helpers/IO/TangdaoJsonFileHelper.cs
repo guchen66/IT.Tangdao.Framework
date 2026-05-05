@@ -58,9 +58,10 @@ namespace IT.Tangdao.Framework.Helpers
         /// <summary>
         /// 获取根目录下的指定json文件并打开查看内容
         /// </summary>
-        /// <param name="resourceName"></param>
+        /// <param name="resourceName">json文件名称，带json后缀</param>
+        /// <param name="selector">读取对象的Key值</param>
         /// <returns></returns>
-        public static async Task<string> GetDecisionJsonAsync(string resourceName, string key)
+        public static async Task<string> GetJsonContentAsync(string resourceName, string selector)
         {
             var path = DirectoryHelper.SelectDirectoryByName(resourceName);
             using (var stream = File.OpenText(path))
@@ -70,7 +71,7 @@ namespace IT.Tangdao.Framework.Helpers
                 JsonTextReader reader = new JsonTextReader(stream);
                 JObject jsonObject = (JObject)await JToken.ReadFromAsync(reader);
 
-                string json = jsonObject[key].ToString();
+                string json = jsonObject[selector].ToString();
                 return json;
             }
         }
@@ -78,10 +79,10 @@ namespace IT.Tangdao.Framework.Helpers
         /// <summary>
         /// 获取根目录下的指定json文件并打开查看内容
         /// </summary>
-        /// <param name="resourceName">资源名称</param>
-        /// <param name="key">JSON对象中的键</param>
-        /// <returns>JSON对象中对应键的值</returns>
-        public static string GetDecisionJson(string resourceName, string key)
+        /// <param name="resourceName">json文件名称，带json后缀</param>
+        /// <param name="selector">读取对象值</param>
+        /// <returns></returns>
+        public static string GetJsonContent(string resourceName, string selector)
         {
             var path = DirectoryHelper.SelectDirectoryByName(resourceName);
 
@@ -97,7 +98,7 @@ namespace IT.Tangdao.Framework.Helpers
                 JsonTextReader reader = new JsonTextReader(stream);
                 JObject jsonObject = (JObject)JToken.ReadFrom(reader);
 
-                string json = jsonObject[key]?.ToString();
+                string json = jsonObject[selector]?.ToString();
                 return json;
             }
         }

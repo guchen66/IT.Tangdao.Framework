@@ -17,6 +17,7 @@ using IT.Tangdao.Framework.Ioc;
 using System.ComponentModel;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.DaoTasks;
+using System.Windows.Forms;
 
 namespace IT.Tangdao.Framework
 {
@@ -26,17 +27,21 @@ namespace IT.Tangdao.Framework
     /// 2. 自动解析主窗口并显示；
     /// 3. 全局 Provider 可后续解析 ViewModel、DialogService...
     /// </summary>
-    public abstract class TangdaoApplication : Application
+    [AssemblyScan]
+    public class TangdaoApplication : TangdaoApplicationBase
     {
         protected static ITangdaoProvider Provider { get; private set; }
+
+        //框架测试阶段，先保留日志记录
         private static readonly ITangdaoLogger Logger = TangdaoLogger.Get(typeof(TangdaoApplication));
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
+            InitializeInternal();
             // ① 仅在此处Build
-            var builder = new TangdaoContainerBuilder();
+            var builder = TangdaoContainerBuilder.Current;
             RegisterServices(builder.Container);   // 暴露 Container 仅此时有效
 
             //发现Module模块，注册模块
@@ -51,6 +56,7 @@ namespace IT.Tangdao.Framework
             // ② 留给子类做额外配置
             Configure();
             AsyncTaskHandler(Provider.GetService<ITaskQueueManager>()).ConfigureAwait(false);
+
             // ③ 创建主窗口
             var window = CreateWindow();
             // ② 摆烂时走约定
@@ -64,9 +70,12 @@ namespace IT.Tangdao.Framework
             }
         }
 
-        /// 仅在此方法内使用 Container，不要持有字段引用
-        protected abstract void RegisterServices(ITangdaoContainer container);
+        private void InitializeInternal()
+        {
+            TangdaoContainerBuilder.SetContainerExtension(CreateContainer);
+        }
 
+        /// 仅在此方法内使用 Container，不要持有字段引用
         protected virtual void Configure()
         {
         }
@@ -75,10 +84,6 @@ namespace IT.Tangdao.Framework
         /// 异步任务处理器
         /// </summary>
         /// <returns></returns>
-        protected virtual async Task AsyncTaskHandler(ITaskQueueManager taskQueueManager)
-        {
-            await taskQueueManager.Empty();
-        }
 
         /// <summary>
         /// 子类**可重写**。
@@ -116,17 +121,8 @@ namespace IT.Tangdao.Framework
             var shell = (Window)Provider.GetService(shellType)
                      ?? throw new InvalidOperationException($"主窗口 {shellType.Name} 未注册。");
 
-            // 自动绑定窗口的 ViewModel
-            AutoBindViewModel(shell, shellType);
+            ViewToViewModelLocator.AutoBindViewModel(shell, shellType);
             return shell;
-        }
-
-        /// <summary>
-        /// 自动为 View 绑定对应的 ViewModel
-        /// </summary>
-        private static void AutoBindViewModel(DependencyObject view, Type viewType)
-        {
-            ViewToViewModelLocator.AutoBindViewModel(view, viewType, Provider);
         }
 
         /// <summary>

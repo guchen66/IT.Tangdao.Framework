@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Abstractions.Loggers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -6,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Common.Reflection;
+using IT.Tangdao.Framework.Extensions;
 
 namespace IT.Tangdao.Framework.Helpers
 {
@@ -141,6 +144,8 @@ namespace IT.Tangdao.Framework.Helpers
                               && !a.Name.StartsWith("netstandard", StringComparison.OrdinalIgnoreCase))
                   .ToArray();
 
+        public static ITangdaoLogger Logger = TangdaoLogger.Get<TangdaoApplication>();
+
         /// <summary>
         /// 返回要搜索的程序集列表；子类可重写过滤
         /// </summary>
@@ -161,7 +166,7 @@ namespace IT.Tangdao.Framework.Helpers
             foreach (var a in loaded)
                 if (IsFrameworkCandidate(a))
                     set.Add(a);
-
+            ReflectionServerContextExtension.assemblies = set;
             return set;
 
             // 本地函数：过滤规则

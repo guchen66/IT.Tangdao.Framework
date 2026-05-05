@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Abstractions
 {
-    [AutoConfigure(1)]
     internal sealed class TangdaoJsonConfig : ITangdaoConfig
     {
         public ITangdaoOrder Order => new TangdaoOrder(1);   // 也可以直接用属性，双重保险

@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.Attributes
 {
     /// <summary>
-    /// 自动装配的元数据，程序启动自动执行查询根目录下的配置文件
+    /// 可扫描程序集，，标注特性后可主动扫描指定程序集，进行操作
+    /// 操作1：对此程序集下的View，ViewModel进行绑定
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    internal sealed class AutoConfigureAttribute : Attribute
+    public sealed class AssemblyScanAttribute : Attribute
     {
     }
 }

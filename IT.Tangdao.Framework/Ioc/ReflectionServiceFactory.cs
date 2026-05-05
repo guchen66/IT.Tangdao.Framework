@@ -40,11 +40,11 @@ namespace IT.Tangdao.Framework.Ioc
             var args = new List<object>();
             foreach (var param in ctor.GetParameters())
             {
-                // 对于基本类型和字符串，不尝试从容器解析，使用默认值
-                if (param.ParameterType.IsPrimitive || param.ParameterType == typeof(string) || param.ParameterType == typeof(Type))
+                // 对于值类型（包括枚举）、字符串和 Type，不尝试从容器解析，使用默认值
+                if (IsValueTypeWithDefault(param.ParameterType))
                 {
-                    // 使用参数的默认值
-                    var defaultValue = param.HasDefaultValue ? param.DefaultValue : null;
+                    // 使用参数的默认值，值类型确保使用 default(T) 而非 null
+                    var defaultValue = param.HasDefaultValue ? param.DefaultValue : GetDefaultValue(param.ParameterType);
                     args.Add(defaultValue);
                 }
                 else
@@ -62,6 +62,38 @@ namespace IT.Tangdao.Framework.Ioc
 
             // ④ 创建实例
             return ctor.Invoke(args.ToArray());
+        }
+
+        /// <summary>
+        /// 判断类型是否为需要使用默认值的类型
+        /// 包括：值类型（含枚举）、字符串、Type
+        /// </summary>
+        /// <param name="type">要判断的类型</param>
+        /// <returns>是否为需要使用默认值的类型</returns>
+        private bool IsValueTypeWithDefault(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            return type.IsValueType || type == typeof(string) || type == typeof(Type);
+        }
+
+        /// <summary>
+        /// 获取类型的默认值
+        /// 对于值类型返回 default(T)，对于引用类型返回 null
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns>类型的默认值</returns>
+        private object GetDefaultValue(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            if (type.IsValueType)
+            {
+                return Activator.CreateInstance(type);
+            }
+            return null;
         }
     }
 }

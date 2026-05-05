@@ -12,5 +12,15 @@ namespace IT.Tangdao.Framework.Attributes
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class AutoWireViewAttribute : Attribute
     {
+        public string ViewName { get; set; }
+
+        public AutoWireViewAttribute(string viewName)
+        {
+            ViewName = viewName;
+        }
+
+        public AutoWireViewAttribute()
+        {
+        }
     }
 }
