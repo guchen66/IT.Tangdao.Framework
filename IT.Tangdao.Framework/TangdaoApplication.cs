@@ -18,6 +18,7 @@ using System.ComponentModel;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.DaoTasks;
 using System.Windows.Forms;
+using IT.Tangdao.Framework.Windows;
 
 namespace IT.Tangdao.Framework
 {
@@ -55,6 +56,7 @@ namespace IT.Tangdao.Framework
 
             // ② 留给子类做额外配置
             Configure();
+            ConfigureWindow();
             AsyncTaskHandler(Provider.GetService<ITaskQueueManager>()).ConfigureAwait(false);
 
             // ③ 创建主窗口
@@ -78,6 +80,13 @@ namespace IT.Tangdao.Framework
         /// 仅在此方法内使用 Container，不要持有字段引用
         protected virtual void Configure()
         {
+        }
+
+        private void ConfigureWindow()
+        {
+            var build = Provider.GetService<IWindowBuilder>();
+            ConfigureWindowPipe(build);
+            build.ExecuteAll();
         }
 
         /// <summary>

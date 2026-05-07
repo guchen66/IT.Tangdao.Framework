@@ -14,6 +14,7 @@ using IT.Tangdao.Framework.Abstractions.Navigation;
 using IT.Tangdao.Framework.Commands;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.DaoTasks;
+using IT.Tangdao.Framework.Windows;
 
 namespace IT.Tangdao.Framework.Bootstrap
 {
@@ -45,6 +46,12 @@ namespace IT.Tangdao.Framework.Bootstrap
 
             //注册异步任务器
             container.AddTangdaoSingleton<ITaskController, TaskController>();
+
+            //登录窗体以及Window管理通道
+            container.AddTangdaoSingleton<IWindowBuilder, WindowBuilder>();
+            container.AddTangdaoSingleton<IWindowPipeline, WindowPipeline>();
+            container.AddTangdaoSingleton<IWindowGuard, LoginSignGuard>();
+            container.AddTangdaoSingleton<WindowAction>();
 
             //注册导航服务
             container.AddTangdaoTransientFactory<ITangdaoRouterResolver>(provider =>

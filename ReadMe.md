@@ -38,6 +38,8 @@ UI线程直接传输类UIAmbientContext、
 
 快速静态命令MinidaoCommand
 
+Window管道，WindowPipe
+
 观察者模式事件通知TangdaoMessenger
 
 拦截器、在开发中
@@ -1511,6 +1513,19 @@ TangdaoMessenger.Instance.Unregister();
  public void Open()
  {
      _handlerTable.GetHandler("Open").Invoke();
+ }
+```
+
+#### 22、Window管道
+
+```C#
+ public override void ConfigureWindowPipe(IWindowBuilder windowBuilder)
+ {
+     windowBuilder.UseGuard<LoginSignGuard>(rules =>
+     {
+         rules.UseLogin<LoginView>();
+         rules.SetCancel(true);
+     });
  }
 ```
 

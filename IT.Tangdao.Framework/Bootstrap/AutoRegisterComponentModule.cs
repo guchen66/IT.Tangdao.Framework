@@ -18,6 +18,7 @@ using IT.Tangdao.Framework.Threading;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Mvvm;
 using System.Runtime.CompilerServices;
+using IT.Tangdao.Framework.Windows;
 
 namespace IT.Tangdao.Framework.Bootstrap
 {
@@ -30,6 +31,7 @@ namespace IT.Tangdao.Framework.Bootstrap
 
         public override void OnInitialized(ITangdaoProvider provider)
         {
+            provider.GetService<WindowAction>();
         }
     }
 }

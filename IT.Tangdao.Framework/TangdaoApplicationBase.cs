@@ -9,6 +9,7 @@ using System.Windows;
 using IT.Tangdao.Framework.Ioc;
 using IT.Tangdao.Framework.DaoTasks;
 using System.Reflection;
+using IT.Tangdao.Framework.Windows;
 
 namespace IT.Tangdao.Framework
 {
@@ -28,6 +29,10 @@ namespace IT.Tangdao.Framework
         public virtual async Task AsyncTaskHandler(ITaskQueueManager taskQueueManager)
         {
             await taskQueueManager.Empty();
+        }
+
+        public virtual void ConfigureWindowPipe(IWindowBuilder windowBuilder)
+        {
         }
     }
 }
