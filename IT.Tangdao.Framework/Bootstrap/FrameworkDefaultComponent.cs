@@ -49,8 +49,8 @@ namespace IT.Tangdao.Framework.Bootstrap
 
             //登录窗体以及Window管理通道
             container.AddTangdaoSingleton<IWindowBuilder, WindowBuilder>();
-            container.AddTangdaoSingleton<IWindowPipeline, WindowPipeline>();
-            container.AddTangdaoSingleton<IWindowGuard, LoginSignGuard>();
+            container.AddTangdaoTransient<IWindowPipeline, WindowPipeline>();
+            container.AddTangdaoTransient<IWindowGuard, LoginSignGuard>();
             container.AddTangdaoSingleton<WindowAction>();
 
             //注册导航服务

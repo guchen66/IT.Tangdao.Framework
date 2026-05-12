@@ -2,6 +2,7 @@
 using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Events;
 using IT.Tangdao.Framework.Ioc;
+using IT.Tangdao.Framework.Threading;
 using IT.Tangdao.Framework.Windows;
 using System;
 using System.Collections.Generic;
@@ -24,12 +25,12 @@ namespace IT.Tangdao.Framework.Windows
         }
 
         private IWindowGuard _guard;
-        private Type _loginWindowType;
-        private bool _allowCancel = true;
+        private Type _windowType;
+        private bool _isAllowShow = false;
         private Action _onSuccess;
         private Action _onFailure;
         public ShowMode ShowMode { get; set; }
-
+        private GuardContext _guardContext;
         private IEventAggregator _eventAggregator;
 
         public WindowPipeline(IWindowGuard guard, IEventAggregator eventAggregator)
@@ -38,22 +39,31 @@ namespace IT.Tangdao.Framework.Windows
             _eventAggregator = eventAggregator;
         }
 
-        public IWindowPipeline UseLogin<TWindow>() where TWindow : Window
+        /// <summary>
+        /// 配置窗体类型
+        /// </summary>
+        /// <typeparam name="TWindow"></typeparam>
+        /// <returns></returns>
+        public IWindowPipeline Configure<TWindow>() where TWindow : Window
         {
-            _loginWindowType = typeof(TWindow);
+            _windowType = typeof(TWindow);
             return this;
         }
 
-        public IWindowPipeline UseConfigure<TWindow>() where TWindow : Window
+        /// <summary>
+        /// 设置窗体是否允许打开
+        /// </summary>
+        /// <param name="allow"></param>
+        /// <returns></returns>
+        public IWindowPipeline SetActive(bool allow)
         {
-            _loginWindowType = typeof(TWindow);
+            _isAllowShow = allow;
             return this;
         }
 
-        public IWindowPipeline SetCancel(bool allow)
+        public void SetContext(GuardContext context)
         {
-            _allowCancel = allow;
-            return this;
+            _guardContext = context;
         }
 
         public IWindowPipeline OnSuccess(Action action)
@@ -79,26 +89,20 @@ namespace IT.Tangdao.Framework.Windows
                 _onFailure?.Invoke();
                 return false;
             }
-
             // 2. 创建并配置窗口
-            if (_loginWindowType == null)
-                throw new InvalidOperationException("未配置登录窗口类型");
-            var window = ServiceLocator.Default.GetService(_loginWindowType) as Window;
-            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            if (_windowType == null)
+                throw new InvalidOperationException("未配置窗口类型");
 
-            if (!_allowCancel)
+            var winEvent = new WinEventBase
             {
-                window.Closing += (s, e) =>
-                {
-                    if (window.DialogResult == null)
-                        e.Cancel = true;
-                };
-            }
-
-            WinEventBase winEventBase = new WinEventBase();
-            winEventBase.WindowType = _loginWindowType;
-            _eventAggregator.Publish(winEventBase);
-
+                WindowType = _windowType,
+                IsShow = _isAllowShow,
+                ShowMode = ShowMode,
+                SucessAction = _onSuccess,
+                FailureAction = _onFailure,
+                Context = _guardContext
+            };
+            _eventAggregator.Publish(winEvent);
             return true;
         }
     }

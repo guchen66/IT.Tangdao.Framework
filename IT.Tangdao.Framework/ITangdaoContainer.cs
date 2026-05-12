@@ -17,6 +17,7 @@ namespace IT.Tangdao.Framework
         /// <summary>
         /// 注册一条服务映射；重复注册覆盖。
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void Register(IServiceEntry entry);
 
         /// <summary>

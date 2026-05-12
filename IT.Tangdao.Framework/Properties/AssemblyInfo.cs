@@ -10,7 +10,8 @@ using IT.Tangdao.Framework.Bootstrap;
 [assembly: AssemblyTitle("Tangdao.Framework")]
 [assembly: AssemblyProduct("Tangdao.Framework")]
 [assembly: ComVisible(false)]
-
+[assembly: AssemblyVersion("5.0.0.0")]
+[assembly: AssemblyFileVersion("5.0.0.0")]
 // 模块自注册（关键一行）
 [assembly: TangdaoModule(typeof(FrameworkDefaultComponentModule))]
 [assembly: TangdaoModule(typeof(AutoRegisterComponentModule))]

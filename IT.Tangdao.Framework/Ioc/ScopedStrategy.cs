@@ -11,9 +11,6 @@ namespace IT.Tangdao.Framework.Ioc
     /// <summary>
     /// 作用域策略：同一线程/同 Scope 内复用；无 Scope 时退化为 Transient。
     /// </summary>
-    /// <summary>
-    /// 作用域策略：同一线程/同 Scope 内复用；无 Scope 时退化为 Transient。
-    /// </summary>
     public sealed class ScopedStrategy : ILifecycleStrategy
     {
         // 线程静态，支持异步流

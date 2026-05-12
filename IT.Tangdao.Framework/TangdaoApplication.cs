@@ -19,14 +19,12 @@ using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.DaoTasks;
 using System.Windows.Forms;
 using IT.Tangdao.Framework.Windows;
+using IT.Tangdao.Framework.Common.Windows;
 
 namespace IT.Tangdao.Framework
 {
     /// <summary>
     /// WPF 专用启动入口。
-    /// 1. OnStartup 里触发用户注册；
-    /// 2. 自动解析主窗口并显示；
-    /// 3. 全局 Provider 可后续解析 ViewModel、DialogService...
     /// </summary>
     [AssemblyScan]
     public class TangdaoApplication : TangdaoApplicationBase
@@ -51,48 +49,46 @@ namespace IT.Tangdao.Framework
             builder.ValidateDependencies();
             Provider = builder.Build().BuildProvider();
 
+            //服务定位器初始化
             ServiceLocator.Default.Initialize(Provider);
             builder.RaiseBuilt(Provider);     //回调插件的Initialized
 
             // ② 留给子类做额外配置
             Configure();
-            ConfigureWindow();
             AsyncTaskHandler(Provider.GetService<ITaskQueueManager>()).ConfigureAwait(false);
-
             // ③ 创建主窗口
-            var window = CreateWindow();
-            // ② 摆烂时走约定
-            if (window == null)
-                window = CreateShell(GetMainWindowType());
-
-            if (window != null)
-            {
-                MainWindow = window;
-                window.Show();
-            }
+            InitializeWindow();
         }
 
+        /// <summary>
+        /// 设置获取容器
+        /// </summary>
         private void InitializeInternal()
         {
             TangdaoContainerBuilder.SetContainerExtension(CreateContainer);
         }
 
-        /// 仅在此方法内使用 Container，不要持有字段引用
-        protected virtual void Configure()
+        private void InitializeWindow()
         {
+            var window = CreateWindow();
+            // ② 摆烂时走约定
+            if (window == null)
+                window = CreateShell(GetMainWindowType());
+            if (window != null)
+            {
+                SetMainWindow(window);
+            }
+            ConfigureWindow();
+            ShowShell();
         }
 
         private void ConfigureWindow()
         {
-            var build = Provider.GetService<IWindowBuilder>();
+            ITangdaoProvider _provider = Provider;
+            var build = _provider.GetService<IWindowBuilder>();
             ConfigureWindowPipe(build);
             build.ExecuteAll();
         }
-
-        /// <summary>
-        /// 异步任务处理器
-        /// </summary>
-        /// <returns></returns>
 
         /// <summary>
         /// 子类**可重写**。
@@ -105,11 +101,48 @@ namespace IT.Tangdao.Framework
         /// 默认实现：扫描当前入口程序集里 *唯一* 的 Window 派生类；
         /// 若不想扫描，子类**重写**此方法来指定。
         /// </summary>
-        protected virtual Type GetMainWindowType()
+        private Type GetMainWindowType()
         {
-            var winType = GetType().Assembly.GetExportedTypes()
-                                  .SingleOrDefault(t => t.IsSubclassOf(typeof(Window)));
-            return winType ?? throw new InvalidOperationException("未找到任何 Window 派生类，请重写 GetMainWindowType()。");
+            var assembly = GetType().Assembly;
+            var windowTypes = assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(Window))).ToList();
+            if (windowTypes.Count == 0)
+            {
+                return null;
+            }
+
+            if (windowTypes.Count > 1)
+            {
+                string typeNames = string.Join(", ", windowTypes.Select(t => t.Name));
+                throw new InvalidOperationException(
+                    $"找到多个 Window 派生类：{typeNames}。\n" +
+                    "请重写 CreateWindow() 方法明确指定要使用的主窗口。");
+            }
+
+            return windowTypes[0];
+        }
+
+        /// <summary>
+        /// 设置 Application.MainWindow（不显示）
+        /// </summary>
+        private void SetMainWindow(Window shell)
+        {
+            if (shell == null)
+            {
+                throw new InvalidOperationException("无法创建主窗口，请重写 CreateWindow() 方法返回您的主窗口。");
+            }
+
+            base.MainWindow = shell;
+        }
+
+        /// <summary>
+        /// 显示Shell
+        /// </summary>
+        private void ShowShell()
+        {
+            if (base.MainWindow != null)
+            {
+                base.MainWindow.Show();
+            }
         }
 
         /// <summary>
@@ -119,18 +152,14 @@ namespace IT.Tangdao.Framework
             => CreateShell(typeof(TShell));
 
         /// <summary>
-        /// 内部实现：按约定装配主窗口（非泛型，零反射重复）。
-        /// </summary>
-        /// <summary>
         /// 创建主窗口并自动绑定 ViewModel
         /// </summary>
         protected static Window CreateShell(Type shellType)
         {
-            // 解析窗口实例
             var shell = (Window)Provider.GetService(shellType)
-                     ?? throw new InvalidOperationException($"主窗口 {shellType.Name} 未注册。");
+                   ?? throw new InvalidOperationException($"主窗口 {shellType.Name} 未注册。");
 
-            ViewToViewModelLocator.AutoBindViewModel(shell, shellType);
+            ViewToViewModelLocator.FindAndBindViewModel(shell);
             return shell;
         }
 

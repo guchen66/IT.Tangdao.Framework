@@ -72,14 +72,15 @@ namespace IT.Tangdao.Framework.Mvvm
         public static void AutoBindViewModel(DependencyObject view, Type viewType)
         {
             //窗体Bind之前ServiceLocator服务定位器已经填充了数据，可以直接使用
-            var Provider = ServiceLocator.Default;
+            var provider = ServiceLocator.Default;
+
             // 查找对应的 ViewModel 类型
             var viewModelType = FindViewModelType(viewType);
 
             if (viewModelType != null)
             {
                 // 从容器解析 ViewModel 并设置 DataContext
-                var viewModel = Provider.GetService(viewModelType);
+                var viewModel = provider.GetService(viewModelType);
                 if (viewModel != null)
                 {
                     if (view is FrameworkElement frameworkElement)
@@ -92,6 +93,48 @@ namespace IT.Tangdao.Framework.Mvvm
                             handler = (s, e) =>
                             {
                                 frameworkElement.Loaded -= handler;   // 立刻解绑
+                                life.OnViewLoaded();
+                            };
+                            frameworkElement.Loaded += handler;
+                            if (frameworkElement.IsLoaded)
+                                handler(frameworkElement, new RoutedEventArgs());
+                        }
+                    }
+                }
+            }
+            RegisterAutoViews();
+        }
+
+        /// <summary>
+        /// 发现并绑定ViewModel
+        /// </summary>
+        /// <param name="view"></param>
+        public static void FindAndBindViewModel(DependencyObject view)
+        {
+            // 方法内部获取 view 的实际类型
+            Type viewType = view.GetType();
+
+            var provider = ServiceLocator.Default;
+
+            // 查找对应的 ViewModel 类型
+            var viewModelType = FindViewModelType(viewType);
+
+            if (viewModelType != null)
+            {
+                var viewModel = provider.GetService(viewModelType);
+                if (viewModel != null)
+                {
+                    // 使用 as 进行安全转换
+                    if (view is FrameworkElement frameworkElement)
+                    {
+                        frameworkElement.DataContext = viewModel;
+
+                        if (viewModel is IViewReady life)
+                        {
+                            RoutedEventHandler handler = null;
+                            handler = (s, e) =>
+                            {
+                                frameworkElement.Loaded -= handler;
                                 life.OnViewLoaded();
                             };
                             frameworkElement.Loaded += handler;
@@ -152,7 +195,7 @@ namespace IT.Tangdao.Framework.Mvvm
         /// <summary>
         /// 根据 View 类型查找对应的 ViewModel 类型
         /// </summary>
-        private static Type FindViewModelType(Type viewType)
+        public static Type FindViewModelType(Type viewType)
         {
             if (viewType == null) return null;
 

@@ -11,24 +11,25 @@ using System.Windows;
 
 namespace IT.Tangdao.Framework.Windows
 {
+    /// <summary>
+    /// Window管道接口
+    /// </summary>
     public interface IWindowPipeline
     {
+        /// <summary>
+        /// 管道守卫
+        /// </summary>
         IWindowGuard Guard { get; set; }
 
         /// <summary>
-        /// 配置登录窗口类型
+        /// 配置窗口类型
         /// </summary>
-        IWindowPipeline UseLogin<TWindow>() where TWindow : Window;
+        IWindowPipeline Configure<TWindow>() where TWindow : Window;
 
         /// <summary>
-        /// 配置公共窗口类型
+        /// 设置是否允许打开窗体（默认false）
         /// </summary>
-        IWindowPipeline UseConfigure<TWindow>() where TWindow : Window;
-
-        /// <summary>
-        /// 设置是否允许取消（默认true）
-        /// </summary>
-        IWindowPipeline SetCancel(bool allow);
+        IWindowPipeline SetActive(bool allow);
 
         /// <summary>
         /// 配置登录成功后的回调
@@ -40,6 +41,15 @@ namespace IT.Tangdao.Framework.Windows
         /// </summary>
         IWindowPipeline OnFailure(Action action);
 
+        /// <summary>
+        /// 设计VM对应上下文数据
+        /// </summary>
+        /// <param name="context"></param>
+        void SetContext(GuardContext context);
+
+        /// <summary>
+        /// 打开的模态
+        /// </summary>
         ShowMode ShowMode { get; set; }
 
         bool Execute();
