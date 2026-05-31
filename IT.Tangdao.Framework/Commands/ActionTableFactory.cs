@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace IT.Tangdao.Framework.Commands
 {
     /// <summary>
-    /// 工厂模式
+    /// 委托表ActionTable的工厂模式
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class ActionTableFactory

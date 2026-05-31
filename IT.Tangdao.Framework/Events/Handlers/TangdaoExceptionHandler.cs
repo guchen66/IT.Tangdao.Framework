@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Threading;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Configurations;
-using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Utilities;
 
 namespace IT.Tangdao.Framework.Events
 {
@@ -88,7 +88,7 @@ namespace IT.Tangdao.Framework.Events
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        Process.Start(LogHelper.GetLogRoot());
+                        Process.Start(LogUtils.GetLogRoot());
                     }
 
                     break;

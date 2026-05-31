@@ -6,23 +6,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Ambient;
 
 namespace IT.Tangdao.Framework.Paths
 {
-    public sealed class TangdaoPath
+    public static class TangdaoPath
     {
-        #region 单例
-
-        public static TangdaoPath Instance { get; } = new TangdaoPath();
-
-        private TangdaoPath()
-        {
-        }
-
-        #endregion 单例
-
         #region 缓存
 
         /// <summary>
@@ -40,7 +29,7 @@ namespace IT.Tangdao.Framework.Paths
         /// </summary>
         /// <param name="filePath">编译期注入的当前文件路径</param>
         /// <returns>当前文件的绝对路径</returns>
-        public AbsolutePath GetThisFilePath([CallerFilePath] string filePath = null)
+        public static AbsolutePath GetThisFilePath([CallerFilePath] string filePath = null)
         {
             // 为每个文件路径创建唯一缓存键，避免不同文件共享同一缓存
             return _cache.GetOrAdd($"{AmbientKeys.File}{filePath}", _ => new AbsolutePath(filePath));
@@ -50,13 +39,13 @@ namespace IT.Tangdao.Framework.Paths
         /// 解决方案根目录（带缓存）
         /// </summary>
         /// <returns>解决方案根目录的绝对路径</returns>
-        public AbsolutePath GetSolutionDirectory() => _cache.GetOrAdd($"{AmbientKeys.Solution}", _ => InternalGetSolutionDirectory());
+        public static AbsolutePath GetSolutionDirectory() => _cache.GetOrAdd($"{AmbientKeys.Solution}", _ => InternalGetSolutionDirectory());
 
         /// <summary>
         /// 内部获取解决方案目录的方法
         /// </summary>
         /// <returns>解决方案目录的绝对路径</returns>
-        private AbsolutePath InternalGetSolutionDirectory()
+        private static AbsolutePath InternalGetSolutionDirectory()
         {
             var dir = FindSolutionDirectory();
             return new AbsolutePath(dir);
@@ -66,7 +55,7 @@ namespace IT.Tangdao.Framework.Paths
         /// 当前工作目录（带缓存）
         /// </summary>
         /// <returns>当前工作目录的绝对路径</returns>
-        public AbsolutePath GetCurrentDirectory()
+        public static AbsolutePath GetCurrentDirectory()
             // 缓存当前工作目录，避免频繁调用 Directory.GetCurrentDirectory()
             => _cache.GetOrAdd($"{AmbientKeys.Current}", _ => new AbsolutePath(Directory.GetCurrentDirectory()));
 
@@ -74,7 +63,7 @@ namespace IT.Tangdao.Framework.Paths
         /// 临时目录（带缓存）
         /// </summary>
         /// <returns>系统临时目录的绝对路径</returns>
-        public AbsolutePath GetTempDirectory()
+        public static AbsolutePath GetTempDirectory()
             // 缓存临时目录，避免频繁调用 Path.GetTempPath()
             => _cache.GetOrAdd($"{AmbientKeys.Temp}", _ => new AbsolutePath(Path.GetTempPath()));
 
@@ -84,7 +73,7 @@ namespace IT.Tangdao.Framework.Paths
         /// <param name="envKey">环境变量名称</param>
         /// <param name="fallback">当环境变量不存在时的回退路径</param>
         /// <returns>环境变量指定的目录或回退路径</returns>
-        public AbsolutePath GetEnvironmentDirectory(string envKey, AbsolutePath? fallback = null)
+        public static AbsolutePath GetEnvironmentDirectory(string envKey, AbsolutePath? fallback = null)
         {
             var val = Environment.GetEnvironmentVariable(envKey);
             return !string.IsNullOrEmpty(val) ? new AbsolutePath(val) : fallback ?? GetCurrentDirectory();
@@ -98,26 +87,26 @@ namespace IT.Tangdao.Framework.Paths
         /// 创建从解决方案目录开始的路径构建器
         /// </summary>
         /// <returns>路径构建器实例</returns>
-        public TangdaoPathBuilder Solution() => new TangdaoPathBuilder(GetSolutionDirectory());
+        public static TangdaoPathBuilder Solution() => new TangdaoPathBuilder(GetSolutionDirectory());
 
         /// <summary>
         /// 创建从当前目录开始的路径构建器
         /// </summary>
         /// <returns>路径构建器实例</returns>
-        public TangdaoPathBuilder Current() => new TangdaoPathBuilder(GetCurrentDirectory());
+        public static TangdaoPathBuilder Current() => new TangdaoPathBuilder(GetCurrentDirectory());
 
         /// <summary>
         /// 创建从临时目录开始的路径构建器
         /// </summary>
         /// <returns>路径构建器实例</returns>
-        public TangdaoPathBuilder Temp() => new TangdaoPathBuilder(GetTempDirectory());
+        public static TangdaoPathBuilder Temp() => new TangdaoPathBuilder(GetTempDirectory());
 
         /// <summary>
         /// 创建自定义根目录的路径构建器
         /// </summary>
         /// <param name="rootDir">自定义根目录路径</param>
         /// <returns>路径构建器实例</returns>
-        public TangdaoPathBuilder AsPath(string rootDir = null) => new TangdaoPathBuilder(string.IsNullOrWhiteSpace(rootDir) ? GetCurrentDirectory() : new AbsolutePath(rootDir));
+        public static TangdaoPathBuilder AsPath(string rootDir = null) => new TangdaoPathBuilder(string.IsNullOrWhiteSpace(rootDir) ? GetCurrentDirectory() : new AbsolutePath(rootDir));
 
         #endregion Fluent Builder
 
@@ -160,7 +149,7 @@ namespace IT.Tangdao.Framework.Paths
         /// </summary>
         /// <param name="basePath">基础路径，默认为当前目录</param>
         /// <returns>基于日期的目录路径</returns>
-        public AbsolutePath GetDateDirectory(string basePath = null)
+        public static AbsolutePath GetDateDirectory(string basePath = null)
         {
             // 使用当前日期和基础路径生成唯一缓存键
             var cacheKey = string.IsNullOrEmpty(basePath) ? $"{AmbientKeys.DateDirectory}" : $"{AmbientKeys.DateDirectory}_${basePath}";
@@ -184,7 +173,7 @@ namespace IT.Tangdao.Framework.Paths
         /// <param name="fileSuffix">文件名后缀</param>
         /// <param name="extension">文件扩展名，默认为 xlsx</param>
         /// <returns>基于日期的文件路径</returns>
-        public AbsolutePath GetDateFilePath(string basePath = null, string fileSuffix = "", string extension = "txt")
+        public static AbsolutePath GetDateFilePath(string basePath = null, string fileSuffix = "", string extension = "txt")
         {
             // 使用当前日期、基础路径、文件后缀和扩展名生成唯一缓存键
             var cacheKey = string.IsNullOrEmpty(basePath)
@@ -208,7 +197,7 @@ namespace IT.Tangdao.Framework.Paths
         /// </summary>
         /// <param name="basePath">基础路径</param>
         /// <returns>日期路径构建器实例</returns>
-        public TangdaoDatePathBuilder DateFrom(string basePath) => new TangdaoDatePathBuilder(new AbsolutePath(basePath));
+        public static TangdaoDatePathBuilder DateFrom(string basePath) => new TangdaoDatePathBuilder(new AbsolutePath(basePath));
 
         #endregion 日期路径功能
     }

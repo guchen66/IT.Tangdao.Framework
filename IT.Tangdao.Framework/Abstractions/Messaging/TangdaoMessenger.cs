@@ -8,8 +8,8 @@ using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Abstractions.Contracts;
 using IT.Tangdao.Framework.Ioc;
 using IT.Tangdao.Framework.Exceptions;
-using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Events;
+using IT.Tangdao.Framework.Utilities;
 
 namespace IT.Tangdao.Framework.Abstractions.Messaging
 {

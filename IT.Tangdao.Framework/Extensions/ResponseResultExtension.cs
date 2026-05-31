@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Collections;
 using IT.Tangdao.Framework.Abstractions.Results;
 using System.Collections.ObjectModel;
 using IT.Tangdao.Framework.Configurations;
 using System.Windows;
+using IT.Tangdao.Framework.Utilities;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -328,7 +329,7 @@ namespace IT.Tangdao.Framework.Extensions
                 TangdaoGuards.ThrowIfNull(result);
             if (result.Data is TangdaoSortedDictionary<string, string> dict)
             {
-                return DictToObject.Convert<T>(dict);
+                return DictToObjectUtils.Convert<T>(dict);
             }
             throw new NotImplementedException();
         }

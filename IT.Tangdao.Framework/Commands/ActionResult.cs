@@ -27,9 +27,6 @@ namespace IT.Tangdao.Framework.Commands
         /// <summary>
         /// 获取或设置操作的参数对象
         /// </summary>
-        /// <remarks>
-        /// 用于传递操作所需的输入参数
-        /// </remarks>
         public ITangdaoParameter Parameter { get; set; }
 
         /// <summary>

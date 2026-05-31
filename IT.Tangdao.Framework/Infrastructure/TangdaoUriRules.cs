@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using IT.Tangdao.Framework.Helpers;
 
 namespace IT.Tangdao.Framework.Infrastructure
 {

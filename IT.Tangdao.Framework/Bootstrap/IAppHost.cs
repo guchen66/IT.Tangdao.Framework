@@ -22,14 +22,16 @@ namespace IT.Tangdao.Framework.Bootstrap
         TangdaoPipe<T> Handler { get; }
 
         /// <summary>
+        /// 创建宿主数据
+        /// </summary>
+        /// <returns></returns>
+        T CreateHost();
+
+        /// <summary>
         /// 提供异步任务流
         /// </summary>
         /// <param name="taskQueueManager"></param>
         /// <returns></returns>
         Task AsyncTaskHandler(ITaskQueueManager taskQueueManager);
-    }
-
-    public class TangdaoHost
-    {
     }
 }

@@ -148,15 +148,7 @@ namespace IT.Tangdao.Framework.Events
             // 执行所有存活处理器
             foreach (var handler in aliveHandlers)
             {
-                try
-                {
-                    handler(eventObj);
-                }
-                catch (Exception ex)
-                {
-                    // 记录错误但继续执行其他处理器
-                    Debug.WriteLine($"Event handler failed: {ex}");
-                }
+                handler(eventObj);
             }
 
             // 自动清理失效的处理器

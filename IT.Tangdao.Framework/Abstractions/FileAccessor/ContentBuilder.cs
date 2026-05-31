@@ -2,7 +2,6 @@
 using IT.Tangdao.Framework.Abstractions.Results;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Enums;
-using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Extensions;
 using System;
 using System.Collections;
@@ -19,6 +18,7 @@ using IT.Tangdao.Framework.Paths;
 using System.Xml;
 using IT.Tangdao.Framework.Configurations;
 using System.Runtime.Remoting.Contexts;
+using IT.Tangdao.Framework.Infrastructure;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
@@ -28,19 +28,14 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         public IContentQueryable Empty()
         {
-            return new ContentQueryable
-            {
-                Content = string.Empty,
-                ReadPath = string.Empty,
-                DetectedType = DaoFileType.None
-            };
+            return ContentQueryable.CreateInstance();
         }
 
         public IContentQueryable Read(string path, DaoFileType t = DaoFileType.None)
         {
             // 读取文件内容
             var content = File.ReadAllText(path);
-            var detectedType = t == DaoFileType.None ? FileHelper.GetExtension(path) : t;
+            var detectedType = t == DaoFileType.None ? FileQueryable.GetExtension(path) : t;
 
             // 缓存内容
             var rootKey = string.Format("Content:{0}:{1}", path, detectedType);
@@ -52,18 +47,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         public IContentQueryable Read(AbsolutePath path, DaoFileType t = DaoFileType.None)
         {
-            // 读取文件内容
-            var content = File.ReadAllText(path.Value);
-            var detectedType = t == DaoFileType.None ? FileHelper.GetExtension(content) : t;
-
-            // 缓存内容
-            var rootKey = $"Content:{path.Value}:{detectedType}";
-            TangdaoParameter tangdaoParameter = new TangdaoParameter();
-            tangdaoParameter.Add(rootKey, content);    //缓存内容
-            TangdaoContext.SetTangdaoParameter(rootKey, tangdaoParameter);
-
-            // 注意：ContentQueryable 内部会处理路径和类型检测
-            return new ContentQueryable { Content = content, ReadPath = path.Value, DetectedType = detectedType };
+            return Read(path.Value, t);
         }
 
         /// <summary>

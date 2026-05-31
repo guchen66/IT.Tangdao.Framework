@@ -10,12 +10,13 @@ using IT.Tangdao.Framework.Ioc;
 using IT.Tangdao.Framework.DaoTasks;
 using System.Reflection;
 using IT.Tangdao.Framework.Windows;
+using IT.Tangdao.Framework.Abstractions.Contracts;
 
 namespace IT.Tangdao.Framework
 {
-    public abstract class TangdaoApplicationBase : Application, IAppHost<TangdaoHost>, ITangdaoDataProvider
+    public abstract class TangdaoApplicationBase : Application, IAppHost<ITangdaoHost>, ITangdaoDataProvider
     {
-        public TangdaoPipe<TangdaoHost> Handler { get; set; }
+        public TangdaoPipe<ITangdaoHost> Handler { get; set; }
 
         public IBindHandler Binding { get; } = new BindHandler();
 
@@ -55,6 +56,15 @@ namespace IT.Tangdao.Framework
         /// <param name="windowBuilder"></param>
         public virtual void ConfigureWindowPipe(IWindowBuilder windowBuilder)
         {
+        }
+
+        /// <summary>
+        /// 创建宿主数据
+        /// </summary>
+        /// <returns></returns>
+        public virtual ITangdaoHost CreateHost()
+        {
+            return new TangdaoHost();
         }
     }
 }

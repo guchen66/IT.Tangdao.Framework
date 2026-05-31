@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Mvvm;
-using IT.Tangdao.Framework.Helpers;
 using System.Runtime.CompilerServices;
 using IT.Tangdao.Framework.Attributes;
 using IT.Tangdao.Framework.Common;
@@ -103,6 +102,7 @@ namespace IT.Tangdao.Framework
         /// </summary>
         private Type GetMainWindowType()
         {
+            Logger.Info("创建幽灵窗体");
             var assembly = GetType().Assembly;
             var windowTypes = assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(Window))).ToList();
             if (windowTypes.Count == 0)
@@ -139,6 +139,7 @@ namespace IT.Tangdao.Framework
         /// </summary>
         private void ShowShell()
         {
+            Logger.Info($"ShowShell 被调用，MainWindow.IsVisible={base.MainWindow?.IsVisible}");
             if (base.MainWindow != null)
             {
                 base.MainWindow.Show();
@@ -170,7 +171,7 @@ namespace IT.Tangdao.Framework
         private static List<ITangdaoModule> DiscoverModules()
         {
             var list = new List<ITangdaoModule>();
-            foreach (var asm in AssemblyHelper.GetModuleAssemblies())
+            foreach (var asm in AssemblyExtension.GetModuleAssemblies())
             {
                 foreach (var attr in asm.GetCustomAttributes<TangdaoModuleAttribute>())
                 {

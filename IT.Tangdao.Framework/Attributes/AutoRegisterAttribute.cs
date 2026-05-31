@@ -9,13 +9,19 @@ using IT.Tangdao.Framework.Extensions;
 namespace IT.Tangdao.Framework.Attributes
 {
     /// <summary>
-    /// 容器自动注册元数据
+    /// IOC容器自动注册元数据，默认为单例注册
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class AutoRegisterAttribute : Attribute, IComparable<AutoRegisterAttribute>
     {
+        /// <summary>
+        /// 注册模式
+        /// </summary>
         public RegisterMode Mode { get; set; }
 
+        /// <summary>
+        /// 注册的顺序，数字越小最新注册
+        /// </summary>
         public int Order { get; set; }
 
         public int CompareTo(AutoRegisterAttribute other)

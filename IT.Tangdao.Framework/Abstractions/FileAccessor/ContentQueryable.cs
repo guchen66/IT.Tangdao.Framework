@@ -2,7 +2,7 @@
 using IT.Tangdao.Framework.Abstractions.Results;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Enums;
-using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Collections;
 using IT.Tangdao.Framework.Extensions;
 using System;
 using System.Collections;
@@ -19,6 +19,8 @@ using IT.Tangdao.Framework.Paths;
 using System.Xml;
 using IT.Tangdao.Framework.Configurations;
 using System.Reflection;
+using IT.Tangdao.Framework.Infrastructure;
+using IT.Tangdao.Framework.Utilities;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
@@ -31,6 +33,17 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         public string ReadPath { get; set; }
 
         public DaoFileType DetectedType { get; set; }
+
+        #endregion
+
+        #region-- ctor--
+
+        public static Lazy<ContentQueryable> contentQueryable { get; set; } = new Lazy<ContentQueryable>(() => new ContentQueryable());
+
+        public static ContentQueryable CreateInstance()
+        {
+            return contentQueryable.Value;
+        }
 
         #endregion
 
@@ -95,7 +108,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
             {
                 var doc = XDocument.Parse(Content);
                 var root = doc.RootElement();
-                var xmlType = FileHelper.DetectXmlStructure(doc);
+                var xmlType = FileQueryable.DetectXmlStructure(doc);
 
                 switch (xmlType)
                 {
@@ -185,7 +198,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
                 foreach (var node in doc.Root.Elements())
                 {
                     var instance = new T();
-                    FileHelper.MapXElementToObject(node, instance); // 自动映射
+                    FileQueryable.MapXElementToObject(node, instance); // 自动映射
                     result.Add(instance);
                 }
 

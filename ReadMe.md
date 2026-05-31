@@ -1202,18 +1202,18 @@ public class ComboboxOptions
 
 | 场景                                       | 用途                                 | 如何使用                                                     |
 | ------------------------------------------ | ------------------------------------ | ------------------------------------------------------------ |
-| **加载本地资源文件**（如JSON、图片、配置） | 避免硬编码路径，支持相对解决方案路径 | `TangdaoPath.Instance.Solution().Combine("Assets", "Icons", "logo.png").Build()` |
-| **日志文件输出路径**                       | 确保日志写入到临时目录或指定目录     | `TangdaoPath.Instance.Temp().Combine("logs", "app.log").Build()` |
-| **用户导出/保存文件**                      | 提供默认路径，避免平台差异           | `TangdaoPath.Instance.GetEnvironmentDirectory("EXPORT_DIR").Combine("report.xlsx")` |
-| **插件加载路径**                           | 动态加载插件DLL，避免路径错误        | `TangdaoPath.Instance.Solution().Combine("Plugins", "PluginA.dll").Build()` |
-| **配置文件路径**                           | 支持CI/CD中配置路径注入              | `TangdaoPath.Instance.GetThisFilePath().Parent().Combine("settings.json")` |
+| **加载本地资源文件**（如JSON、图片、配置） | 避免硬编码路径，支持相对解决方案路径 | `TangdaoPath.Solution().Combine("Assets", "Icons", "logo.png").Build()` |
+| **日志文件输出路径**                       | 确保日志写入到临时目录或指定目录     | `TangdaoPath.Temp().Combine("logs", "app.log").Build()`      |
+| **用户导出/保存文件**                      | 提供默认路径，避免平台差异           | `TangdaoPath.GetEnvironmentDirectory("EXPORT_DIR").Combine("report.xlsx")` |
+| **插件加载路径**                           | 动态加载插件DLL，避免路径错误        | `TangdaoPath.Solution().Combine("Plugins", "PluginA.dll").Build()` |
+| **配置文件路径**                           | 支持CI/CD中配置路径注入              | `TangdaoPath.GetThisFilePath().Parent().Combine("settings.json")` |
 | **单元测试中模拟路径**                     | 避免使用真实文件系统                 | 使用 `AbsolutePath` 和 `RelativePath` 构造虚拟路径，不依赖磁盘 |
 
 ###### 1、WPF中加载图片资源
 
 ```C#
 // ViewModel 或代码背后
-var imagePath = TangdaoPath.Instance
+var imagePath = TangdaoPath
     .Solution()
     .Combine("Assets", "Images", "user_avatar.png")
     .Build();
@@ -1270,7 +1270,7 @@ foreach (var p in props)
 
 ```C#
 // 全局初始化一次
-var solutionDir = TangdaoPath.Instance.GetSolutionDirectory();
+var solutionDir = TangdaoPath.GetSolutionDirectory();
 
 // 后续使用
 var configPath = solutionDir.Combine("config", "appSettings.json");
@@ -1280,7 +1280,7 @@ var dbPath = solutionDir.Combine("data", "local.db");
 ###### 4、清理临时文件
 
 ```C#
-var tempDir = TangdaoPath.Instance.GetTempDirectory().Combine("MyApp");
+var tempDir = TangdaoPath.GetTempDirectory().Combine("MyApp");
 if (tempDir.DirectoryExists)
 {
     Directory.Delete(tempDir.Value, true);
@@ -1297,7 +1297,7 @@ if (tempDir.DirectoryExists)
          var template = PathTemplate.Create("{Solution}/Exports/{Date}/report.txt");
          var exportPath = template.Resolve(new
          {
-             Solution = TangdaoPath.Instance.GetSolutionDirectory().Value,
+             Solution = TangdaoPath.GetSolutionDirectory().Value,
              Date = DateTime.Now.ToString("yyyy-MM-dd")
          });
 
@@ -1314,7 +1314,7 @@ if (tempDir.DirectoryExists)
 
 ```C#
 // 使用 Combine 构建路径
-AbsolutePath sourcePath = TangdaoPath.Instance
+AbsolutePath sourcePath = TangdaoPath
     .GetThisFilePath()
     .Parent()                           // 移除文件名
     .Combine("..")                      // 上级目录

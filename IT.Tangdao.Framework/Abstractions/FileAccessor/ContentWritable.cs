@@ -2,10 +2,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using IT.Tangdao.Framework.Helpers;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Extensions;
+using IT.Tangdao.Framework.Serializers;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
@@ -62,12 +62,12 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
         public void ToXml<T>(T obj)
         {
-            TangdaoXmlSerializer.SerializeXMLToFile<T>(obj, WritePath);
+            TangdaoXmlConvert.SerializeXMLToFile<T>(obj, WritePath);
         }
 
         public void ToJson<T>(T obj)
         {
-            TangdaoJsonFileHelper.SaveJsonData(obj, WritePath);
+            TangdaoJsonQueryable.SaveJsonData(obj, WritePath);
         }
     }
 }

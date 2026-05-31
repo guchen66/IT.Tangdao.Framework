@@ -1,4 +1,4 @@
-﻿using IT.Tangdao.Framework.Helpers;
+﻿using IT.Tangdao.Framework.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

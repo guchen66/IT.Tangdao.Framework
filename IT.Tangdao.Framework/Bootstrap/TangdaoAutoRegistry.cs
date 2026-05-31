@@ -1,6 +1,5 @@
 ﻿using IT.Tangdao.Framework.Attributes;
 using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -20,7 +19,7 @@ namespace IT.Tangdao.Framework.Bootstrap
     {
         public static void Register(ITangdaoContainer tangdaoContainer)
         {
-            var AttributeInfos = TangdaoAttributeSelector.GetAttributeInfos<AutoRegisterAttribute>();
+            var AttributeInfos = AttributeSelector.GetAttributeInfos<AutoRegisterAttribute>();
             Array.Sort(AttributeInfos, (a, b) => a.Attribute.CompareTo(b.Attribute));
             foreach (var info in AttributeInfos)
             {

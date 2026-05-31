@@ -1,12 +1,12 @@
 ﻿using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Common;
 using IT.Tangdao.Framework.Enums;
-using IT.Tangdao.Framework.Helpers;
 using IT.Tangdao.Framework.Extensions;
 using System;
 using System.IO;
 using IT.Tangdao.Framework.Paths;
 using IT.Tangdao.Framework.Ambient;
+using IT.Tangdao.Framework.Infrastructure;
 
 namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 {
@@ -30,7 +30,7 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
 
             // ② 磁盘读 + 探测
             var content = File.ReadAllText(path);
-            var detectedType = t == DaoFileType.None ? FileHelper.DetectFromContent(content) : t;
+            var detectedType = t == DaoFileType.None ? FileQueryable.DetectFromContent(content) : t;
 
             // ③ 新实例（无参构造）
             var fresh = new ContentQueryable

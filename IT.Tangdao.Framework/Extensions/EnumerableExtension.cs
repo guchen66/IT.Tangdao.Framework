@@ -6,8 +6,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Collections;
 using IT.Tangdao.Framework.Abstractions.Contracts;
+using IT.Tangdao.Framework.Utilities;
 
 namespace IT.Tangdao.Framework.Extensions
 {

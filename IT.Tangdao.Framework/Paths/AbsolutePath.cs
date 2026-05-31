@@ -1,5 +1,5 @@
 ﻿using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Helpers;
+using IT.Tangdao.Framework.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +13,10 @@ namespace IT.Tangdao.Framework.Paths
     public readonly struct AbsolutePath : IEquatable<AbsolutePath>, IComparable<AbsolutePath>
     {
         private readonly string _path;
+
+        private struct AbsolutePathResult
+        {
+        }
 
         private AbsolutePath(bool _) => _path = string.Empty;
 
@@ -42,7 +46,7 @@ namespace IT.Tangdao.Framework.Paths
         {
             get
             {
-                return FileHelper.IsRoot(_path);
+                return FileQueryable.IsRoot(_path);
             }
         }
 
