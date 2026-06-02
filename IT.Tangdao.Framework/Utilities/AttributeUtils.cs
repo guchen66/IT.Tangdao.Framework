@@ -2,9 +2,11 @@
 using IT.Tangdao.Framework.Infrastructure;
 using IT.Tangdao.Framework.Reflection;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace IT.Tangdao.Framework.Utilities
 {
@@ -16,11 +18,40 @@ namespace IT.Tangdao.Framework.Utilities
         private static Assembly DefaultAssembly => Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
 
         /// <summary>
+        /// 特性携带体缓存字典
+        /// </summary>
+        private static ConcurrentDictionary<Type, Array> attributeInfos = new ConcurrentDictionary<Type, Array>();
+
+        /// <summary>
         /// 获取特性携带体
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="isCache">是否缓存</param>
         /// <returns></returns>
-        public static AttributeInfo<T>[] GetAttributeInfos<T>() where T : Attribute
+        public static AttributeInfo<T>[] GetAttributeInfos<T>(bool isCache = false) where T : Attribute
+        {
+            if (!isCache)
+            {
+                return InternalGetAttributeInfos<T>();
+            }
+            // 先检查字典是否有缓存
+            if (attributeInfos.TryGetValue(typeof(T), out var cached))
+            {
+                return (AttributeInfo<T>[])cached;
+            }
+            var result = InternalGetAttributeInfos<T>();
+            // 存入字典
+            attributeInfos[typeof(T)] = result;
+
+            return result;
+        }
+
+        /// <summary>
+        /// 私有特性查询
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        private static AttributeInfo<T>[] InternalGetAttributeInfos<T>() where T : Attribute
         {
             return DefaultAssembly.GetTypes()
                       .Select(t => new AttributeInfo<T>(t, (T)Attribute.GetCustomAttribute(t, typeof(T), inherit: false)))

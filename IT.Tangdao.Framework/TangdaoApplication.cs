@@ -19,6 +19,7 @@ using IT.Tangdao.Framework.DaoTasks;
 using System.Windows.Forms;
 using IT.Tangdao.Framework.Windows;
 using IT.Tangdao.Framework.Common.Windows;
+using IT.Tangdao.Framework.Infrastructure;
 
 namespace IT.Tangdao.Framework
 {
@@ -37,34 +38,54 @@ namespace IT.Tangdao.Framework
         {
             base.OnStartup(e);
 
-            InitializeInternal();
-            // ① 仅在此处Build
+            //初始化容器
+            InitializeContainer();
+            //仅在此处Build
             var builder = TangdaoContainerBuilder.Current;
-            RegisterServices(builder.Container);   // 暴露 Container 仅此时有效
 
-            //发现Module模块，注册模块
-            var moduleCatalog = DiscoverModules();
-            RegisterModules(moduleCatalog, builder);
-            builder.ValidateDependencies();
-            Provider = builder.Build().BuildProvider();
+            //初始化模块
+            InitializeModules(builder);
 
-            //服务定位器初始化
+            //初始化解析器
+            Provider = builder.Container.BuildProvider();
+
+            //初始化服务定位器
             ServiceLocator.Default.Initialize(Provider);
-            builder.RaiseBuilt(Provider);     //回调插件的Initialized
 
-            // ② 留给子类做额外配置
+            //回调插件的Initialized
+            builder.RaiseBuilt(Provider);
+
+            // 子类做额外配置
             Configure();
+
+            //启动异步任务流
             AsyncTaskHandler(Provider.GetService<ITaskQueueManager>()).ConfigureAwait(false);
-            // ③ 创建主窗口
+
+            // 创建主窗口
             InitializeWindow();
         }
 
         /// <summary>
         /// 设置获取容器
         /// </summary>
-        private void InitializeInternal()
+        private void InitializeContainer()
         {
             TangdaoContainerBuilder.SetContainerExtension(CreateContainer);
+        }
+
+        /// <summary>
+        /// 初始化模块
+        /// </summary>
+        private void InitializeModules(TangdaoContainerBuilder builder)
+        {
+            //注册服务
+            RegisterServices(builder.Container);
+            //发现Module模块
+            var moduleCatalog = ModuleFinder.SelectModules();
+            //注册模块
+            ModuleFinder.RegisterModules(moduleCatalog, builder);
+            //模块回调
+            builder.ValidateDependencies();
         }
 
         private void InitializeWindow()
@@ -102,23 +123,7 @@ namespace IT.Tangdao.Framework
         /// </summary>
         private Type GetMainWindowType()
         {
-            Logger.Info("创建幽灵窗体");
-            var assembly = GetType().Assembly;
-            var windowTypes = assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(Window))).ToList();
-            if (windowTypes.Count == 0)
-            {
-                return null;
-            }
-
-            if (windowTypes.Count > 1)
-            {
-                string typeNames = string.Join(", ", windowTypes.Select(t => t.Name));
-                throw new InvalidOperationException(
-                    $"找到多个 Window 派生类：{typeNames}。\n" +
-                    "请重写 CreateWindow() 方法明确指定要使用的主窗口。");
-            }
-
-            return windowTypes[0];
+            return WindowFinder.GetWindow(this);
         }
 
         /// <summary>
@@ -139,7 +144,6 @@ namespace IT.Tangdao.Framework
         /// </summary>
         private void ShowShell()
         {
-            Logger.Info($"ShowShell 被调用，MainWindow.IsVisible={base.MainWindow?.IsVisible}");
             if (base.MainWindow != null)
             {
                 base.MainWindow.Show();
@@ -155,58 +159,11 @@ namespace IT.Tangdao.Framework
         /// <summary>
         /// 创建主窗口并自动绑定 ViewModel
         /// </summary>
-        protected static Window CreateShell(Type shellType)
+        private static Window CreateShell(Type shellType)
         {
-            var shell = (Window)Provider.GetService(shellType)
-                   ?? throw new InvalidOperationException($"主窗口 {shellType.Name} 未注册。");
-
+            var shell = (Window)Provider.GetService(shellType) ?? throw new InvalidOperationException($"主窗口 {shellType.Name} 未注册。");
             ViewToViewModelLocator.FindAndBindViewModel(shell);
             return shell;
-        }
-
-        /// <summary>
-        /// 要想生效，用户代码需要写[assembly: TangdaoModule(typeof(DemoModule))]
-        /// </summary>
-        /// <returns></returns>
-        private static List<ITangdaoModule> DiscoverModules()
-        {
-            var list = new List<ITangdaoModule>();
-            foreach (var asm in AssemblyExtension.GetModuleAssemblies())
-            {
-                foreach (var attr in asm.GetCustomAttributes<TangdaoModuleAttribute>())
-                {
-                    if (Activator.CreateInstance(attr.ModuleType) is ITangdaoModule module)
-                        list.Add(module);
-                }
-            }
-            return list;
-        }
-
-        /// <summary>
-        /// 注册模块以及将初始化回调存在builder的委托
-        /// </summary>
-        /// <param name="catalog"></param>
-        /// <param name="builder"></param>
-        private static void RegisterModules(IReadOnlyList<ITangdaoModule> catalog, TangdaoContainerBuilder builder)
-        {
-            var eager = catalog.Where(m => !m.Lazy).OrderBy(m => m.Order);
-            foreach (var m in eager)
-            {
-                m.RegisterServices(builder.Container);
-                builder.AddBuiltCallback(provider => m.OnInitialized(provider));
-            }
-
-            // 懒加载模块：注册一个工厂，第一次解析时触发真实 RegisterServices
-            // 延迟注册（只攒动作，不解析）
-            foreach (var m in catalog.Where(m => m.Lazy))
-            {
-                var moduleCopy = m;
-                builder.Container.AddLazyRegistration(c =>
-                {
-                    moduleCopy.RegisterServices(c);
-                    builder.AddBuiltCallback(provider => m.OnInitialized(provider));
-                });
-            }
         }
 
         protected override void OnExit(ExitEventArgs e)

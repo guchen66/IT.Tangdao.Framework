@@ -1,4 +1,5 @@
 ﻿using IT.Tangdao.Framework.Extensions;
+using IT.Tangdao.Framework.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,11 +12,9 @@ namespace IT.Tangdao.Framework.Ioc
     /// <summary>
     /// 默认建造者实现。
     /// </summary>
-    public sealed class TangdaoContainerBuilder : ITangdaoContainerBuilder
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public sealed class TangdaoContainerBuilder
     {
-        // 1. 保存“容器构建完成后”要执行的回调
-        private readonly List<Action<ITangdaoProvider>> _builtCallbacks = new List<Action<ITangdaoProvider>>();
-
         public ITangdaoContainer Container { get; }
 
         private static TangdaoContainerBuilder _current;
@@ -34,37 +33,19 @@ namespace IT.Tangdao.Framework.Ioc
 
         public void ValidateDependencies()
         {
-            Container.Registry.ValidateDependencies(); // 用前面写好的访问者
-        }
-
-        public ITangdaoContainer Build()
-        {
-            // 目前只是快照返回，后续可加锁防再写
-
-            return Container;
+            ContainerUtils.ValidateDependencies(Container); // 用前面写好的访问者
         }
 
         // 2. 供框架内部注册初始化钩子（模块 OnInitialized）
         internal void AddBuiltCallback(Action<ITangdaoProvider> callback)
-            => _builtCallbacks.Add(callback);
+        {
+            ContainerUtils.AddBuiltCallback(callback);
+        }
 
         // 3. 由 TangdaoApplication 在 BuildProvider() 后调用
         internal void RaiseBuilt(ITangdaoProvider provider)
         {
-            var exceptions = new List<Exception>();
-            foreach (var back in _builtCallbacks)
-            {
-                try
-                {
-                    back.Invoke(provider);
-                }
-                catch (Exception ex)
-                {
-                    exceptions.Add(ex);
-                }
-            }
-            if (exceptions.Count > 0)
-                throw new AggregateException("模块初始化失败，见内部异常", exceptions);
+            ContainerUtils.RaiseBuilt(provider);
         }
     }
 }

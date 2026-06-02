@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace IT.Tangdao.Framework
+namespace IT.Tangdao.Framework.Infrastructure
 {
     /// <summary>
     /// 特性扫描器
