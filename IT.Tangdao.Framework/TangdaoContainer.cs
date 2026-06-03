@@ -22,7 +22,7 @@ namespace IT.Tangdao.Framework
             Registry = new ServiceRegistry();
         }
 
-        public void Register(IServiceEntry entry)
+        void ITangdaoContainer.Register(IServiceEntry entry)
         {
             if (entry == null) throw new ArgumentNullException(nameof(entry));
             Registry.Add(entry);
@@ -31,9 +31,8 @@ namespace IT.Tangdao.Framework
         public ITangdaoProvider BuildProvider()
         {
             // 把内部注册表和反射工厂一起塞进 Provider
-            var factory = new ReflectionServiceFactory(
-                            new TangdaoProvider(Registry, null)); // 先循环引用占位
-                                                                  // 用临时委托解决循环：Provider 需要 Factory，Factory 需要 Provider
+            var factory = new ReflectionServiceFactory(new TangdaoProvider(Registry, null)); // 先循环引用占位
+            // 用临时委托解决循环：Provider 需要 Factory，Factory 需要 Provider
             var provider = new TangdaoProvider(Registry, factory);
             ((ReflectionServiceFactory)factory).RebindProvider(provider);
             return provider;

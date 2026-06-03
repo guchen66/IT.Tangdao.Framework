@@ -8,13 +8,13 @@ namespace IT.Tangdao.Framework.Extensions
     /// </summary>
     public static class TangdaoContainerExtension
     {
-        public static ITangdaoContainer AddTangdaoTransient<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
+        public static ITangdaoContainer RegisterTransient<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
             container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new TransientStrategy()));
             return container;
         }
 
-        public static ITangdaoContainer AddTangdaoSingleton<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
+        public static ITangdaoContainer RegisterSingleton<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
             container.Register(new ServiceEntry(typeof(TService), typeof(TImpl), new SingletonStrategy()));
             return container;
@@ -23,23 +23,23 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 自己注册自己：T 既是服务类型也是实现类型。
         /// </summary>
-        public static ITangdaoContainer AddTangdaoTransient<T>(this ITangdaoContainer container) where T : class
+        public static ITangdaoContainer RegisterTransient<T>(this ITangdaoContainer container) where T : class
         {
-            return container.AddTangdaoTransient(typeof(T));
+            return container.RegisterTransient(typeof(T));
         }
 
-        public static ITangdaoContainer AddTangdaoTransient(this ITangdaoContainer container, Type type)
+        public static ITangdaoContainer RegisterTransient(this ITangdaoContainer container, Type type)
         {
             container.Register(new ServiceEntry(type, type, new TransientStrategy()));
             return container;
         }
 
-        public static ITangdaoContainer AddTangdaoSingleton<T>(this ITangdaoContainer container) where T : class
+        public static ITangdaoContainer RegisterSingleton<T>(this ITangdaoContainer container) where T : class
         {
-            return container.AddTangdaoSingleton(typeof(T));
+            return container.RegisterSingleton(typeof(T));
         }
 
-        public static ITangdaoContainer AddTangdaoSingleton(this ITangdaoContainer container, Type type)
+        public static ITangdaoContainer RegisterSingleton(this ITangdaoContainer container, Type type)
         {
             container.Register(new ServiceEntry(type, type, new SingletonStrategy()));
             return container;
@@ -50,12 +50,12 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 自己注册自己（作用域）
         /// </summary>
-        public static ITangdaoContainer AddTangdaoScoped<T>(this ITangdaoContainer container) where T : class
+        public static ITangdaoContainer RegisterScoped<T>(this ITangdaoContainer container) where T : class
         {
-            return container.AddTangdaoScoped(typeof(T));
+            return container.RegisterScoped(typeof(T));
         }
 
-        public static ITangdaoContainer AddTangdaoScoped(this ITangdaoContainer container, Type type)
+        public static ITangdaoContainer RegisterScoped(this ITangdaoContainer container, Type type)
         {
             container.Register(new ServiceEntry(type, type, new ScopedStrategy()));
             return container;
@@ -64,12 +64,12 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 接口→实现（作用域）
         /// </summary>
-        public static ITangdaoContainer AddTangdaoScoped<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
+        public static ITangdaoContainer RegisterScoped<TService, TImpl>(this ITangdaoContainer container) where TImpl : TService
         {
-            return container.AddTangdaoScoped(typeof(TService), typeof(TImpl));
+            return container.RegisterScoped(typeof(TService), typeof(TImpl));
         }
 
-        public static ITangdaoContainer AddTangdaoScoped(this ITangdaoContainer container, Type serviceType, Type implementationType)
+        public static ITangdaoContainer RegisterScoped(this ITangdaoContainer container, Type serviceType, Type implementationType)
         {
             if (!serviceType.IsAssignableFrom(implementationType))
             {
@@ -87,7 +87,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 瞬态工厂：每次调用 factory 委托。
         /// </summary>
-        public static ITangdaoContainer AddTangdaoTransientFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
+        public static ITangdaoContainer RegisterTransientFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
         {
             container.Register(new ServiceEntry(typeof(T), typeof(TransientFactory<T>), new TransientStrategy()));
             // 把委托塞进容器元数据，后续工厂能拿到
@@ -98,7 +98,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 单例工厂：只调用一次 factory 委托，结果缓存。
         /// </summary>
-        public static ITangdaoContainer AddTangdaoSingletonFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
+        public static ITangdaoContainer RegisterSingletonFactory<T>(this ITangdaoContainer container, Func<ITangdaoProvider, T> factory) where T : class
         {
             container.Register(new ServiceEntry(typeof(T), typeof(SingletonFactory<T>), new SingletonStrategy()));
             SingletonFactory<T>.SetFactory(factory);
@@ -108,7 +108,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 把**已有实例**注册成单例；后续解析都返回同一对象。
         /// </summary>
-        public static ITangdaoContainer AddTangdaoSingleton<T>(this ITangdaoContainer container, T instance) where T : class
+        public static ITangdaoContainer RegisterSingleton<T>(this ITangdaoContainer container, T instance) where T : class
         {
             if (instance == null) throw new ArgumentNullException(nameof(instance));
 
@@ -194,10 +194,34 @@ namespace IT.Tangdao.Framework.Extensions
         /// <param name="container"></param>
         /// <param name="registerAction"></param>
         /// <returns></returns>
-        internal static ITangdaoContainer AddLazyRegistration(this ITangdaoContainer container, Action<ITangdaoContainer> registerAction)
+        internal static ITangdaoContainer RegisterLazyRegistration(this ITangdaoContainer container, Action<ITangdaoContainer> registerAction)
         {
             container.LazyRegistrations.Add(registerAction);
             return container;   // 链式
         }
+
+        #region 私有验证方法
+
+        /// <summary>
+        /// 验证类型是否为可实例化的具体类型（非接口、非抽象类）。
+        /// </summary>
+        /// <param name="type">待验证的类型</param>
+        /// <exception cref="InvalidOperationException">当类型是接口或抽象类时抛出</exception>
+        private static void ValidateConcreteType(Type type)
+        {
+            if (type.IsInterface)
+            {
+                throw new InvalidOperationException(
+                    $"不能直接注册接口 '{type.Name}'。请使用 RegisterTransient<{type.Name}, TImpl>() 或类似重载指定具体实现类。");
+            }
+
+            if (type.IsAbstract)
+            {
+                throw new InvalidOperationException(
+                    $"不能直接注册抽象类 '{type.Name}'。请使用 RegisterTransient<{type.Name}, TImpl>() 或类似重载指定具体实现类。");
+            }
+        }
+
+        #endregion 私有验证方法
     }
 }

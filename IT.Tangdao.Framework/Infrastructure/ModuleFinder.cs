@@ -49,7 +49,7 @@ namespace IT.Tangdao.Framework.Infrastructure
             foreach (var m in catalog.Where(m => m.Lazy))
             {
                 var moduleCopy = m;
-                builder.Container.AddLazyRegistration(c =>
+                builder.Container.RegisterLazyRegistration(c =>
                 {
                     moduleCopy.RegisterServices(c);
                     builder.AddBuiltCallback(provider => m.OnInitialized(provider));

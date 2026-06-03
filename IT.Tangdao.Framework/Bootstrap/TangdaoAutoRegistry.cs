@@ -27,19 +27,19 @@ namespace IT.Tangdao.Framework.Bootstrap
                 switch (registerAttribute.Mode)
                 {
                     case RegisterMode.Transient:
-                        tangdaoContainer.AddTangdaoTransient(info.Type);
+                        tangdaoContainer.RegisterTransient(info.Type);
                         break;
 
                     case RegisterMode.Singleton:
-                        tangdaoContainer.AddTangdaoSingleton(info.Type);
+                        tangdaoContainer.RegisterSingleton(info.Type);
                         break;
 
                     case RegisterMode.Scoped:
-                        tangdaoContainer.AddTangdaoScoped(info.Type);
+                        tangdaoContainer.RegisterScoped(info.Type);
                         break;
 
                     default:
-                        tangdaoContainer.AddTangdaoSingleton(info.Type);
+                        tangdaoContainer.RegisterSingleton(info.Type);
                         break;
                 }
             }

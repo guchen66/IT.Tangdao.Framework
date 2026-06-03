@@ -77,8 +77,8 @@ Window管道，WindowPipe
 
      protected override void RegisterServices(ITangdaoContainer container)
      {
-         container.AddTangdaoSingleton<MainView>();
-         container.AddTangdaoSingleton<MainViewModel>();
+         container.RegisterdaoSingleton<MainView>();
+         container.RegisterdaoSingleton<MainViewModel>();
          Logger.WriteLocal("Tangdao测试代码启动");
      }
 
@@ -156,10 +156,10 @@ public partial class App : TangdaoApplication
  {
      protected override void RegisterServices(ITangdaoContainer container)
      {
-         container.AddTangdaoSingleton<MainView>();
-         container.AddTangdaoSingleton<MainViewModel>();
-         container.AddTangdaoSingleton<HomeViewModel>();
-         container.AddTangdaoSingleton<IReadService, ReadService>();
+         container.RegisterdaoSingleton<MainView>();
+         container.RegisterdaoSingleton<MainViewModel>();
+         container.RegisterdaoSingleton<HomeViewModel>();
+         container.RegisterdaoSingleton<IReadService, ReadService>();
      }
 
      protected override Window CreateWindow()
@@ -173,11 +173,11 @@ public partial class App : TangdaoApplication
 
 ```C#
 
- container.AddTangdaoScoped<T>();
- container.AddTangdaoTransient<T>();
- container.AddTangdaoSingleton<T>();
+ container.RegisterdaoScoped<T>();
+ container.RegisterdaoTransient<T>();
+ container.RegisterdaoSingleton<T>();
  container.AddKeyedTransient<T>();
- container.AddTangdaoSingletonFactory<IWeatherService>(provider =>
+ container.RegisterdaoSingletonFactory<IWeatherService>(provider =>
 new WeatherService(provider.GetService<ITangdaoLogger>(), provider.GetService<IConfig>()));
 ```
 
@@ -629,9 +629,9 @@ TangdaoContext.GetTangdaoParameter<T>();
  var uri = new TangdaoUri(connUri);
 
  Context = TangdaoChannelBuilder.Build(NetMode.Client, connUri);
- container.AddTangdaoSingleton<ITangdaoChannel>();
- container.AddTangdaoSingleton<ITangdaoRequest>();
- container.AddTangdaoSingleton<ITangdaoResponse>();
+ container.RegisterdaoSingleton<ITangdaoChannel>();
+ container.RegisterdaoSingleton<ITangdaoRequest>();
+ container.RegisterdaoSingleton<ITangdaoResponse>();
 
 ```
 
@@ -1056,7 +1056,7 @@ class Program
 注册代码
 
 ```C#
- container.AddTangdaoSingleton(new FileMonitorConfig() 
+ container.RegisterdaoSingleton(new FileMonitorConfig() 
  {
      MonitorRootPath = ConfigurationManager.AppSettings["MontionPath"],
      IncludeSubdirectories = true,
@@ -1067,7 +1067,7 @@ class Program
      DebounceMilliseconds = 800,
      FileReadRetryCount = 3
  });
- container.AddTangdaoSingletonFactory<IFileMonitor>(provider =>
+ container.RegisterdaoSingletonFactory<IFileMonitor>(provider =>
  {
      return new FileMonitor
      {
@@ -1471,7 +1471,7 @@ TangdaoMessenger.Instance.Unregister();
 1、使用时需要保持单例唯一性，这里跟据你使用的IOC决定注册
 
 ````
- container.AddTangdaoSingleton<IActionTable, ActionTable>();
+ container.RegisterdaoSingleton<IActionTable, ActionTable>();
 ````
 
 2、带参数使用

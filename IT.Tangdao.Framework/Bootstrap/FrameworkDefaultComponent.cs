@@ -26,43 +26,43 @@ namespace IT.Tangdao.Framework.Bootstrap
         public void Load(ITangdaoContainer container, TangdaoComponentContext context)
         {
             //注册读写服务
-            container.AddTangdaoSingleton<IContentAccess, ContentAccess>();
+            container.RegisterSingleton<IContentAccess, ContentAccess>();
 
             //注册读取地址服务
-            container.AddTangdaoSingleton<IFileLocator, FileLocator>();
+            container.RegisterSingleton<IFileLocator, FileLocator>();
 
             //注册发布通知服务
-            container.AddTangdaoSingleton<ITangdaoPublisher, TangdaoPublisher>();
-            container.AddTangdaoSingleton<ITangdaoNotifier, TangdaoNotifier>();
+            container.RegisterSingleton<ITangdaoPublisher, TangdaoPublisher>();
+            container.RegisterSingleton<ITangdaoNotifier, TangdaoNotifier>();
 
             //注册委托传输服务
-            container.AddTangdaoSingleton<IActionTable, ActionTable>();
+            container.RegisterSingleton<IActionTable, ActionTable>();
 
             //注册事件聚合器
-            container.AddTangdaoSingleton<IEventAggregator, EventAggregator>();
+            container.RegisterSingleton<IEventAggregator, EventAggregator>();
 
             //注册异步任务流
-            container.AddTangdaoSingleton<ITaskQueueManager, TaskQueueManager>();
+            container.RegisterSingleton<ITaskQueueManager, TaskQueueManager>();
 
             //注册异步任务器
-            container.AddTangdaoSingleton<ITaskController, TaskController>();
+            container.RegisterSingleton<ITaskController, TaskController>();
 
             //登录窗体以及Window管理通道
-            container.AddTangdaoSingleton<IWindowBuilder, WindowBuilder>();
-            container.AddTangdaoTransient<IWindowPipeline, WindowPipeline>();
-            container.AddTangdaoTransient<IWindowGuard, LoginSignGuard>();
-            container.AddTangdaoSingleton<WindowAction>();
+            container.RegisterSingleton<IWindowBuilder, WindowBuilder>();
+            container.RegisterTransient<IWindowPipeline, WindowPipeline>();
+            container.RegisterTransient<IWindowGuard, LoginSignGuard>();
+            container.RegisterSingleton<WindowAction>();
 
             //注册导航服务
-            container.AddTangdaoTransientFactory<ITangdaoRouterResolver>(provider =>
+            container.RegisterTransientFactory<ITangdaoRouterResolver>(provider =>
             {
                 return new TangdaoRouterResolver(entry => provider.GetService(entry.RegisterType) as ITangdaoPage);
             });
 
-            container.AddTangdaoSingleton<ITangdaoRouter, TangdaoRouter>();
+            container.RegisterSingleton<ITangdaoRouter, TangdaoRouter>();
             var loader = new TangdaoConfigLoader();
             // 2. 立即 Load 并塞进容器
-            container.AddTangdaoSingleton(loader.Load());
+            container.RegisterSingleton(loader.Load());
         }
     }
 }
