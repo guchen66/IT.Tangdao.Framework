@@ -5,16 +5,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Events;
-using IT.Tangdao.Framework.Events;
 
 namespace IT.Tangdao.Framework.DaoTasks
 {
     /// <summary>
     /// 进度报告实现类
     /// </summary>
-    /// <remarks>
-    /// 实现了IProgressReport接口，用于报告任务执行进度
-    /// </remarks>
     public class ProgressReport : IProgressReport
     {
         private long _total = 100;

@@ -91,7 +91,7 @@ namespace IT.Tangdao.Framework.DaoTasks
             {
                 return await TangdaoTaskScheduler.ExecuteAsync(async (task) =>
                 {
-                    return await action(token);
+                    await action(token);
                 });
             };
 

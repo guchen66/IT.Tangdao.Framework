@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,42 +14,22 @@ namespace IT.Tangdao.Framework.Utilities
     /// <typeparam name="TTarget">目标枚举类型</typeparam>
     internal static class EnumUtils<TSource, TTarget> where TSource : struct, Enum where TTarget : struct, Enum
     {
-        /// <summary>
-        /// 按枚举底层数值进行转换
-        /// </summary>
-        /// <param name="source">源枚举值</param>
-        /// <returns>转换后的目标枚举值</returns>
-        /// <exception cref="InvalidOperationException">当无法转换时抛出</exception>
-        public static TTarget Converter(TSource source)
+        public static readonly Func<TSource, TTarget> Convert;
+
+        static EnumUtils()
         {
-            object underlyingValue = Convert.ChangeType(source, Enum.GetUnderlyingType(typeof(TSource)));
-            try
-            {
-                return (TTarget)Enum.ToObject(typeof(TTarget), underlyingValue);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Cannot convert enum value '{source}' to type {typeof(TTarget).Name}", ex);
-            }
-        }
+            var sourceParam = Expression.Parameter(typeof(TSource), "source");
 
-        /// <summary>
-        /// 枚举之间安全转换
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public static TTarget ConvertByValueSafe(TSource source)
-        {
-            object value = Convert.ChangeType(source, Enum.GetUnderlyingType(typeof(TSource)));
+            // 将源枚举转换为底层类型（如 int）
+            var toUnderlying = Expression.Convert(sourceParam,
+                Enum.GetUnderlyingType(typeof(TSource)));
 
-            if (!Enum.IsDefined(typeof(TTarget), value))
-            {
-                throw new InvalidOperationException(
-                    $"数值 {value} 在枚举 {typeof(TTarget).Name} 中未定义");
-            }
+            // 再转换为目标枚举类型
+            var toTarget = Expression.Convert(toUnderlying, typeof(TTarget));
 
-            return (TTarget)Enum.ToObject(typeof(TTarget), value);
+            // 编译成原生委托
+            var lambda = Expression.Lambda<Func<TSource, TTarget>>(toTarget, sourceParam);
+            Convert = lambda.Compile();
         }
     }
 }

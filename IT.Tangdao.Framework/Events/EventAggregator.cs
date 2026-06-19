@@ -115,9 +115,7 @@ namespace IT.Tangdao.Framework.Events
 
                 lock (_cleanupLock)
                 {
-                    var aliveHandlers = handlers
-                        .Where(wh => wh.TryGetDelegate(delegateType, out _))
-                        .ToList();
+                    var aliveHandlers = handlers.Where(wh => wh.TryGetDelegate(delegateType, out _)).ToList();
 
                     if (aliveHandlers.Count != handlers.Count)
                     {
@@ -138,8 +136,7 @@ namespace IT.Tangdao.Framework.Events
 
             foreach (var weakHandler in weakHandlers)
             {
-                if (weakHandler.TryGetDelegate(typeof(DaoEventHandler<T>), out var handler) &&
-                    handler is DaoEventHandler<T> typedHandler)
+                if (weakHandler.TryGetDelegate(typeof(DaoEventHandler<T>), out var handler) && handler is DaoEventHandler<T> typedHandler)
                 {
                     aliveHandlers.Add(typedHandler);
                 }

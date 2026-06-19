@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Abstractions.Results;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,19 +11,43 @@ namespace IT.Tangdao.Framework.DaoTasks
     /// 任务可等待接口
     /// </summary>
     /// <remarks>
-    /// 定义了任务生命周期的钩子方法，由任务调度器调用
+    /// 定义任务的基本属性和生命周期方法，由任务调度器使用
     /// </remarks>
-    internal interface ITaskAwaitable
+    public interface ITaskAwaitable
     {
         /// <summary>
-        /// 任务完成时调用
+        /// 获取任务的当前状态
         /// </summary>
-        void OnCompleted();
+        TaskStatus Status { get; }
 
         /// <summary>
-        /// 任务执行出错时调用
+        /// 获取任务执行结果
         /// </summary>
-        /// <param name="ex">任务执行过程中发生的异常</param>
-        void OnFaulted(Exception ex);
+        IResponseResult Result { get; }
+
+        /// <summary>
+        /// 任务完成事件
+        /// </summary>
+        event Action OnCompleted;
+
+        /// <summary>
+        /// 任务失败事件
+        /// </summary>
+        event Action<Exception> OnFaulted;
+
+        /// <summary>
+        /// 标记任务成功完成
+        /// </summary>
+        void Complete();
+
+        /// <summary>
+        /// 标记任务失败
+        /// </summary>
+        void Fault(Exception ex);
+
+        /// <summary>
+        /// 标记任务失败
+        /// </summary>
+        void Fault(IResponseResult result);
     }
 }

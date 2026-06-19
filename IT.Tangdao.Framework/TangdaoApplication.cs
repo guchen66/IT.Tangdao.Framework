@@ -27,6 +27,7 @@ namespace IT.Tangdao.Framework
     /// WPF 专用启动入口。
     /// </summary>
     [AssemblyScan]
+    [Component]
     public class TangdaoApplication : TangdaoApplicationBase
     {
         protected static ITangdaoProvider Provider { get; private set; }

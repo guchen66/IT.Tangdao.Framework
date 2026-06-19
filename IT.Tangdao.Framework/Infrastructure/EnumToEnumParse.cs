@@ -22,18 +22,7 @@ namespace IT.Tangdao.Framework.Infrastructure
         /// <exception cref="InvalidOperationException">当无法转换时抛出</exception>
         public static TTarget Converter(TSource source)
         {
-            return EnumUtils<TSource, TTarget>.Converter(source);
-        }
-
-        /// <summary>
-        /// 枚举之间安全转换
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public static TTarget ConvertByValueSafe(TSource source)
-        {
-            return EnumUtils<TSource, TTarget>.ConvertByValueSafe(source);
+            return EnumUtils<TSource, TTarget>.Convert(source);
         }
     }
 }

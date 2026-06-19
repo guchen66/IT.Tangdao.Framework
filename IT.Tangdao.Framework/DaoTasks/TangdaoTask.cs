@@ -1,26 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
+using IT.Tangdao.Framework.Abstractions.Results;
+using IT.Tangdao.Framework.Enums;
 
 namespace IT.Tangdao.Framework.DaoTasks
 {
     /// <summary>
-    /// 同步任务执行上下文
+    /// 任务包装器，提供状态追踪、耗时统计、进度报告和取消支持
     /// </summary>
-    /// <remarks>
-    /// 用于同步任务的执行状态管理和生命周期跟踪
-    /// </remarks>
-    public sealed class TangdaoTask : ITaskAwaitable, IDisposable
+    public sealed class TangdaoTask : IDisposable
     {
         private readonly Stopwatch _sw = Stopwatch.StartNew();
-        private bool _disposed;                       // 防止重复 Dispose
-        private readonly object _lock = new object(); // 线程安全锁
-        private readonly ProgressReport _progressReport = new ProgressReport();
+        private readonly object _lock = new object();
+        private ProgressReport _progressReport;
 
-        #region ---- 对外只读状态 ----
+        private TaskStatus _status = TaskStatus.Running;
+        private bool _disposed;
 
         /// <summary>
         /// 获取任务已执行的时间跨度
@@ -30,56 +28,98 @@ namespace IT.Tangdao.Framework.DaoTasks
         /// <summary>
         /// 获取任务的当前状态
         /// </summary>
-        public TaskStatus Status { get; private set; } = TaskStatus.Running;
-
-        /// <summary>
-        /// 获取任务执行过程中发生的异常
-        /// </summary>
-        public Exception Error { get; private set; }
-
-        /// <summary>
-        /// 获取任务是否成功完成
-        /// </summary>
-        public bool IsCompletedSuccessfully => Status == TaskStatus.RanToCompletion;
+        public TaskStatus Status => _status;
 
         /// <summary>
         /// 获取进度报告对象
         /// </summary>
-        public IProgressReport ProgressReport => _progressReport;
-
-        #endregion ---- 对外只读状态 ----
-
-        #region ---- 生命周期钩子（调度器会调用） ----
-
         /// <summary>
-        /// 任务完成时调用的钩子方法
+        /// 获取进度报告对象（懒加载）
         /// </summary>
-        public void OnCompleted()
+        public IProgressReport ProgressReport
         {
-            lock (_lock)
+            get
             {
-                if (_disposed) return;
-                Status = TaskStatus.RanToCompletion;
+                if (_progressReport == null)
+                    _progressReport = new ProgressReport();
+                return _progressReport;
             }
         }
 
         /// <summary>
-        /// 任务执行出错时调用的钩子方法
+        /// 取消令牌
         /// </summary>
-        /// <param name="ex">任务执行过程中发生的异常</param>
-        public void OnFaulted(Exception ex)
+        public CancellationToken CancellationToken { get; internal set; }
+
+        /// <summary>
+        /// 如果已请求取消，则抛出OperationCanceledException
+        /// </summary>
+        public void ThrowIfCancellationRequested()
+        {
+            _progressReport.ThrowIfCancellationRequested(CancellationToken);
+        }
+
+        /// <summary>
+        /// 检查是否已请求取消
+        /// </summary>
+        public bool IsCancellationRequested => CancellationToken.IsCancellationRequested || _progressReport.IsCancelled;
+
+        /// <summary>
+        /// 注册取消回调
+        /// </summary>
+        public CancellationTokenRegistration Register(Action callback)
+            => CancellationToken.Register(callback);
+
+        /// <summary>
+        /// 注册取消回调（带状态）
+        /// </summary>
+        public CancellationTokenRegistration Register(Action<object> callback, object state)
+            => CancellationToken.Register(callback, state);
+
+        /// <summary>
+        /// 标记任务成功完成
+        /// </summary>
+        internal TangdaoTask SetResult()
         {
             lock (_lock)
             {
-                if (_disposed) return;
-                Status = TaskStatus.Faulted;
-                Error = ex;
+                if (_disposed || _status != TaskStatus.Running) return this;
+
+                _status = TaskStatus.RanToCompletion;
+                _progressReport?.Report(100, "任务执行成功");
+                return this;
             }
         }
 
-        #endregion ---- 生命周期钩子（调度器会调用） ----
+        /// <summary>
+        /// 标记任务失败
+        /// </summary>
+        internal TangdaoTask SetException(Exception ex)
+        {
+            lock (_lock)
+            {
+                if (_disposed || _status != TaskStatus.Running) return this;
 
-        #region ---- IDisposable ----
+                _status = TaskStatus.Faulted;
+
+                _progressReport?.Report(0, $"任务执行失败：{ex?.Message}");
+                return this;
+            }
+        }
+
+        /// <summary>
+        /// 标记任务被取消
+        /// </summary>
+        internal void SetCanceled()
+        {
+            lock (_lock)
+            {
+                if (_disposed || _status != TaskStatus.Running) return;
+
+                _status = TaskStatus.Canceled;
+                _progressReport?.Report(0, "任务被取消");
+            }
+        }
 
         /// <summary>
         /// 释放任务资源
@@ -91,12 +131,8 @@ namespace IT.Tangdao.Framework.DaoTasks
                 if (_disposed) return;
                 _disposed = true;
                 _sw.Stop();
-                Status = Status == TaskStatus.Running
-                            ? TaskStatus.Canceled
-                            : Status;
+                // 不修改 _status，职责分离
             }
         }
-
-        #endregion ---- IDisposable ----
     }
 }
