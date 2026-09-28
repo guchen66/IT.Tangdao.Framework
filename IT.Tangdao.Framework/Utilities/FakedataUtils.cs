@@ -8,21 +8,37 @@ using System.Threading;
 using System.Threading.Tasks;
 using IT.Tangdao.Framework.Abstractions.Loggers;
 using IT.Tangdao.Framework.Extensions;
-using IT.Tangdao.Framework.Faker;
 using IT.Tangdao.Framework.Utilities;
 
 namespace IT.Tangdao.Framework.Utilities
 {
+    /// <summary>
+    /// 假数据基础工具：只提供"无状态的原子造值动作"。
+    /// <para>
+    /// 【本版核心变更】所有随机方法都改为<b>由调用方传入 <see cref="Random"/></b>，
+    /// 工具类自身不再持有任何静态可变状态：原先的 <c>ThreadLocal&lt;Random&gt;</c>、
+    /// 自增计数器 <c>_intIdCounter</c>、已用 ID 集合 <c>_usedIds</c> 全部移除。
+    /// </para>
+    /// <para>
+    /// 为什么要这么做：并行生成时，静态共享的随机源与计数器本身就是竞争点；
+    /// 其中自增计数器更是<b>进程级</b>的，多个调用方同时构建数据时会互相污染序号。
+    /// 把随机源的所有权交还给调用方（由生成上下文按线程持有）之后，
+    /// 本类退化为纯函数集合，天然线程安全，也能用固定种子在单元测试中复现结果。
+    /// </para>
+    /// </summary>
     internal static class FakedataUtils
     {
         private static readonly char[] _chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
 
         /// <summary>
-        /// 生成一个指定长度的随机字符串，RNGCryptoServiceProvider确保安全性
-        /// 使用场景，生成随机密码，会话标识
+        /// 生成一个指定长度的随机字符串，使用加密级随机源。
+        /// 使用场景：生成随机密码、会话标识等对随机性要求较高的地方。
+        /// <para>
+        /// 本方法刻意不接受外部随机源：它追求的是密码学强度，
+        /// 与业务假数据用的 <see cref="Random"/> 不是同一层级的需求。
+        /// </para>
         /// </summary>
-        /// <param name="length"></param>
-        /// <returns></returns>
+        /// <param name="length">字符串长度，必须为正数</param>
         public static string CreateRandomString(int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
@@ -40,55 +56,26 @@ namespace IT.Tangdao.Framework.Utilities
             }
         }
 
-        private static readonly Random _rand = new Random();
-
-        /// <summary>
-        /// 使用正则随机生成一个邮箱（.NET Framework 版）
-        /// 正则：^[a-z]{6,12}@[a-z]{3,6}\.(com|cn|net|org)$
-        /// </summary>
-        public static string CreateRandomEmail()
-        {
-            // 1. 小写字母池
-            const string letters = "abcdefghijklmnopqrstuvwxyz";
-
-            // 2. 随机字符串辅助
-            Func<int, int, string> randLower = (min, max) =>
-            {
-                int len = _rand.Next(min, max + 1);
-                var sb = new StringBuilder(len);
-                for (int i = 0; i < len; i++)
-                    sb.Append(letters[_rand.Next(letters.Length)]);
-                return sb.ToString();
-            };
-
-            // 3. 按正则片段拼接
-            string local = randLower(6, 12);          // [a-z]{6,12}
-            string domain = randLower(3, 6);          // [a-z]{3,6}
-            string tld = _rand.Next(2) == 0 ? "com" : "cn"; // 简化二选一
-
-            return $"{local}@{domain}.{tld}";
-        }
-
         /// <summary>
         /// 这个字段可以作为日志标识符使用
         /// </summary>
-        public static string LogId => CreateRandomString(48);
+        public static string LogId
+        {
+            get { return CreateRandomString(48); }
+        }
 
-        // 使用ThreadLocal<Random>避免多线程竞争问题，提高性能
-        private static readonly ThreadLocal<Random> _random = new ThreadLocal<Random>(() => new Random(Guid.NewGuid().GetHashCode()));
+        // ===== 常用数据池 =====
 
-        private static readonly HashSet<int> _usedIds = new HashSet<int>();
-
-        // 常用数据池
         private static readonly string[] ChineseCities = { "北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "南京" };
 
         private static readonly string[] CommonHobbies = { "阅读", "旅行", "摄影", "烹饪", "运动", "音乐", "电影" };
 
+        /// <summary>中文常见姓名池（保留公开：外部偶尔直接取用）。</summary>
         public static readonly string[] CommonNames = { "张三", "李四", "王五", "赵六", "钱七" };
 
         private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        // 手机号正则（符合中国手机号规则）
+        // 手机号正则（符合中国手机号规则），保留作为规则说明
         private const string MobilePhonePattern = "^1[3-9]\\d{9}$";
 
         // 常用手机号前缀（中国运营商号段）
@@ -102,18 +89,20 @@ namespace IT.Tangdao.Framework.Utilities
         };
 
         /// <summary>
-        /// 生成符合中国规则的11位手机号
+        /// 生成符合中国规则的 11 位手机号。
         /// </summary>
-        public static string GenerateChineseMobileNumber()
+        /// <param name="random">调用方提供的随机源</param>
+        public static string GenerateChineseMobileNumber(Random random)
         {
-            string prefix = MobilePrefixes[_random.Value.Next(MobilePrefixes.Length)];
-            string suffix = _random.Value.Next(10000000, 99999999).ToString();
+            string prefix = MobilePrefixes[random.Next(MobilePrefixes.Length)];
+            string suffix = random.Next(10000000, 99999999).ToString();
             return prefix + suffix;
         }
 
         /// <summary>
-        /// 检查字符串是否包含"手机"或"电话"
+        /// 检查字符串是否包含"手机"或"电话"。
         /// </summary>
+        /// <param name="description">待检查的描述文本</param>
         public static bool IsMobilePhoneDescription(string description)
         {
             if (string.IsNullOrEmpty(description))
@@ -122,195 +111,244 @@ namespace IT.Tangdao.Framework.Utilities
             return description.Contains("手机") || description.Contains("电话");
         }
 
-        // 自增ID计数器
-        private static int _intIdCounter = 1;
-
-        public static void ResetCounters()
+        /// <summary>
+        /// 生成 int 随机数。
+        /// </summary>
+        /// <param name="random">调用方提供的随机源</param>
+        /// <param name="min">下界（含）</param>
+        /// <param name="max">上界（不含）</param>
+        public static int GenerateUniqueId(Random random, int min = 1, int max = 1000)
         {
-            _intIdCounter = 1;
-            _usedIds.Clear();
+            NormalizeRange(ref min, ref max);
+            return random.Next(min, max);
         }
 
         /// <summary>
-        /// int类型使用，生成随机数
+        /// 生成 double 随机数（整数部分 + 指定小数位）。
         /// </summary>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
-        /// <returns></returns>
-        public static int GenerateUniqueId(int min = 1, int max = 1000)
+        /// <param name="random">调用方提供的随机源</param>
+        /// <param name="min">整数部分下界（含）</param>
+        /// <param name="max">整数部分上界（不含）</param>
+        /// <param name="point">小数位数，取值 0~15</param>
+        public static double GenerateDoubleUniqueId(Random random, int min = 0, int max = 1000, int point = 4)
         {
-            // 直接返回随机数，不使用HashSet检查唯一性
-            // 对于大范围的随机数，重复概率极低
-            return _random.Value.Next(min, max);
-        }
+            NormalizeRange(ref min, ref max);
+            point = NormalizePoint(point);
 
-        /// <summary>
-        /// double类型使用，生成随机数
-        /// </summary>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
-        /// <returns></returns>
-        public static double GenerateDoubleUniqueId(int min = 0, int max = 1000, int point = 4)
-        {
-            if (min >= max)
-                throw new ArgumentException("min must be less than max");
-
-            if (point < 0 || point > 15)
-                throw new ArgumentException("point must be between 0 and 15");
-
-            // 先生成整数，再添加小数部分
-            int integerPart = _random.Value.Next(min, max);
+            int integerPart = random.Next(min, max);
 
             if (point == 0)
             {
                 return integerPart;
             }
-            else
-            {
-                int maxFraction = (int)Math.Pow(10, point);
-                double fractionalPart = _random.Value.Next(0, maxFraction) / (double)maxFraction;
-                double id = integerPart + fractionalPart;
-                return Math.Round(id, point);
-            }
+
+            int maxFraction = (int)Math.Pow(10, point);
+            double fractionalPart = random.Next(0, maxFraction) / (double)maxFraction;
+            return Math.Round(integerPart + fractionalPart, point);
         }
 
         /// <summary>
-        /// decimal类型使用，生成随机数
+        /// 生成 decimal 随机数（整数部分 + 指定小数位）。
+        /// <para>不经过 double 中转，避免二进制浮点误差。</para>
         /// </summary>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
-        /// <returns></returns>
-        public static decimal GenerateDecimalUniqueId(int min = 0, int max = 1000, int point = 4)
+        /// <param name="random">调用方提供的随机源</param>
+        /// <param name="min">整数部分下界（含）</param>
+        /// <param name="max">整数部分上界（不含）</param>
+        /// <param name="point">小数位数，取值 0~15</param>
+        public static decimal GenerateDecimalUniqueId(Random random, int min = 0, int max = 1000, int point = 4)
         {
-            if (min >= max)
-                throw new ArgumentException("min must be less than max");
+            NormalizeRange(ref min, ref max);
+            point = NormalizePoint(point);
 
-            if (point < 0 || point > 15)
-                throw new ArgumentException("point must be between 0 and 15");
+            int integerPart = random.Next(min, max);
 
-            // 生成整数部分
-            int integerPart = _random.Value.Next(min, max);
-
-            // 生成小数部分
             decimal fractionalPart = 0;
             if (point > 0)
             {
                 int maxFraction = (int)Math.Pow(10, point);
-                fractionalPart = (decimal)_random.Value.Next(0, maxFraction) / maxFraction;
+                fractionalPart = (decimal)random.Next(0, maxFraction) / maxFraction;
             }
 
             return integerPart + fractionalPart;
         }
 
         /// <summary>
-        /// 生成唯一数字（根据Length特性决定位数）
+        /// 生成指定长度的随机字符串。
         /// </summary>
-        public static int GenerateUniqueNumber(int? length = null)
+        /// <param name="random">调用方提供的随机源</param>
+        /// <param name="length">目标长度，非正数时退化为默认长度 6</param>
+        public static string GenerateRandomString(Random random, int length)
         {
-            if (length.HasValue)
-            {
-                // 根据Length生成指定位数的数字（如Length=3 → 100-999）
-                int min = (int)Math.Pow(10, length.Value - 1);
-                int max = (int)Math.Pow(10, length.Value) - 1;
-                return _random.Value.Next(min, max);
-            }
-            // 默认返回1-1000的随机数
-            return _random.Value.Next(1, 1001);
-        }
-
-        /// <summary>
-        /// 生成随机字符串（根据Length特性决定长度）
-        /// </summary>
-        public static string GenerateRandomString(int? length = null)
-        {
-            int len = length ?? 6; // 默认长度6
+            int len = length <= 0 ? 6 : length;
             char[] chars = new char[len];
-            int charsLength = Chars.Length;
-            Random random = _random.Value;
 
             for (int i = 0; i < len; i++)
             {
-                chars[i] = Chars[random.Next(charsLength)];
+                chars[i] = Chars[random.Next(Chars.Length)];
             }
+
             return new string(chars);
         }
 
         /// <summary>
-        /// 生成随机日期（包含随机时分秒）
+        /// 生成随机日期（包含随机时分秒）。
         /// </summary>
-        public static DateTime GenerateRandomDateTime(DateTime? startDate = null, DateTime? endDate = null)
+        /// <param name="random">调用方提供的随机源</param>
+        /// <param name="startDate">下界，默认 1990-01-01</param>
+        /// <param name="endDate">上界，默认当天</param>
+        public static DateTime GenerateRandomDateTime(Random random, DateTime? startDate = null, DateTime? endDate = null)
         {
-            startDate = startDate ?? new DateTime(1990, 1, 1);
-            endDate = endDate ?? DateTime.Today;
+            DateTime start = startDate ?? new DateTime(1990, 1, 1);
+            DateTime end = endDate ?? DateTime.Today;
 
-            int range = (endDate.Value - startDate.Value).Days;
-            var randomDate = startDate.Value.AddDays(_random.Value.Next(range));
+            // 区间写反时自动纠正，避免随机抽样抛异常
+            if (start > end)
+            {
+                DateTime temp = start;
+                start = end;
+                end = temp;
+            }
+
+            int range = (end - start).Days;
+            DateTime randomDate = start.AddDays(range <= 0 ? 0 : random.Next(range));
 
             // 添加随机时分秒
             return randomDate
-                .AddHours(_random.Value.Next(0, 24))
-                .AddMinutes(_random.Value.Next(0, 60))
-                .AddSeconds(_random.Value.Next(0, 60));
+                .AddHours(random.Next(0, 24))
+                .AddMinutes(random.Next(0, 60))
+                .AddSeconds(random.Next(0, 60));
         }
 
-        public static object GetRandomEnumValue(Type enumType, bool returnString = false)
+        /// <summary>
+        /// 随机取一个枚举成员。
+        /// </summary>
+        /// <param name="random">调用方提供的随机源</param>
+        /// <param name="enumType">枚举类型</param>
+        /// <param name="returnString">true 返回成员名字符串，false 返回枚举值本身</param>
+        public static object GetRandomEnumValue(Random random, Type enumType, bool returnString = false)
         {
             var values = Enum.GetValues(enumType);
-            var value = values.GetValue(_random.Value.Next(values.Length));
+            var value = values.GetValue(random.Next(values.Length));
 
-            // 根据需求返回枚举值或字符串
             return returnString ? value.ToString() : value;
         }
 
         /// <summary>
-        /// 根据模板键返回随机值（.NET Framework 版）
+        /// 随机取一个城市名。
         /// </summary>
-        public static object GetRandomTemplateValue(string template)
+        /// <param name="random">调用方提供的随机源</param>
+        public static string GetRandomChineseCity(Random random)
         {
-            switch (template)
+            return ChineseCities[random.Next(ChineseCities.Length)];
+        }
+
+        /// <summary>
+        /// 随机取一个爱好。
+        /// </summary>
+        /// <param name="random">调用方提供的随机源</param>
+        public static string GetRandomHobby(Random random)
+        {
+            return CommonHobbies[random.Next(CommonHobbies.Length)];
+        }
+
+        /// <summary>
+        /// 随机取一个中文姓名（固定池）。
+        /// </summary>
+        /// <param name="random">调用方提供的随机源</param>
+        public static string GetRandomChineseName(Random random)
+        {
+            return CommonNames[random.Next(CommonNames.Length)];
+        }
+
+        /// <summary>
+        /// 生成随机布尔值。
+        /// </summary>
+        /// <param name="random">调用方提供的随机源</param>
+        public static bool GetRandomBoolean(Random random)
+        {
+            return random.Next(2) == 1;
+        }
+
+        /// <summary>
+        /// 按当前线程文化随机取一个姓名。
+        /// <para>
+        /// 【修正说明】旧实现写作
+        /// <c>GetCultureSpecificNames()[_random.Next(CommonNames.Length)]</c>：
+        /// 用 <c>CommonNames</c> 的长度去索引文化姓名数组，
+        /// 两个数组长度一旦不一致就会下标越界。此处改为使用被访问数组自身的长度。
+        /// </para>
+        /// </summary>
+        /// <param name="random">调用方提供的随机源</param>
+        public static string GetCurrentRandomChineseName(Random random)
+        {
+            string[] names = CultureUtils.GetCultureSpecificNames();
+            return names[random.Next(names.Length)];
+        }
+
+        /// <summary>
+        /// 生成符合 <c>^[a-z]{6,12}@[a-z]{3,6}\.(com|cn)$</c> 的随机邮箱。
+        /// </summary>
+        /// <param name="random">调用方提供的随机源</param>
+        public static string CreateRandomEmail(Random random)
+        {
+            const string letters = "abcdefghijklmnopqrstuvwxyz";
+
+            Func<int, int, string> randLower = (min, max) =>
             {
-                case MockTemplate.ChineseName:
-                    return GetRandomChineseName();
+                int len = random.Next(min, max + 1);
+                var sb = new StringBuilder(len);
+                for (int i = 0; i < len; i++)
+                    sb.Append(letters[random.Next(letters.Length)]);
+                return sb.ToString();
+            };
 
-                case MockTemplate.Mobile:
-                    return GenerateChineseMobileNumber();
+            string local = randLower(6, 12);   // [a-z]{6,12}
+            string domain = randLower(3, 6);   // [a-z]{3,6}
+            string tld = random.Next(2) == 0 ? "com" : "cn";
 
-                case MockTemplate.City:
-                    return GetRandomChineseCity();
+            return local + "@" + domain + "." + tld;
+        }
 
-                case MockTemplate.Date:
-                    return GenerateRandomDateTime();
+        /// <summary>
+        /// 纠正区间：min 大于 max 时交换；两者相等时把上界撑开一位，
+        /// 以保证 <c>Random.Next</c> 的调用始终合法。
+        /// <para>
+        /// 旧实现对 <c>min &gt;= max</c> 直接抛 <c>ArgumentException</c>，
+        /// 一个属性上的配置笔误就会让整批数据生成失败；
+        /// 这里改为静默纠正，把"配置错误"降级为"结果不精确"，而不是中断任务。
+        /// </para>
+        /// </summary>
+        private static void NormalizeRange(ref int min, ref int max)
+        {
+            if (min > max)
+            {
+                int temp = min;
+                min = max;
+                max = temp;
+            }
 
-                case MockTemplate.Email:
-                    return FakedataUtils.CreateRandomEmail();
-
-                default:
-                    return GenerateRandomString(6);
+            if (min == max)
+            {
+                max = min + 1;
             }
         }
 
-        public static T GetRandomEnumValue<T>() where T : Enum
+        /// <summary>
+        /// 把小数位数限制在 0~15，超出时收敛到边界。
+        /// </summary>
+        private static int NormalizePoint(int point)
         {
-            var values = Enum.GetValues(typeof(T));
-            return (T)values.GetValue(_random.Value.Next(values.Length));
-        }
+            if (point < 0)
+            {
+                return 0;
+            }
 
-        public static string GetRandomChineseCity() => ChineseCities[_random.Value.Next(ChineseCities.Length)];
+            if (point > 15)
+            {
+                return 15;
+            }
 
-        public static string GetRandomHobby() => CommonHobbies[_random.Value.Next(CommonHobbies.Length)];
-
-        public static string GetRandomChineseName() => CommonNames[_random.Value.Next(CommonNames.Length)];
-
-        public static bool GetRandomBoolean() => _random.Value.Next(2) == 1;
-
-        public static int GetAutoIncrementId() => _intIdCounter++;
-
-        public static string CurrentRandomChineseName => GetCurrentRandomChineseName();
-        public static string RandomChineseName => GetRandomChineseName();
-
-        public static string GetCurrentRandomChineseName()
-        {
-            return CultureUtils.GetCultureSpecificNames()[_random.Value.Next(CommonNames.Length)];
+            return point;
         }
     }
 }

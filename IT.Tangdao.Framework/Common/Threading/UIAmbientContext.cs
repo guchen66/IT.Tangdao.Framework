@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -77,31 +78,41 @@ namespace IT.Tangdao.Framework.Threading
 
         public static T GetObject<T>() where T : class
         {
-            // return CallContext.LogicalGetData(KeyOf<T>()) as T;
+            NotOnUIThreadException.ThrowIfNotOnUIThread();
             return InternalGetObject(KeyOf<T>()) as T;
         }
 
         public static void SetObject<T>(T value) where T : class
         {
-            // CallContext.LogicalSetData(KeyOf<T>(), value);
+            NotOnUIThreadException.ThrowIfNotOnUIThread();
             InternalSetObject(KeyOf<T>(), value);
         }
 
         public static void ClearObject<T>() where T : class
         {
+            NotOnUIThreadException.ThrowIfNotOnUIThread();
             CallContext.FreeNamedDataSlot(KeyOf<T>());
         }
 
         /* ---------- 具名槽 ---------- */
 
         public static void SetObject<T>(string name, T value) where T : class
-            => InternalSetObject(KeyOf<T>() + ":" + name, value);
+        {
+            NotOnUIThreadException.ThrowIfNotOnUIThread();
+            InternalSetObject(KeyOf<T>() + ":" + name, value);
+        }
 
         public static T GetObject<T>(string name) where T : class
-            => InternalGetObject(KeyOf<T>() + ":" + name) as T;
+        {
+            NotOnUIThreadException.ThrowIfNotOnUIThread();
+            return InternalGetObject(KeyOf<T>() + ":" + name) as T;
+        }
 
         public static void ClearObject<T>(string name) where T : class
-            => CallContext.FreeNamedDataSlot(KeyOf<T>() + ":" + name);
+        {
+            NotOnUIThreadException.ThrowIfNotOnUIThread();
+            CallContext.FreeNamedDataSlot(KeyOf<T>() + ":" + name);
+        }
 
         /* ---------- 唯一底层 ---------- */
 

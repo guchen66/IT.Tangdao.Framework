@@ -1,6 +1,10 @@
-﻿using IT.Tangdao.Framework.Attributes;
+﻿using IT.Tangdao.Framework.Abstractions.Contracts;
+using IT.Tangdao.Framework.Attributes;
 using IT.Tangdao.Framework.Enums;
 using IT.Tangdao.Framework.Extensions;
+using IT.Tangdao.Framework.Faker;
+using IT.Tangdao.Framework.Pooling;
+using IT.Tangdao.Framework.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,268 +14,310 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using IT.Tangdao.Framework.Pooling;
-using IT.Tangdao.Framework.Utilities;
 
 namespace IT.Tangdao.Framework.Infrastructure
 {
     /// <summary>
-    /// 数据自动生成器
+    /// 门面层默认组件的共享实例持有者。
+    /// <para>
+    /// 注册表与空值策略都是<b>无状态</b>的（状态全在传入的上下文里），因此可以安全共享；
+    /// 放进非泛型类是为了避免 <c>TangdaoDataFaker&lt;T&gt;</c> 每封闭一个类型就重建一份注册表。
+    /// </para>
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    internal static class FakeDefaults
+    {
+        /// <summary>默认生成器注册表。</summary>
+        public static readonly ITangdaoGeneratorRegistry Registry = new DefaultGeneratorRegistry();
+
+        /// <summary>默认空值策略（按概率判 null）。</summary>
+        public static readonly ITangdaoNullPolicy NullPolicy = new ProbabilityNullPolicy();
+    }
+
+    /// <summary>
+    /// 数据自动生成器（门面）。
+    /// <para>
+    /// 【职责】只做三件事：并发调度造值、串行收尾主键、把结果交回调用方。
+    /// 具体"某个类型该生成什么值"全部委托给
+    /// <see cref="ITangdaoGeneratorRegistry"/> 中的生成器，
+    /// "某个属性该走哪条规则"委托给 <c>FakeRuleChain</c>。
+    /// </para>
+    /// <para>
+    /// 【对外契约保持不变】<c>Build(int)</c> 的签名与返回语义与旧版完全一致，
+    /// 调用方无需改动代码。变化只在内部：不再有硬编码的类型分支字典，
+    /// 不再有进程级自增计数器，属性 setter 缓存键补上了类型全名。
+    /// </para>
+    /// <para>
+    /// 【可替换的三个扩展点】<see cref="Registry"/>、<see cref="NullPolicy"/>、<see cref="Options"/>
+    /// 均可由调用方整体替换，从而在不改库源码的前提下改变生成行为。
+    /// </para>
+    /// </summary>
+    /// <typeparam name="T">待生成的类型，需具备公开无参构造函数</typeparam>
     public class TangdaoDataFaker<T> where T : class, new()
     {
-        //缓存属性生成setter
+        #region 可替换的扩展点
+
+        private static ITangdaoGeneratorRegistry _registry = FakeDefaults.Registry;
+        private static ITangdaoNullPolicy _nullPolicy = FakeDefaults.NullPolicy;
+        private static TangdaoFakerOptions _options = TangdaoFakerOptions.Default;
+
+        /// <summary>
+        /// 生成器注册表。替换后本类型后续生成立即生效；传入 null 则恢复默认。
+        /// </summary>
+        public static ITangdaoGeneratorRegistry Registry
+        {
+            get { return _registry; }
+            set { _registry = value ?? FakeDefaults.Registry; }
+        }
+
+        /// <summary>
+        /// 可空属性的空值策略。替换后立即生效；传入 null 则恢复默认。
+        /// </summary>
+        public static ITangdaoNullPolicy NullPolicy
+        {
+            get { return _nullPolicy; }
+            set { _nullPolicy = value ?? FakeDefaults.NullPolicy; }
+        }
+
+        /// <summary>
+        /// 全局配置。替换后立即生效；传入 null 则恢复默认。
+        /// </summary>
+        public static TangdaoFakerOptions Options
+        {
+            get { return _options; }
+            set { _options = value ?? TangdaoFakerOptions.Default; }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 属性 setter 缓存。
+        /// <para>
+        /// 【缓存键必须含类型全名】旧实现只用 <c>property.Name</c> 作键，并且依赖
+        /// "泛型类的静态字段按封闭类型各存一份"这一<b>隐式</b>机制来避免跨类型串味。
+        /// 这种依赖非常脆弱：一旦缓存被提升到非泛型层就会立刻出错。
+        /// 这里把 <c>typeof(T).FullName</c> 显式写进键，无论缓存放在哪一层都正确。
+        /// </para>
+        /// </summary>
         private static readonly ConcurrentDictionary<string, Action<T, object>> _cachePropertySetters =
             new ConcurrentDictionary<string, Action<T, object>>();
 
-        // 缓存属性信息，避免重复反射
+        /// <summary>
+        /// 可写属性列表（已剔除标记了 <see cref="IgnoreAttribute"/> 的属性），延迟初始化。
+        /// </summary>
         private static readonly Lazy<PropertyInfo[]> _cachedProperties = new Lazy<PropertyInfo[]>(() =>
-            typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            typeof(T)
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => !p.IsDefined(typeof(IgnoreAttribute), false))
                 .ToArray());
 
-        // 缓存属性的特性信息
-        private static readonly ConcurrentDictionary<string, TangdaoFakeAttribute> _cachedAttributes =
-            new ConcurrentDictionary<string, TangdaoFakeAttribute>();
-
-        // 缓存类型到生成方法的映射，避免多次if-else判断
-        private static readonly Lazy<Dictionary<Type, Func<object>>> _typeGenerators = new Lazy<Dictionary<Type, Func<object>>>(() =>
-            new Dictionary<Type, Func<object>>
-            {
-                { typeof(string), () => FakedataUtils.GenerateRandomString() },
-                { typeof(int), () => FakedataUtils.GenerateUniqueId() },
-                { typeof(double), () => FakedataUtils.GenerateDoubleUniqueId() },
-                { typeof(float), () => FakedataUtils.GenerateDoubleUniqueId() },
-                { typeof(long), () => (long)FakedataUtils.GenerateUniqueId() },
-                { typeof(decimal), () => FakedataUtils.GenerateDecimalUniqueId() },
-                { typeof(DateTime), () => FakedataUtils.GenerateRandomDateTime() },
-                { typeof(bool), () => FakedataUtils.GetRandomBoolean() }
-            });
-
-        // 对象池，用于复用生成的对象，减少GC压力
-        private static readonly ThreadLocal<TangdaoObjectPool<T>> _objectPool = new ThreadLocal<TangdaoObjectPool<T>>(() => new TangdaoObjectPool<T>());
-
         /// <summary>
-        /// 通过动态委托自动生成数据
+        /// 生成指定数量的随机数据实例。
         /// </summary>
-        /// <param name="count">要生成的数据数量</param>
-        /// <returns>生成的数据列表</returns>
+        /// <param name="count">生成数量，非正数时返回空集合</param>
+        /// <returns>生成的数据集合</returns>
         public List<T> Build(int count)
         {
-            var array = new T[count];
-
-            Parallel.For(0, count, i =>
+            if (count <= 0)
             {
-                array[i] = CreateRandomInstance();
-            });
-            // 检查是否需要重新赋值自增ID
-            var idProperty = GetIdPropertyThatNeedsAutoIncrement();
-            if (idProperty != null)
+                return new List<T>();
+            }
+
+            TangdaoFakerOptions options = _options ?? TangdaoFakerOptions.Default;
+            T[] array = new T[count];
+
+            if (options.EnableParallel)
             {
-                // 重新初始化计数器
-                FakedataUtils.ResetCounters();
-
-                // 为每个对象重新赋值ID，确保连续递增
-                for (int i = 0; i < array.Length; i++)
-                {
-                    var instance = array[i];
-                    var setter = GetOrCreateSetter(idProperty);
-
-                    if (idProperty.PropertyType == typeof(int))
+                // 线程本地随机源：每个工作线程持有一个 Random，
+                // 既避开 Random 的线程安全问题，也省去"每个对象 new 一个 Random"的开销
+                Parallel.For(
+                    0,
+                    count,
+                    () => CreateSeededRandom(),
+                    (i, state, localRandom) =>
                     {
-                        setter(instance, FakedataUtils.GetAutoIncrementId());
-                    }
-                    else if (idProperty.PropertyType == typeof(long))
-                    {
-                        setter(instance, (long)FakedataUtils.GetAutoIncrementId());
-                    }
-                }
+                        array[i] = CreateRandomInstance(options, localRandom);
+                        return localRandom;
+                    },
+                    localRandom => { });
             }
             else
             {
-                FakedataUtils.ResetCounters();
+                Random random = CreateSeededRandom();
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = CreateRandomInstance(options, random);
+                }
             }
+
+            // 串行收尾：并发阶段主键只写了占位值，这里统一回填连续序号
+            AssignAutoIncrementIds(array);
 
             return array.ToList();
         }
 
         /// <summary>
-        /// 检查属性是否需要设置自增Id
+        /// 创建一个受当前线程随机源驱动的实例。
         /// </summary>
-        /// <param name="property">要检查的属性</param>
-        /// <returns>如果需要设置自增Id则返回true</returns>
-        private static bool ShouldSetAutoIncrementId(PropertyInfo property)
+        /// <param name="options">本次生成使用的配置</param>
+        /// <param name="random">本线程的随机源</param>
+        private static T CreateRandomInstance(TangdaoFakerOptions options, Random random)
         {
-            // 检查是否带有PrimarykeyAutoIncrement=true属性
-            var fakeAttr = _cachedAttributes.GetOrAdd(property.Name, key =>
-                property.GetCustomAttribute<TangdaoFakeAttribute>());
+            TangdaoGeneratorContext context = new TangdaoGeneratorContext(options, Registry, random);
+            T instance = new T();
 
-            return fakeAttr != null && fakeAttr.PrimarykeyAutoIncrement;
-        }
+            PropertyInfo[] properties = _cachedProperties.Value;
 
-        private static Action<T, object> GetOrCreateSetter(PropertyInfo property)
-        {
-            return _cachePropertySetters.GetOrAdd(property.Name, key =>
+            for (int i = 0; i < properties.Length; i++)
             {
-                if (!property.CanWrite || property.SetMethod?.IsPublic != true)
+                PropertyInfo property = properties[i];
+                Action<T, object> setter = GetOrCreateSetter(property);
+
+                object value;
+                try
                 {
-                    return (instance, value) => { };
+                    value = GeneratePropertyValue(property, context);
+                }
+                catch (Exception)
+                {
+                    // 单个属性上的配置错误不应中断整批数据生成
+                    continue;
                 }
 
-                var instanceParam = Expression.Parameter(typeof(T), "instance");
-                var valueParam = Expression.Parameter(typeof(object), "value");
-                var convertedValue = Expression.Convert(valueParam, property.PropertyType);
-                var propertyAccess = Expression.Property(instanceParam, property);
-                var assign = Expression.Assign(propertyAccess, convertedValue);
+                // 值类型属性无法接受 null，跳过赋值以保留其默认值
+                if (value == null && property.PropertyType.IsValueType && Nullable.GetUnderlyingType(property.PropertyType) == null)
+                {
+                    continue;
+                }
 
-                return Expression.Lambda<Action<T, object>>(assign, instanceParam, valueParam).Compile();
-            });
-        }
-
-        private static T CreateRandomInstance()
-        {
-            // 1、从对象池中租借一个对象，避免频繁创建新对象
-            var instance = _objectPool.Value.Rent();
-            var properties = _cachedProperties.Value;  // 2. 使用缓存的属性信息
-
-            foreach (var property in properties)  // 3. 遍历每个属性
-            {
-                var setter = GetOrCreateSetter(property);  // 4. 获取设置器委托
-                var randomValue = GenerateRandomValue(property);  // 5. 生成随机值
-                setter(instance, randomValue);  // 6. 设置属性值
+                setter(instance, value);
             }
+
             return instance;
         }
 
-        private static object GenerateRandomValue(PropertyInfo property)
+        /// <summary>
+        /// 计算单个属性的值：先由空值策略裁决可空属性，再交责任链。
+        /// </summary>
+        /// <param name="property">目标属性</param>
+        /// <param name="context">生成上下文</param>
+        private static object GeneratePropertyValue(PropertyInfo property, TangdaoGeneratorContext context)
         {
-            // 使用缓存的特性信息
-            var fakeDataAttr = _cachedAttributes.GetOrAdd(property.Name, key =>
-                property.GetCustomAttribute<TangdaoFakeAttribute>());
-
-            // 1. 处理带有特性的属性
-            if (fakeDataAttr != null)
+            // 只有可空类型（Nullable<T>）才参与空值裁决：
+            // 引用类型的 null 语义由属性自身决定，不应被概率随机影响
+            if (Nullable.GetUnderlyingType(property.PropertyType) != null)
             {
-                // 1.1 最高优先级：DefaultValue
-                if (!string.IsNullOrEmpty(fakeDataAttr.DefaultValue))
+                ITangdaoNullPolicy policy = NullPolicy;
+                if (policy != null && policy.ShouldBeNull(property, context))
                 {
-                    //使用C#内置的类型转换
-                    return Convert.ChangeType(fakeDataAttr.DefaultValue, property.PropertyType);
+                    return null;
                 }
-
-                // 1.2 第二优先级：Length（仅字符串）不是 string → 当场放弃，继续走后面逻辑
-                if (fakeDataAttr.Length > 0 && property.PropertyType == typeof(string))
-                {
-                    return FakedataUtils.GenerateRandomString(fakeDataAttr.Length);
-                }
-
-                // 1.3 处理数值类型，包括int和long
-                if (property.PropertyType == typeof(int))
-                {
-                    // 检查是否为ID属性且需要自增
-                    if (IsIdProperty(property) && ShouldSetAutoIncrementId(property))
-                    {
-                        return FakedataUtils.GetAutoIncrementId();
-                    }
-                    // 否则使用随机数，并考虑Min和Max
-                    return FakedataUtils.GenerateUniqueId(fakeDataAttr.Min, fakeDataAttr.Max);
-                }
-
-                if (property.PropertyType == typeof(long))
-                {
-                    // 检查是否为ID属性且需要自增
-                    if (IsIdProperty(property) && ShouldSetAutoIncrementId(property))
-                    {
-                        return (long)FakedataUtils.GetAutoIncrementId();
-                    }
-                    // 否则使用随机数，并考虑Min和Max
-                    return (long)FakedataUtils.GenerateUniqueId(fakeDataAttr.Min, fakeDataAttr.Max);
-                }
-
-                if ((property.PropertyType == typeof(float) || property.PropertyType == typeof(double)))
-                {
-                    return FakedataUtils.GenerateDoubleUniqueId(fakeDataAttr.Min, fakeDataAttr.Max, fakeDataAttr.Point);
-                }
-
-                if (property.PropertyType == typeof(decimal))
-                {
-                    return FakedataUtils.GenerateDecimalUniqueId(fakeDataAttr.Min, fakeDataAttr.Max, fakeDataAttr.Point);
-                }
-
-                // 1.4 第三优先级：DataType
-                if (property.PropertyType.IsEnum)
-                {
-                    return FakedataUtils.GetRandomEnumValue(property.PropertyType);
-                }
-
-                // 1.5 模板键（用户显式指定）
-                if (!string.IsNullOrEmpty(fakeDataAttr.Template))
-                    return FakedataUtils.GetRandomTemplateValue(fakeDataAttr.Template);
             }
 
-            // 2. 处理ID属性（没有特性或特性中未指定DefaultValue的情况）
-            if (IsIdProperty(property))
-            {
-                if (ShouldSetAutoIncrementId(property))
-                {
-                    return property.PropertyType == typeof(int)
-                        ? FakedataUtils.GetAutoIncrementId()
-                        : (object)(long)FakedataUtils.GetAutoIncrementId();
-                }
-                // 否则使用默认的随机生成逻辑
-                return GenerateByPropertyType(property.PropertyType);
-            }
-
-            // === 3. 无特性 → 自动递归生成（深度 ≤ 2）===
-            if (fakeDataAttr == null)
-            {
-                // 3.1 嵌套类
-                if (!property.PropertyType.IsValueType && !property.PropertyType.IsArray && !property.PropertyType.IsEnum &&
-                    !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) &&
-                    !property.PropertyType.FullName.StartsWith("System.", StringComparison.Ordinal))
-                {
-                    return GenerateNestedObject(property.PropertyType, depth: 2);
-                }
-            }
-            // 4. 默认类型处理
-            return GenerateByPropertyType(property.PropertyType);
-        }
-
-        private static bool IsIdProperty(PropertyInfo property)
-        {
-            return property.Name.ContainsIgnoreCase("Id") && property.PropertyType.IsIntegerKey();
+            return FakeRuleChain.ResolvePropertyValue(property, context);
         }
 
         /// <summary>
-        /// 获取需要自增ID的属性
+        /// 串行回填自增主键：从 1 开始按数组顺序连续赋值。
+        /// <para>
+        /// 序号与线程调度彻底解耦——并发阶段各线程只管造出对象，
+        /// 谁先谁后不影响最终 ID，也不再依赖任何进程级静态计数器。
+        /// </para>
         /// </summary>
-        /// <returns>需要自增ID的属性，如果没有则返回null</returns>
-        private static PropertyInfo GetIdPropertyThatNeedsAutoIncrement()
+        /// <param name="array">已生成的对象数组</param>
+        private static void AssignAutoIncrementIds(T[] array)
         {
-            return _cachedProperties.Value.FirstOrDefault(property =>
-                IsIdProperty(property) && ShouldSetAutoIncrementId(property));
+            PropertyInfo idProperty = GetAutoIncrementProperty();
+
+            if (idProperty == null || array.Length == 0)
+            {
+                return;
+            }
+
+            Action<T, object> setter = GetOrCreateSetter(idProperty);
+            int nextId = 1;
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                T instance = array[i];
+                if (instance == null)
+                {
+                    continue;
+                }
+
+                setter(instance, Convert.ChangeType(nextId, FakeRuleChain.GetEffectiveType(idProperty)));
+                nextId++;
+            }
         }
 
-        private static object GenerateByPropertyType(Type propertyType)
+        /// <summary>
+        /// 找出需要自增的主键属性，找不到返回 null。
+        /// <para>
+        /// 判断口径复用 <see cref="PrimaryKeyIncrementRule.IsAutoIncrementKey"/>，
+        /// 保证"生成阶段谁是主键"与"收尾阶段给谁编号"两个判断不会出现分歧。
+        /// </para>
+        /// </summary>
+        private static PropertyInfo GetAutoIncrementProperty()
         {
-            // 优先检查枚举类型
-            if (propertyType.IsEnum)
-                return FakedataUtils.GetRandomEnumValue(propertyType);
+            PropertyInfo[] properties = _cachedProperties.Value;
 
-            // 使用缓存的生成器，避免多次if-else判断
-            if (_typeGenerators.Value.TryGetValue(propertyType, out var generator))
-                return generator();
+            for (int i = 0; i < properties.Length; i++)
+            {
+                if (PrimaryKeyIncrementRule.IsAutoIncrementKey(properties[i]))
+                {
+                    return properties[i];
+                }
+            }
 
-            return propertyType.IsValueType ? Activator.CreateInstance(propertyType) : null;
+            return null;
         }
 
-        private static object GenerateNestedObject(Type type, int depth)
+        /// <summary>
+        /// 取属性的赋值委托，带缓存。
+        /// </summary>
+        /// <param name="property">目标属性</param>
+        private static Action<T, object> GetOrCreateSetter(PropertyInfo property)
         {
-            if (depth <= 0) return null;
+            string key = typeof(T).FullName + "." + property.Name;
+            return _cachePropertySetters.GetOrAdd(key, k => BuildSetter(property));
+        }
 
-            // 使用缓存的嵌套对象生成器，避免多次反射
-            return Activator.CreateInstance(type);
+        /// <summary>
+        /// 用表达式树编译属性赋值委托。
+        /// <para>
+        /// 相比 <c>PropertyInfo.SetValue</c>（每次调用都要装箱与反射查找），
+        /// 编译后的委托接近直接赋值的开销；而生成十万条数据时，
+        /// 每个属性省下的这点开销会被放大十万倍。
+        /// </para>
+        /// </summary>
+        /// <param name="property">目标属性</param>
+        private static Action<T, object> BuildSetter(PropertyInfo property)
+        {
+            // 无公开 setter 的属性（含只读属性）直接给一个空操作，避免调用方额外判空
+            if (!property.CanWrite || property.GetSetMethod() == null)
+            {
+                return (instance, value) => { };
+            }
+
+            ParameterExpression instanceParameter = Expression.Parameter(typeof(T), "instance");
+            ParameterExpression valueParameter = Expression.Parameter(typeof(object), "value");
+
+            MemberExpression propertyAccess = Expression.Property(instanceParameter, property);
+            UnaryExpression convertedValue = Expression.Convert(valueParameter, property.PropertyType);
+            BinaryExpression assign = Expression.Assign(propertyAccess, convertedValue);
+
+            return Expression.Lambda<Action<T, object>>(assign, instanceParameter, valueParameter).Compile();
+        }
+
+        /// <summary>
+        /// 创建一个带随机种子的随机源。
+        /// <para>
+        /// 不用 <c>new Random()</c> 无参构造：在 .NET Framework 与 .NET Core 2.x 上，
+        /// 无参构造以系统时钟为种子，多线程同时构造极易拿到同一种子、产出相同的随机序列。
+        /// </para>
+        /// </summary>
+        private static Random CreateSeededRandom()
+        {
+            return new Random(Guid.NewGuid().GetHashCode());
         }
     }
 }
