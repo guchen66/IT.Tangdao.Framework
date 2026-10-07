@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 
 namespace IT.Tangdao.Framework.Infrastructure
 {
-    /// <summary>
-    /// 对象创建工具类，提供高效的对象实例化、属性映射等功能
-    /// </summary>
     public static class ObjectCreator
     {
         /// <summary>
@@ -23,6 +20,14 @@ namespace IT.Tangdao.Framework.Infrastructure
         /// 缓存属性映射函数，避免重复生成表达式树
         /// </summary>
         private static readonly ConcurrentDictionary<(Type, Type), Delegate> _mapCache = new ConcurrentDictionary<(Type, Type), Delegate>();
+
+        /// <summary>
+        /// 按运行时类型缓存构造函数委托，避免重复生成表达式树。
+        /// 注意：不能与 <see cref="_constructorCache"/> 合并——后者按封闭类型存储
+        /// <c>Func&lt;TType&gt;</c>，与这里的 <c>Func&lt;object&gt;</c> 委托类型不同，
+        /// 共用同一字典会让先写入的一方取到不可强转的委托。
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, Func<object>> _runtimeFactoryCache = new ConcurrentDictionary<Type, Func<object>>();
 
         /// <summary>
         /// 创建无参构造函数的对象实例
@@ -45,6 +50,26 @@ namespace IT.Tangdao.Framework.Infrastructure
 
             // 调用构造函数委托创建实例
             return ((Func<TType>)constructor)();
+        }
+
+        /// <summary>
+        /// 按运行时类型创建对象实例（无参构造的非泛型重载）
+        /// 使用场景：类型在编译期不可知（反射扫描得来）时，无法调用泛型重载
+        /// 优化点：与泛型重载同源，均以表达式树编译构造函数委托并缓存，避免重复反射
+        /// </summary>
+        /// <param name="type">要创建的对象类型，需具备公共无参构造函数</param>
+        /// <returns>创建的对象实例</returns>
+        public static object CreateInstance(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            // 委托在编译期就绑定到 Func<object>，调用方无需再做泛型强转
+            var factory = _runtimeFactoryCache.GetOrAdd(
+                type,
+                t => Expression.Lambda<Func<object>>(Expression.Convert(Expression.New(t), typeof(object))).Compile());
+
+            return factory();
         }
 
         /// <summary>
