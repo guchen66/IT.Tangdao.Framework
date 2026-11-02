@@ -65,7 +65,7 @@ namespace IT.Tangdao.Framework.Abstractions.Messaging
         /// <summary>
         /// 一键创建并注册指定泛型类型的观察者（泛型版本）
         /// </summary>
-        /// <typeparam name="T">观察者类型，必须实现INoticeObserver接口</typeparam>
+        /// <typeparam name="T">观察者类型，必须实现IMessageObserver接口</typeparam>
         /// <returns>当前ObserverBuilder实例，用于链式调用</returns>
         /// <exception cref="InvalidOperationException">当无法创建实例时抛出</exception>
         public ObserverBuilder Add<T>() where T : IMessageObserver

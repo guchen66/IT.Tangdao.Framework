@@ -323,5 +323,196 @@ namespace IT.Tangdao.Framework.Extensions
             if (!t.IsGenericType) return t.Name;
             return $"{t.Name.Split('`')[0]}<{string.Join(", ", t.GetGenericArguments().Select(ToReadableName))}>";
         }
+
+        /// <summary>
+        /// 查询指定类型（类或接口）的所有派生类型。
+        /// 派生类型包括：类的直接/间接子类、接口的实现类、接口的派生接口。
+        /// </summary>
+        /// <param name="baseType">基类型，必须是类或接口。</param>
+        /// <param name="assembly">要扫描的程序集；为 null 时扫描当前 AppDomain 中所有已加载程序集。</param>
+        /// <param name="predicate">可选的额外筛选谓词；为 null 时不筛选。</param>
+        /// <param name="matchGenericDefinitions">
+        /// 是否开启开放泛型匹配。为 true 时，若 <paramref name="baseType"/> 是泛型定义
+        /// （如 typeof(BaseEntity&lt;&gt;)），也会返回以该泛型定义派生的类型
+        /// （如 <c>UserEntity : BaseEntity&lt;int&gt;</c>）。
+        /// 注意：<see cref="Type.IsAssignableFrom(Type)"/> 对开放泛型定义恒返回 false，必须开启此开关才能匹配。
+        /// </param>
+        /// <returns>派生类型集合（已物化，非延迟执行）。</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="baseType"/> 为 null。</exception>
+        /// <exception cref="ArgumentException"><paramref name="baseType"/> 既不是类也不是接口。</exception>
+        public static IEnumerable<Type> GetDerivedTypes(this Type baseType, Assembly assembly = null, Func<Type, bool> predicate = null, bool matchGenericDefinitions = false)
+        {
+            if (baseType == null) throw new ArgumentNullException(nameof(baseType));
+            if (!baseType.IsClass && !baseType.IsInterface)
+                throw new ArgumentException("baseType 必须是类或接口。", nameof(baseType));
+
+            var candidates = GetCandidateTypes(assembly);
+
+            return candidates
+                .Where(t => t != baseType
+                            && MatchesBaseType(t, baseType, matchGenericDefinitions)
+                            && (predicate == null || predicate(t)))
+                .ToArray();
+        }
+
+        /// <summary>
+        /// 查询指定类的所有子类（包括间接子类）。
+        /// </summary>
+        /// <param name="baseType">父类类型，必须是类。</param>
+        /// <param name="assembly">要扫描的程序集；为 null 时扫描当前 AppDomain 中所有已加载程序集。</param>
+        /// <param name="includeAbstract">是否包含抽象类与静态类；默认为 false。</param>
+        /// <param name="matchGenericDefinitions">是否开启开放泛型匹配，语义同 <see cref="GetDerivedTypes"/>。</param>
+        /// <returns>子类类型集合（已物化）。</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="baseType"/> 为 null。</exception>
+        /// <exception cref="ArgumentException"><paramref name="baseType"/> 不是类时抛出；
+        /// 如需查询接口的实现类型，请改用 <see cref="GetImplementingTypes"/>。</exception>
+        public static IEnumerable<Type> GetDerivedClasses(this Type baseType, Assembly assembly = null, bool includeAbstract = false, bool matchGenericDefinitions = false)
+        {
+            if (baseType == null) throw new ArgumentNullException(nameof(baseType));
+            if (!baseType.IsClass)
+                throw new ArgumentException("baseType 必须是类。如需查询接口的实现类型，请使用 GetImplementingTypes。", nameof(baseType));
+
+            return baseType.GetDerivedTypes(
+                assembly,
+                t => t.IsClass
+                     && (includeAbstract || !t.IsAbstract)
+                     && !t.IsGenericTypeDefinition,
+                matchGenericDefinitions);
+        }
+
+        /// <summary>
+        /// 查询指定接口的所有实现类（包括间接实现）。
+        /// </summary>
+        /// <param name="interfaceType">接口类型，必须是接口。</param>
+        /// <param name="assembly">要扫描的程序集；为 null 时扫描当前 AppDomain 中所有已加载程序集。</param>
+        /// <param name="includeAbstract">是否包含抽象类；默认为 false。</param>
+        /// <param name="includeValueTypes">是否包含结构体等值类型实现者；默认为 false（仅返回类）。</param>
+        /// <param name="matchGenericDefinitions">是否开启开放泛型匹配，语义同 <see cref="GetDerivedTypes"/>。</param>
+        /// <returns>实现类类型集合（已物化）。接口继承接口的派生关系请使用 <see cref="GetDerivedInterfaces"/>。</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="interfaceType"/> 为 null。</exception>
+        /// <exception cref="ArgumentException"><paramref name="interfaceType"/> 不是接口。</exception>
+        public static IEnumerable<Type> GetImplementingTypes(this Type interfaceType, Assembly assembly = null, bool includeAbstract = false, bool includeValueTypes = false, bool matchGenericDefinitions = false)
+        {
+            if (interfaceType == null) throw new ArgumentNullException(nameof(interfaceType));
+            if (!interfaceType.IsInterface)
+                throw new ArgumentException("interfaceType 必须是接口。", nameof(interfaceType));
+
+            return interfaceType.GetDerivedTypes(
+                assembly,
+                t => (t.IsClass || (includeValueTypes && t.IsValueType))
+                     && (includeAbstract || !t.IsAbstract)
+                     && !t.IsGenericTypeDefinition,
+                matchGenericDefinitions);
+        }
+
+        /// <summary>
+        /// 查询指定接口的所有派生接口（子接口，包括间接派生）。
+        /// </summary>
+        /// <param name="interfaceType">接口类型，必须是接口。</param>
+        /// <param name="assembly">要扫描的程序集；为 null 时扫描当前 AppDomain 中所有已加载程序集。</param>
+        /// <param name="matchGenericDefinitions">是否开启开放泛型匹配，语义同 <see cref="GetDerivedTypes"/>。</param>
+        /// <returns>派生接口类型集合（已物化）。</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="interfaceType"/> 为 null。</exception>
+        /// <exception cref="ArgumentException"><paramref name="interfaceType"/> 不是接口。</exception>
+        public static IEnumerable<Type> GetDerivedInterfaces(this Type interfaceType, Assembly assembly = null, bool matchGenericDefinitions = false)
+        {
+            if (interfaceType == null) throw new ArgumentNullException(nameof(interfaceType));
+            if (!interfaceType.IsInterface)
+                throw new ArgumentException("interfaceType 必须是接口。", nameof(interfaceType));
+
+            return interfaceType.GetDerivedTypes(
+                assembly,
+                t => t.IsInterface,
+                matchGenericDefinitions);
+        }
+
+        /// <summary>
+        /// 查询指定父类的所有子类（泛型重载，语义同 <see cref="GetDerivedClasses(Type, Assembly, bool, bool)"/>）。
+        /// </summary>
+        /// <typeparam name="TParent">父类类型。</typeparam>
+        /// <param name="assembly">要扫描的程序集；为 null 时扫描当前 AppDomain 中所有已加载程序集。</param>
+        /// <param name="includeAbstract">是否包含抽象类；默认为 false。</param>
+        /// <param name="matchGenericDefinitions">是否开启开放泛型匹配。</param>
+        public static IEnumerable<Type> GetDerivedClasses<TParent>(Assembly assembly = null, bool includeAbstract = false, bool matchGenericDefinitions = false) where TParent : class
+        {
+            return typeof(TParent).GetDerivedClasses(assembly, includeAbstract, matchGenericDefinitions);
+        }
+
+        /// <summary>
+        /// 查询指定接口的所有实现类（泛型重载，语义同 <see cref="GetImplementingTypes(Type, Assembly?, bool, bool, bool)"/>）。
+        /// </summary>
+        /// <typeparam name="TInterface">接口类型。</typeparam>
+        /// <param name="assembly">要扫描的程序集；为 null 时扫描当前 AppDomain 中所有已加载程序集。</param>
+        /// <param name="includeAbstract">是否包含抽象类；默认为 false。</param>
+        /// <param name="includeValueTypes">是否包含结构体等值类型实现者；默认为 false。</param>
+        /// <param name="matchGenericDefinitions">是否开启开放泛型匹配。</param>
+        public static IEnumerable<Type> GetImplementingTypes<TInterface>(Assembly assembly = null, bool includeAbstract = false, bool includeValueTypes = false, bool matchGenericDefinitions = false)
+        {
+            return typeof(TInterface).GetImplementingTypes(assembly, includeAbstract, includeValueTypes, matchGenericDefinitions);
+        }
+
+        /// <summary>
+        /// 获取待扫描的类型集合；未指定程序集时扫描当前 AppDomain 中所有已加载程序集。
+        /// </summary>
+        private static Type[] GetCandidateTypes(Assembly assembly)
+        {
+            if (assembly != null)
+            {
+                return GetTypesSafely(assembly);
+            }
+
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(GetTypesSafely)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// 安全获取程序集中的全部类型，避免 <see cref="ReflectionTypeLoadException"/> 中断整个扫描；
+        /// 部分类型（如依赖缺失的类型）加载失败时仅返回成功加载的部分。
+        /// </summary>
+        private static Type[] GetTypesSafely(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                // 调试程序集加载失败时，可查看 ex.LoaderExceptions 获取具体失败原因。
+                return ex.Types.OfType<Type>().ToArray();
+            }
+        }
+        /// <summary>
+        /// 判断 <paramref name="type"/> 是否派生自 <paramref name="baseType"/>；
+        /// 开启开放泛型匹配时，额外比对泛型定义。
+        /// </summary>
+        private static bool MatchesBaseType(Type type, Type baseType, bool matchGenericDefinitions)
+        {
+            if (baseType.IsAssignableFrom(type))
+            {
+                return true;
+            }
+
+            if (!matchGenericDefinitions || !baseType.IsGenericTypeDefinition)
+            {
+                return false;
+            }
+
+            if (baseType.IsInterface)
+            {
+                return type.GetInterfaces()
+                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == baseType);
+            }
+
+            for (var current = type.BaseType; current != null; current = current.BaseType)
+            {
+                if (current.IsGenericType && current.GetGenericTypeDefinition() == baseType)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

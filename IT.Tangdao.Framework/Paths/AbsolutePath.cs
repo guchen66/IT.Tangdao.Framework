@@ -1,4 +1,6 @@
-﻿using IT.Tangdao.Framework.Extensions;
+﻿using IT.Tangdao.Framework.Abstractions.Results;
+using IT.Tangdao.Framework.Enums;
+using IT.Tangdao.Framework.Extensions;
 using IT.Tangdao.Framework.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -34,9 +36,21 @@ namespace IT.Tangdao.Framework.Paths
         public static AbsolutePath Empty { get; } = new AbsolutePath(false);
 
         public string Value => _path;
-        public bool Exists => File.Exists(_path) || Directory.Exists(_path);
-        public bool FileExists => File.Exists(_path);
-        public bool DirectoryExists => Directory.Exists(_path);
+
+        /// <summary>
+        /// 探测路径状态，仅转发，不承载任何判断逻辑。
+        /// 成功时 Data 为 File / Directory / None（None 表示确实不存在）；
+        /// 无法确定状态时返回失败，原因保留在 Exception。
+        /// 空对象实例视为“无路径”，直接返回 None。
+        /// </summary>
+        public ResponseResult<PathKind> Probe()
+        {
+            if (string.IsNullOrEmpty(_path))
+            {
+                return ResponseResult<PathKind>.Success(PathKind.None);
+            }
+            return FileQueryable.Probe(_path);
+        }
 
         /// <summary>
         /// 判断是否是根目录

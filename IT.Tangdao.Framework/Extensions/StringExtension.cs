@@ -500,6 +500,7 @@ namespace IT.Tangdao.Framework.Extensions
         /// 安全读取文件（避免文件不存在的异常）
         /// </summary>
         /// <returns>返回文件内容，如果文件不存在返回null</returns>
+        [Obsolete("存在性判断与读取应分离：该写法会掩盖失败原因且无法规避竞态。请改为直接读取并让异常向上传递，或先用路径探测接口确认状态。", false)]
         public static byte[] SafeReadAllBytes(this string path)
         {
             return File.Exists(path) ? File.ReadAllBytes(path) : null;
@@ -508,13 +509,13 @@ namespace IT.Tangdao.Framework.Extensions
         /// <summary>
         /// 安全读取文本（自动处理编码）
         /// </summary>
+        [Obsolete("存在性判断与读取应分离：该写法会掩盖失败原因且无法规避竞态。请改为直接读取并让异常向上传递，或先用路径探测接口确认状态。", false)]
         public static string SafeReadAllText(this string path, Encoding encoding = null)
         {
             if (!File.Exists(path)) return null;
             encoding = encoding ?? Encoding.UTF8;
             return File.ReadAllText(path, encoding);
         }
-
         /// <summary>
         /// 继续创建文件
         /// 并且设置缓冲区

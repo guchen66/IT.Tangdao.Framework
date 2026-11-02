@@ -1,10 +1,11 @@
-﻿using System;
+﻿using IT.Tangdao.Framework.Enums;
+using IT.Tangdao.Framework.Paths;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IT.Tangdao.Framework.Paths;
 
 namespace IT.Tangdao.Framework.Extensions
 {
@@ -52,7 +53,10 @@ namespace IT.Tangdao.Framework.Extensions
         /// <returns>备份后的 AbsolutePath</returns>
         public static AbsolutePath Backup(this AbsolutePath source, string newExtension, bool overwrite = true)
         {
-            if (!source.FileExists)
+            var probe = source.Probe();
+            if (!probe.IsSuccess)
+                throw probe.Exception ?? new IOException($"无法确定源文件状态: {source.Value}");
+            if (probe.Data != PathKind.File)
                 throw new FileNotFoundException("源文件不存在", source.Value);
 
             var backup = source.WithExtension(newExtension);
@@ -65,7 +69,10 @@ namespace IT.Tangdao.Framework.Extensions
         /// </summary>
         public static AbsolutePath CopyTo(this AbsolutePath source, AbsolutePath destination, bool overwrite = true)
         {
-            if (!source.FileExists)
+            var probe = source.Probe();
+            if (!probe.IsSuccess)
+                throw probe.Exception ?? new IOException($"无法确定源文件状态: {source.Value}");
+            if (probe.Data != PathKind.File)
                 throw new FileNotFoundException("源文件不存在", source.Value);
 
             Directory.CreateDirectory(destination.Parent().Value); // 确保目录存在

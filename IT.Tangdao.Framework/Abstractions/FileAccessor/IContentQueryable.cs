@@ -27,6 +27,11 @@ namespace IT.Tangdao.Framework.Abstractions.FileAccessor
         /// </summary>
         DaoFileType DetectedType { get; }
 
+        /// <summary>
+        /// 读取结果。成功时 IsSuccess 为 true；
+        /// 失败时保留原始异常，Content 为 null（空文件内容是空字符串，不返回 null）。
+        /// </summary>
+        ResponseResult Status { get; }
         IXmlQueryable AsXml();
 
         IJsonQueryable AsJson();

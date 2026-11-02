@@ -1,20 +1,21 @@
-﻿using IT.Tangdao.Framework.Extensions;
+﻿using IT.Tangdao.Framework.Abstractions;
+using IT.Tangdao.Framework.Abstractions.Results;
+using IT.Tangdao.Framework.Enums;
+using IT.Tangdao.Framework.Extensions;
+using IT.Tangdao.Framework.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using IT.Tangdao.Framework.Abstractions;
-using IT.Tangdao.Framework.Enums;
-using System.Collections.Concurrent;
-using System.ComponentModel.Design;
 using System.Xml.Linq;
-using System.Linq.Expressions;
-using System.ComponentModel;
-using IT.Tangdao.Framework.Utilities;
 
 namespace IT.Tangdao.Framework.Infrastructure
 {
@@ -223,6 +224,46 @@ namespace IT.Tangdao.Framework.Infrastructure
                 return path + Path.DirectorySeparatorChar;
             }
             return path;
+        }
+
+        /// <summary>
+        /// 探测路径状态。这是全库唯一的路径探测实现，<see cref="IT.Tangdao.Paths.AbsolutePath.Probe"/> 只是转发。
+        /// 成功时 Data 为 File / Directory / None，其中 None 表示路径确实不存在；
+        /// 无法确定状态（无权限、路径非法、IO 故障等）时返回失败，原始异常保留在 Exception，不做类型转换。
+        /// 注意：本方法返回的是某一时刻的快照，不能作为后续读写操作的安全性保证。
+        /// </summary>
+        /// <param name="path">待探测的路径</param>
+        /// <returns>探测结果</returns>
+        public static ResponseResult<PathKind> Probe(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return ResponseResult<PathKind>.Failure(
+                    "路径为空，无法探测状态",
+                    new ArgumentException("路径不能为 null 或空字符串", nameof(path)));
+            }
+
+            try
+            {
+                var attributes = File.GetAttributes(path);
+                var kind = (attributes & FileAttributes.Directory) != 0 ? PathKind.Directory : PathKind.File;
+                return ResponseResult<PathKind>.Success(kind);
+            }
+            catch (FileNotFoundException)
+            {
+                // 探测成功，答案是“不存在”
+                return ResponseResult<PathKind>.Success(PathKind.None);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // 探测成功，答案是“不存在”
+                return ResponseResult<PathKind>.Success(PathKind.None);
+            }
+            catch (Exception ex)
+            {
+                // 探测失败，原因原样保留
+                return ResponseResult<PathKind>.Failure($"无法确定路径状态：{path}", ex);
+            }
         }
 
         /// <summary>
